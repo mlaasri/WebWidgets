@@ -12,11 +12,16 @@ class HTMLNode:
         self.children = children
         self.attributes = attributes
 
-    def add(self, child: Union['HTMLNode', str]) -> None:
-        self.children.append(child)
-
     def _get_tag_name(self) -> str:
         return self.__class__.__name__.lower()
+
+    def _render_attributes(self) -> str:
+        return ' '.join(
+            f'{key}="{value}"' for key, value in self.attributes.items()
+        )
+
+    def add(self, child: Union['HTMLNode', str]) -> None:
+        self.children.append(child)
 
     @property
     def start_tag(self) -> str:
@@ -31,11 +36,6 @@ class HTMLNode:
     @property
     def end_tag(self) -> str:
         return f"</{self._get_tag_name()}>"
-
-    def _render_attributes(self) -> str:
-        return ' '.join(
-            f'{key}="{value}"' for key, value in self.attributes.items()
-        )
 
     def to_html(self, indent_level: int = 0, indent_size: int = 4, force_one_line: bool = False) -> str:
 
