@@ -131,3 +131,32 @@ def no_end_tag(cls):
     cls.end_tag = property(
         lambda _: '', doc="This element does not have an end tag")
     return cls
+
+
+@no_start_tag
+@no_end_tag
+class RawText(HTMLNode):
+    """A raw text node that contains text without any HTML tags."""
+
+    one_line = True
+
+    def __init__(self, text: str):
+        """Creates a raw text node.
+
+        :param text: The text content of the node.
+        :type text: str
+        """
+        super().__init__()
+        self.text = text
+
+    def to_html(self, indent_level: int = 0, indent_size: int = 4, *args, **kwargs) -> str:
+        """Converts the raw text node to HTML.
+
+        :param indent_level: See :py:meth:`HTMLNode.to_html`.
+        :type indent_level: int
+        :param indent_size: See :py:meth:`HTMLNode.to_html`.
+        :type indent_size: int
+        :return: See :py:meth:`HTMLNode.to_html`.
+        :rtype: str
+        """
+        return ' ' * indent_size * indent_level + self.text
