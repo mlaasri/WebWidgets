@@ -68,3 +68,15 @@ class HTMLNode:
             html_code += indentation + self.end_tag
 
         return html_code
+
+
+def no_start_tag(cls):
+    cls.start_tag = property(
+        lambda _: '', doc="This element does not have a start tag")
+    return cls
+
+
+def no_end_tag(cls):
+    cls.end_tag = property(
+        lambda _: '', doc="This element does not have an end tag")
+    return cls
