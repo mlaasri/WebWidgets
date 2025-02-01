@@ -78,7 +78,7 @@ class TestHTMLNode:
     def test_recursive_rendering(self):
         inner_node = HTMLNode(children=[RawText('inner_child')])
         node = TestHTMLNode.CustomNode(children=[inner_node])
-        expected_html = ''.join([
+        expected_html = '\n'.join([
             "<customnode>",
             "    <htmlnode>",
             "        inner_child",
@@ -94,7 +94,7 @@ class TestHTMLNode:
             pass
         inner_node = HTMLNode(children=[RawText('inner_child')])
         node = NoStartNode(children=[inner_node])
-        expected_html = ''.join([
+        expected_html = '\n'.join([
             "    <htmlnode>",
             "        inner_child",
             "    </htmlnode>",
@@ -108,7 +108,7 @@ class TestHTMLNode:
             pass
         inner_node = HTMLNode(children=[RawText('inner_child')])
         node = NoEndNode(children=[inner_node])
-        expected_html = ''.join([
+        expected_html = '\n'.join([
             "<noendnode>",
             "    <htmlnode>",
             "        inner_child",
