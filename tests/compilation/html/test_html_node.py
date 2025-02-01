@@ -5,6 +5,19 @@ class TestHTMLNode:
     class CustomNode(HTMLNode):
         pass
 
+    @no_start_tag
+    class NoStartNode(HTMLNode):
+        pass
+
+    @no_end_tag
+    class NoEndNode(HTMLNode):
+        pass
+
+    @no_start_tag
+    @no_end_tag
+    class NoStartEndNode(HTMLNode):
+        pass
+
     def test_basic_node(self):
         node = HTMLNode()
         assert node.start_tag == "<htmlnode>"
@@ -24,29 +37,19 @@ class TestHTMLNode:
         assert node.to_html() == '<htmlnode id="test-id" class="test-class"></htmlnode>'
 
     def test_no_start_tag(self):
-        @no_start_tag
-        class NoStartNode(HTMLNode):
-            pass
-        node = NoStartNode()
+        node = TestHTMLNode.NoStartNode()
         assert node.start_tag == ''
         assert node.end_tag == '</nostartnode>'
         assert node.to_html() == "</nostartnode>"
 
     def test_no_end_tag(self):
-        @no_end_tag
-        class NoEndNode(HTMLNode):
-            pass
-        node = NoEndNode()
+        node = TestHTMLNode.NoEndNode()
         assert node.start_tag == '<noendnode>'
         assert node.end_tag == ''
         assert node.to_html() == "<noendnode>"
 
     def test_no_start_end_tag(self):
-        @no_start_tag
-        @no_end_tag
-        class NoStartEndNode(HTMLNode):
-            pass
-        node = NoStartEndNode()
+        node = TestHTMLNode.NoStartEndNode()
         assert node.start_tag == ''
         assert node.end_tag == ''
         assert node.to_html() == ""
@@ -58,20 +61,14 @@ class TestHTMLNode:
         assert node.to_html(force_one_line=True) == expected_html
 
     def test_no_start_tag_with_one_line(self):
-        @no_start_tag
-        class NoStartNode(HTMLNode):
-            pass
-        node = NoStartNode(children=[RawText('child1'),
-                                     RawText('child2')])
+        node = TestHTMLNode.NoStartNode(children=[RawText('child1'),
+                                                  RawText('child2')])
         expected_html = "child1child2</nostartnode>"
         assert node.to_html(force_one_line=True) == expected_html
 
     def test_no_end_tag_with_one_line(self):
-        @no_end_tag
-        class NoEndNode(HTMLNode):
-            pass
-        node = NoEndNode(children=[RawText('child1'),
-                                   RawText('child2')])
+        node = TestHTMLNode.NoEndNode(children=[RawText('child1'),
+                                                RawText('child2')])
         expected_html = "<noendnode>child1child2"
         assert node.to_html(force_one_line=True) == expected_html
 
@@ -89,11 +86,8 @@ class TestHTMLNode:
         assert node.to_html(force_one_line=False) == expected_html
 
     def test_no_start_tag_with_recursive_rendering(self):
-        @no_start_tag
-        class NoStartNode(HTMLNode):
-            pass
         inner_node = HTMLNode(children=[RawText('inner_child')])
-        node = NoStartNode(children=[inner_node])
+        node = TestHTMLNode.NoStartNode(children=[inner_node])
         expected_html = '\n'.join([
             "    <htmlnode>",
             "        inner_child",
@@ -103,11 +97,8 @@ class TestHTMLNode:
         assert node.to_html() == expected_html
 
     def test_no_end_tag_with_recursive_rendering(self):
-        @no_end_tag
-        class NoEndNode(HTMLNode):
-            pass
         inner_node = HTMLNode(children=[RawText('inner_child')])
-        node = NoEndNode(children=[inner_node])
+        node = TestHTMLNode.NoEndNode(children=[inner_node])
         expected_html = '\n'.join([
             "<noendnode>",
             "    <htmlnode>",
