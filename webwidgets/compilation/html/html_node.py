@@ -92,10 +92,13 @@ class HTMLNode:
 
         # If content spans multi-line
         else:
-            html_code += '\n'
-            html_code += ''.join(
-                [c.to_html(indent_level=indent_level + 1) + '\n' for c in self.children])
-            html_code += indentation + self.end_tag
+            if self.start_tag and self.children:
+                html_code += '\n'
+            html_code += '\n'.join(
+                [c.to_html(indent_level=indent_level + 1) for c in self.children])
+            if self.end_tag and self.children:
+                html_code += '\n' + indentation
+            html_code += self.end_tag
 
         return html_code
 

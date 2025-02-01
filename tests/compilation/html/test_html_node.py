@@ -9,19 +9,19 @@ class TestHTMLNode:
         node = HTMLNode()
         assert node.start_tag == "<htmlnode>"
         assert node.end_tag == "</htmlnode>"
-        assert node.to_html() == "<htmlnode>\n</htmlnode>"
+        assert node.to_html() == "<htmlnode></htmlnode>"
 
     def test_custom_name(self):
         node = TestHTMLNode.CustomNode()
         assert node.start_tag == "<customnode>"
         assert node.end_tag == "</customnode>"
-        assert node.to_html() == "<customnode>\n</customnode>"
+        assert node.to_html() == "<customnode></customnode>"
 
     def test_attributes(self):
         node = HTMLNode(attributes={'id': 'test-id', 'class': 'test-class'})
         assert node.start_tag == '<htmlnode id="test-id" class="test-class">'
         assert node.end_tag == '</htmlnode>'
-        assert node.to_html() == '<htmlnode id="test-id" class="test-class">\n</htmlnode>'
+        assert node.to_html() == '<htmlnode id="test-id" class="test-class"></htmlnode>'
 
     def test_no_start_tag(self):
         @no_start_tag
