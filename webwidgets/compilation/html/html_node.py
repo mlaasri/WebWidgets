@@ -18,7 +18,8 @@ class HTMLNode:
     def _get_tag_name(self) -> str:
         return self.__class__.__name__.lower()
 
-    def _get_start_tag(self) -> str:
+    @property
+    def start_tag(self) -> str:
 
         # Rendering attributes
         attributes = self._render_attributes()
@@ -27,7 +28,8 @@ class HTMLNode:
         # Building start tag
         return f"<{self._get_tag_name()}{maybe_space}{attributes}>"
 
-    def _get_end_tag(self) -> str:
+    @property
+    def end_tag(self) -> str:
         return f"</{self._get_tag_name()}>"
 
     def _render_attributes(self) -> str:
@@ -42,7 +44,7 @@ class HTMLNode:
         html_code = indentation
 
         # Opening the element
-        html_code += self._get_start_tag()
+        html_code += self.start_tag
 
         # If content must be in one line
         if self.one_line or force_one_line:
@@ -52,7 +54,7 @@ class HTMLNode:
                 else:
                     html_code += child.to_html(indent_level=0,
                                                force_one_line=True)
-            html_code += self._get_end_tag()
+            html_code += self.end_tag
 
         # If content spans multi-line
         else:
@@ -63,6 +65,6 @@ class HTMLNode:
                 else:
                     html_code += child.to_html(indent_level=indent_level + 1)
                 html_code += '\n'
-            html_code += indentation + self._get_end_tag()
+            html_code += indentation + self.end_tag
 
         return html_code
