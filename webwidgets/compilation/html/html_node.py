@@ -36,7 +36,7 @@ class HTMLNode:
             f'{key}="{value}"' for key, value in self.attributes.items()
         )
 
-    def add(self, child: Union['HTMLNode', str]) -> None:
+    def add(self, child: 'HTMLNode') -> None:
         """
         Adds a child to the HTML node.
 
@@ -80,32 +80,21 @@ class HTMLNode:
         :return: A string containing the HTML representation of the element.
         :rtype: str
         """
-        # Indenting
-        indentation = "" if force_one_line else ' ' * indent_size * indent_level
-        html_code = indentation
-
         # Opening the element
-        html_code += self.start_tag
+        indentation = "" if force_one_line else ' ' * indent_size * indent_level
+        html_code = indentation + self.start_tag
 
         # If content must be in one line
         if self.one_line or force_one_line:
-            for child in self.children:
-                if isinstance(child, str):
-                    html_code += child
-                else:
-                    html_code += child.to_html(indent_level=0,
-                                               force_one_line=True)
+            html_code += ''.join(
+                [c.to_html(indent_level=0, force_one_line=True) for c in self.children])
             html_code += self.end_tag
 
         # If content spans multi-line
         else:
             html_code += '\n'
-            for child in self.children:
-                if isinstance(child, str):
-                    html_code += indentation + ' ' * indent_size + child
-                else:
-                    html_code += child.to_html(indent_level=indent_level + 1)
-                html_code += '\n'
+            html_code += ''.join(
+                [c.to_html(indent_level=indent_level + 1) + '\n' for c in self.children])
             html_code += indentation + self.end_tag
 
         return html_code
