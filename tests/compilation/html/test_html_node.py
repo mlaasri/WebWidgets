@@ -1,3 +1,4 @@
+import pytest
 from webwidgets.compilation.html.html_node import HTMLNode, no_start_tag, no_end_tag, RawText
 
 
@@ -194,3 +195,33 @@ class TestHTMLNode:
             "</htmlnode>"
         ])
         assert node.to_html() == expected_html
+
+    @pytest.mark.parametrize("indent_level", [0, 1, 2])
+    @pytest.mark.parametrize("indent_size", [3, 4, 8])
+    def test_indentation(self, indent_level: int, indent_size: int):
+        """Test the to_html method with different indentation parameters."""
+
+        # Creating a simple HTMLNode
+        node = HTMLNode(children=[RawText('child1'), RawText('child2')])
+
+        # Expected output based on the test parameters
+        expected_html = "\n".join([
+            f"{' ' * indent_size * indent_level}<htmlnode>",
+            f"{' ' * indent_size * (indent_level + 1)}child1",
+            f"{' ' * indent_size * (indent_level + 1)}child2",
+            f"{' ' * indent_size * indent_level}</htmlnode>"
+        ])
+
+        # Calling to_html with the test parameters
+        actual_html = node.to_html(
+            indent_level=indent_level, indent_size=indent_size)
+        assert actual_html == expected_html
+
+    @pytest.mark.parametrize("indent_level", [0, 1, 2])
+    @pytest.mark.parametrize("indent_size", [3, 4, 8])
+    def test_indentation_empty_node(self, indent_level, indent_size):
+        node = HTMLNode()
+        expected_html = f"{' ' * indent_size * indent_level}<htmlnode></htmlnode>"
+        actual_html = node.to_html(
+            indent_level=indent_level, indent_size=indent_size)
+        assert actual_html == expected_html
