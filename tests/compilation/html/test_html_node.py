@@ -181,3 +181,16 @@ class TestHTMLNode:
         expected_html = "<noendnode><noendnode>child1child2</nostartnode>" + \
             "<noendnode>child3</nostartnode>"
         assert node.to_html(force_one_line=True) == expected_html
+
+    def test_raw_text_as_orphan_node(self):
+        node = HTMLNode(children=[
+            TestHTMLNode.CustomNode(),
+            RawText("raw_text")
+        ])
+        expected_html = '\n'.join([
+            "<htmlnode>",
+            "    <customnode></customnode>",
+            "    raw_text",
+            "</htmlnode>"
+        ])
+        assert node.to_html() == expected_html
