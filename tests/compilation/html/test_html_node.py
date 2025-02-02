@@ -112,3 +112,23 @@ class TestHTMLNode:
         node = TestHTMLNode.CustomNode(children=[inner_node])
         expected_html = "<customnode><htmlnode>inner_child</htmlnode></customnode>"
         assert node.to_html(force_one_line=True) == expected_html
+
+    def test_recursive_rendering_with_tagless_mix(self):
+        children = [
+            TestHTMLNode.NoEndNode([RawText("child1")]),
+            TestHTMLNode.NoStartNode([RawText("child2")]),
+            TestHTMLNode.NoEndNode([RawText("child3")]),
+        ]
+        inner_node = TestHTMLNode.NoStartNode(children=children)
+        node = TestHTMLNode.NoEndNode(children=[inner_node])
+        expected_html = '\n'.join([
+            "<noendnode>",
+            "        <noendnode>",
+            "            child1",
+            "            child2",
+            "        </nostartnode>",
+            "        <noendnode>",
+            "            child3",
+            "    </nostartnode>"
+        ])
+        assert node.to_html() == expected_html
