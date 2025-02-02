@@ -202,13 +202,24 @@ class TestHTMLNode:
         """Test the to_html method with different indentation parameters."""
 
         # Creating a simple HTMLNode
-        node = HTMLNode(children=[RawText('child1'), RawText('child2')])
+        node = HTMLNode(children=[
+            RawText('child1'),
+            RawText('child2'),
+            HTMLNode(children=[
+                RawText('grandchild1'),
+                RawText('grandchild2')
+            ])
+        ])
 
         # Expected output based on the test parameters
         expected_html = "\n".join([
             f"{' ' * indent_size * indent_level}<htmlnode>",
             f"{' ' * indent_size * (indent_level + 1)}child1",
             f"{' ' * indent_size * (indent_level + 1)}child2",
+            f"{' ' * indent_size * (indent_level + 1)}<htmlnode>",
+            f"{' ' * indent_size * (indent_level + 2)}grandchild1",
+            f"{' ' * indent_size * (indent_level + 2)}grandchild2",
+            f"{' ' * indent_size * (indent_level + 1)}</htmlnode>",
             f"{' ' * indent_size * indent_level}</htmlnode>"
         ])
 
