@@ -18,6 +18,9 @@ class TestHTMLNode:
     class NoStartEndNode(HTMLNode):
         pass
 
+    class OneLineNode(HTMLNode):
+        one_line = True
+
     class OneLineNoStartNode(NoStartNode):
         one_line = True
 
@@ -115,6 +118,18 @@ class TestHTMLNode:
         node = TestHTMLNode.CustomNode(children=[inner_node])
         expected_html = "<customnode><htmlnode>inner_child</htmlnode></customnode>"
         assert node.to_html(force_one_line=True) == expected_html
+
+    def test_recursive_rendering_one_line_propagation(self):
+        one_line = TestHTMLNode.OneLineNode(
+            [HTMLNode(children=[RawText('inner_child')])]
+        )
+        node = HTMLNode(children=[one_line])
+        expected_html = '\n'.join([
+            "<htmlnode>",
+            "    <onelinenode><htmlnode>inner_child</htmlnode></onelinenode>",
+            "</htmlnode>"
+        ])
+        assert node.to_html() == expected_html
 
     def test_recursive_rendering_of_tagless_mix(self):
         children = [
