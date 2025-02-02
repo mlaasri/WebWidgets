@@ -1,3 +1,4 @@
+import itertools
 from typing import Dict, List, Union
 
 
@@ -67,8 +68,9 @@ class HTMLNode:
         """
         return f"</{self._get_tag_name()}>"
 
-    def to_html(self, indent_level: int = 0, indent_size: int = 4, force_one_line: bool = False) -> str:
-        """Converts the HTML node into a HTML code.
+    def to_html(self, indent_level: int = 0, indent_size: int = 4,
+                force_one_line: bool = False, return_lines: bool = False) -> Union[str, List[str]]:
+        """Converts the HTML node into HTML code.
 
         :param indent_level: The current level of indentation in the HTML output.
         :type indent_level: int
@@ -77,30 +79,40 @@ class HTMLNode:
         :param force_one_line: If True, forces all child elements to be rendered on a single line without additional
             indentation. Defaults to False.
         :type force_one_line: bool
-        :return: A string containing the HTML representation of the element.
-        :rtype: str
+        :param return_lines: Whether to return the lines of HTML code individually. Defaults to False.
+        :type return_lines: bool
+        :return: A string containing the HTML representation of the element if
+            `return_lines` is `False` (default), or the list of individual lines
+            from that HTML code if `return_lines` is `True`.
+        :rtype: str or List[str]
         """
         # Opening the element
         indentation = "" if force_one_line else ' ' * indent_size * indent_level
-        html_code = indentation + self.start_tag
+        html_lines = [indentation + self.start_tag]
 
         # If content must be in one line
-        if self.one_line or force_one_line:
-            html_code += ''.join(
-                [c.to_html(indent_level=0, force_one_line=True) for c in self.children])
-            html_code += self.end_tag
+        if self.one_line or force_one_line or not self.children:
+            html_lines += list(itertools.chain.from_iterable(
+                [c.to_html(indent_level=0, force_one_line=True, return_lines=True)
+                 for c in self.children]))
+            html_lines += [self.end_tag]
+            html_lines = [''.join(html_lines)]  # Flattening the line
 
         # If content spans multi-line
         else:
-            if self.start_tag and self.children:
-                html_code += '\n'
-            html_code += '\n'.join(
-                [c.to_html(indent_level=indent_level + 1) for c in self.children])
-            if self.end_tag and self.children:
-                html_code += '\n' + indentation
-            html_code += self.end_tag
+            html_lines += list(itertools.chain.from_iterable(
+                [c.to_html(indent_level=indent_level + 1, return_lines=True)
+                 for c in self.children]))
+            html_lines += [indentation + self.end_tag]
+            html_lines = [l for l in html_lines if any(
+                c != ' ' for c in l)]  # Trimming empty lines
 
-        return html_code
+        # If return_lines is True, return a list of lines
+        if return_lines:
+            return html_lines
+
+        # Otherwise, return a single string
+        return '\n'.join(html_lines)
 
 
 def no_start_tag(cls):
@@ -141,14 +153,20 @@ class RawText(HTMLNode):
         super().__init__()
         self.text = text
 
-    def to_html(self, indent_level: int = 0, indent_size: int = 4, *args, **kwargs) -> str:
+    def to_html(self, indent_level: int = 0, indent_size: int = 4,
+                return_lines: bool = False, *args, **kwargs) -> Union[str, List[str]]:
         """Converts the raw text node to HTML.
 
         :param indent_level: See :py:meth:`HTMLNode.to_html`.
         :type indent_level: int
         :param indent_size: See :py:meth:`HTMLNode.to_html`.
         :type indent_size: int
+        :param return_lines: See :py:meth:`HTMLNode.to_html`.
+        :type return_lines: bool
         :return: See :py:meth:`HTMLNode.to_html`.
-        :rtype: str
+        :rtype: str or List[str]
         """
-        return ' ' * indent_size * indent_level + self.text
+        line = ' ' * indent_size * indent_level + self.text
+        if return_lines:
+            return [line]
+        return line
