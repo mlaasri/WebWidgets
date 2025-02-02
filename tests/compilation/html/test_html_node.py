@@ -18,6 +18,9 @@ class TestHTMLNode:
     class NoStartEndNode(HTMLNode):
         pass
 
+    class OneLineNoStartNode(NoStartNode):
+        one_line = True
+
     def test_basic_node(self):
         node = HTMLNode()
         assert node.start_tag == "<htmlnode>"
@@ -113,7 +116,7 @@ class TestHTMLNode:
         expected_html = "<customnode><htmlnode>inner_child</htmlnode></customnode>"
         assert node.to_html(force_one_line=True) == expected_html
 
-    def test_recursive_rendering_with_tagless_mix(self):
+    def test_recursive_rendering_of_tagless_mix(self):
         children = [
             TestHTMLNode.NoEndNode([RawText("child1")]),
             TestHTMLNode.NoStartNode([RawText("child2")]),
@@ -132,3 +135,34 @@ class TestHTMLNode:
             "    </nostartnode>"
         ])
         assert node.to_html() == expected_html
+
+    def test_recursive_rendering_of_tagless_mix_one_line(self):
+        children = [
+            TestHTMLNode.NoEndNode([RawText("child1")]),
+            TestHTMLNode.OneLineNoStartNode([RawText("child2")]),
+            TestHTMLNode.NoEndNode([RawText("child3")]),
+        ]
+        inner_node = TestHTMLNode.NoStartNode(children=children)
+        node = TestHTMLNode.NoEndNode(children=[inner_node])
+        expected_html = '\n'.join([
+            "<noendnode>",
+            "        <noendnode>",
+            "            child1",
+            "        child2</onelinenostartnode>",
+            "        <noendnode>",
+            "            child3",
+            "    </nostartnode>"
+        ])
+        assert node.to_html() == expected_html
+
+    def test_recursive_rendering_of_tagless_mix_force_one_line(self):
+        children = [
+            TestHTMLNode.NoEndNode([RawText("child1")]),
+            TestHTMLNode.NoStartNode([RawText("child2")]),
+            TestHTMLNode.NoEndNode([RawText("child3")]),
+        ]
+        inner_node = TestHTMLNode.NoStartNode(children=children)
+        node = TestHTMLNode.NoEndNode(children=[inner_node])
+        expected_html = "<noendnode><noendnode>child1child2</nostartnode>" + \
+            "<noendnode>child3</nostartnode>"
+        assert node.to_html(force_one_line=True) == expected_html
