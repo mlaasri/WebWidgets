@@ -53,7 +53,7 @@ class HTMLNode:
         """
         Adds a child to the HTML node.
 
-        :param child: The child to be added. Can be either an instance of HTMLNode or a string.
+        :param child: The child to be added.
         """
         self.children.append(child)
 
