@@ -80,10 +80,14 @@ class HTMLNode:
         """
         return f"</{self._get_tag_name()}>"
 
-    def to_html(self, indent_size: int = 4, indent_level: int = 0,
+    def to_html(self, collapse_empty: bool = True,
+                indent_size: int = 4, indent_level: int = 0,
                 force_one_line: bool = False, return_lines: bool = False) -> Union[str, List[str]]:
         """Converts the HTML node into HTML code.
 
+        :param collapse_empty: If True, collapses empty elements into a single line.
+            Defaults to True.
+        :type collapse_empty: bool
         :param indent_size: The number of spaces to use for each indentation level.
         :type indent_size: int
         :param indent_level: The current level of indentation in the HTML output.
@@ -103,9 +107,11 @@ class HTMLNode:
         html_lines = [indentation + self.start_tag]
 
         # If content must be in one line
-        if self.one_line or force_one_line or not self.children:
+        if self.one_line or force_one_line or (collapse_empty
+                                               and not self.children):
             html_lines += list(itertools.chain.from_iterable(
-                [c.to_html(indent_level=0, force_one_line=True, return_lines=True)
+                [c.to_html(collapse_empty=collapse_empty,
+                           indent_level=0, force_one_line=True, return_lines=True)
                  for c in self.children]))
             html_lines += [self.end_tag]
             html_lines = [''.join(html_lines)]  # Flattening the line

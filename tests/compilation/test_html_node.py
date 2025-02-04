@@ -248,3 +248,35 @@ class TestHTMLNode:
         actual_html = node.to_html(
             indent_level=indent_level, indent_size=indent_size)
         assert actual_html == expected_html
+
+    def test_collapse_empty(self):
+        node = HTMLNode(children=[
+            TestHTMLNode.CustomNode(),
+            HTMLNode(children=[RawText('grandchild1')])
+        ])
+        expected_html = "\n".join([
+            "<htmlnode>",
+            "    <customnode></customnode>",
+            "    <htmlnode>",
+            "        grandchild1",
+            "    </htmlnode>",
+            "</htmlnode>"
+        ])
+        assert node.to_html() == expected_html
+        assert node.to_html(collapse_empty=True) == expected_html
+
+    def test_not_collapse_empty(self):
+        node = HTMLNode(children=[
+            TestHTMLNode.CustomNode(),
+            HTMLNode(children=[RawText('grandchild1')])
+        ])
+        expected_html = "\n".join([
+            "<htmlnode>",
+            "    <customnode>",
+            "    </customnode>",
+            "    <htmlnode>",
+            "        grandchild1",
+            "    </htmlnode>",
+            "</htmlnode>"
+        ])
+        assert node.to_html(collapse_empty=False) == expected_html
