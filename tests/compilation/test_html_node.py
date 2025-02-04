@@ -237,7 +237,7 @@ class TestHTMLNode:
 
         # Calling to_html with the test parameters
         actual_html = node.to_html(
-            indent_level=indent_level, indent_size=indent_size)
+            indent_size=indent_size, indent_level=indent_level)
         assert actual_html == expected_html
 
     @pytest.mark.parametrize("indent_level", [0, 1, 2])
@@ -246,7 +246,7 @@ class TestHTMLNode:
         node = HTMLNode()
         expected_html = f"{' ' * indent_size * indent_level}<htmlnode></htmlnode>"
         actual_html = node.to_html(
-            indent_level=indent_level, indent_size=indent_size)
+            indent_size=indent_size, indent_level=indent_level)
         assert actual_html == expected_html
 
     def test_collapse_empty(self):
