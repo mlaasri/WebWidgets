@@ -80,14 +80,14 @@ class HTMLNode:
         """
         return f"</{self._get_tag_name()}>"
 
-    def to_html(self, indent_level: int = 0, indent_size: int = 4,
+    def to_html(self, indent_size: int = 4, indent_level: int = 0,
                 force_one_line: bool = False, return_lines: bool = False) -> Union[str, List[str]]:
         """Converts the HTML node into HTML code.
 
-        :param indent_level: The current level of indentation in the HTML output.
-        :type indent_level: int
         :param indent_size: The number of spaces to use for each indentation level.
         :type indent_size: int
+        :param indent_level: The current level of indentation in the HTML output.
+        :type indent_level: int
         :param force_one_line: If True, forces all child elements to be rendered on a single line without additional
             indentation. Defaults to False.
         :type force_one_line: bool
@@ -113,8 +113,8 @@ class HTMLNode:
         # If content spans multi-line
         else:
             html_lines += list(itertools.chain.from_iterable(
-                [c.to_html(indent_level=indent_level + 1,
-                           indent_size=indent_size,
+                [c.to_html(indent_size=indent_size,
+                           indent_level=indent_level + 1,
                            return_lines=True)
                  for c in self.children]))
             html_lines += [indentation + self.end_tag]
@@ -167,14 +167,14 @@ class RawText(HTMLNode):
         super().__init__()
         self.text = text
 
-    def to_html(self, indent_level: int = 0, indent_size: int = 4,
+    def to_html(self, indent_size: int = 4, indent_level: int = 0,
                 return_lines: bool = False, *args, **kwargs) -> Union[str, List[str]]:
         """Converts the raw text node to HTML.
 
-        :param indent_level: See :py:meth:`HTMLNode.to_html`.
-        :type indent_level: int
         :param indent_size: See :py:meth:`HTMLNode.to_html`.
         :type indent_size: int
+        :param indent_level: See :py:meth:`HTMLNode.to_html`.
+        :type indent_level: int
         :param return_lines: See :py:meth:`HTMLNode.to_html`.
         :type return_lines: bool
         :return: See :py:meth:`HTMLNode.to_html`.
