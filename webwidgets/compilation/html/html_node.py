@@ -119,7 +119,8 @@ class HTMLNode:
         # If content spans multi-line
         else:
             html_lines += list(itertools.chain.from_iterable(
-                [c.to_html(indent_size=indent_size,
+                [c.to_html(collapse_empty=collapse_empty,
+                           indent_size=indent_size,
                            indent_level=indent_level + 1,
                            return_lines=True)
                  for c in self.children]))
