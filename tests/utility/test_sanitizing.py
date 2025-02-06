@@ -34,7 +34,7 @@ class TestSanitizingHTMLText:
             html_entity)
         assert sanitize_html_text(text) == expected_text
 
-    @ pytest.mark.parametrize("text, expected", [
+    @pytest.mark.parametrize("text, expected", [
         ("Some text abcdefghijklmnopqrstuvwxyz",
          "Some text abcdefghijklmnopqrstuvwxyz"),
         ("0123456789.!?#",
@@ -54,7 +54,7 @@ class TestSanitizingHTMLText:
         assert sanitize_html_text(text) == expected
         assert sanitize_html_text(text, replace_all_entities=True) == expected
 
-    @ pytest.mark.parametrize("text, expected", [
+    @pytest.mark.parametrize("text, expected", [
         ("Some text abcdefghijklmnopqrstuvwxyz",
          "Some text abcdefghijklmnopqrstuvwxyz"),
         ("0123456789.!?#",
