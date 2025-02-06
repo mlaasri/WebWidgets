@@ -26,10 +26,10 @@ _REGEXP_SEMI = re.compile(
 
 
 # Entities that are always replaced during sanitization. These are: &, <, >, /,
-# according to rule 13.1.2.6 of the HTML5 specification, and new line characters
-# '\n'.
+# according to rule 13.1.2.6 of the HTML5 specification, as well as single quotes
+# ', double quotes ", and new line characters '\n'.
 # Source: https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions
-_ALWAYS_SANITIZED = ("\u0026", "\u003C", "\u003E", "\u002F", "\n")
+_ALWAYS_SANITIZED = ("\u0026", "\u003C", "\u003E", "\u002F", "'", "\"", "\n")
 
 
 # Entities other than the semicolon (which requires special treatment) that are
@@ -43,10 +43,12 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
     """Sanitizes raw HTML text by replacing certain characters with HTML-friendly equivalents.
 
     Sanitization affects the following characters:
-    - '<', '/', and '>', replaced with their corresponding HTML entities
+    - `<`, `/`, and `>`, replaced with their corresponding HTML entities
         ("&lt;", "&gt;", "&sol;") according to rule 13.1.2.6 of the HTML5
         specification (see source:
         https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions)
+    - single quotes `'` and double quotes `"`, replaced with their corresponding
+      HTML entities ("&apos;" and "&quot;")
     - new line characters '\\n', replaced with `br` tags
     - if `replace_all_entities` is True, every character that can be represented by
         an HTML entity is replaced with that entity. If a character can be
@@ -70,9 +72,10 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
         # Replacing '&' ONLY when not part of an HTML entity itself
         text = _REGEX_AMP.sub('&amp;', text)
 
-    # Then we replace '<', '/', and '>' with their corresponding HTML entities.
+    # Then we replace <, /, >, ', and " with their corresponding HTML entities.
     text = text.replace('<', '&lt;').replace(
-        '>', '&gt;').replace("\u002F", '&sol;')
+        '>', '&gt;').replace("\u002F", '&sol;').replace(
+            "'", '&apos;').replace('"', '&quot;')
 
     # If requested, we then replace all remaining HTML entities
     if replace_all_entities:
