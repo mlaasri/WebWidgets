@@ -46,7 +46,7 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
         ("&lt;", "&gt;", "&sol;") according to rule 13.1.2.6 of the HTML5
         specification (see source:
         https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions)
-    - new line characters '\\n', replaced with `br` tags
+    - new line characters '\\n', replaced with their corresponding entity
     - if `replace_all_entities` is True, every character that can be represented by
         an HTML entity is replaced with that entity. If a character can be
         represented by multiple entities, preference is given to the shortest one
@@ -69,9 +69,10 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
         # Replacing '&' ONLY when not part of an HTML entity itself
         text = _REGEX_AMP.sub('&amp;', text)
 
-    # Then we replace '<', '/', and '>' with their corresponding HTML entities.
+    # Then we replace '<', '/', '>', and '\n' with their corresponding HTML
+    # entities.
     text = text.replace('<', '&lt;').replace(
-        '>', '&gt;').replace("\u002F", '&sol;')
+        '>', '&gt;').replace("\u002F", '&sol;').replace("\n", "&NewLine;")
 
     # If requested, we then replace all remaining HTML entities
     if replace_all_entities:
@@ -94,8 +95,5 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
 
             # Replacing the characters with the preferred HTML entity
             text = text.replace(characters, e)
-
-    # Finally we replace every new line with <br>
-    text = text.replace('\n', '<br>')
 
     return text
