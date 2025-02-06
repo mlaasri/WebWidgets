@@ -46,7 +46,7 @@ class TestSanitizingHTMLText:
         ('<div>Some text &sol;</div>',
          '&lt;div&gt;Some text &sol;&lt;&sol;div&gt;'),
         ('Some text\nand more',
-         'Some text&NewLine;and more'),
+         'Some text<br>and more'),
         ('<p>&nbsp;</p>',
          '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
     ])
@@ -66,7 +66,7 @@ class TestSanitizingHTMLText:
         ('<div>Some text &sol;</div>',
          '&lt;div&gt;Some text &sol;&lt;&sol;div&gt;'),
         ('Some text\nand more',
-         'Some text&NewLine;and more'),
+         'Some text<br>and more'),
         ('<p>&nbsp;</p>',
          '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
     ])

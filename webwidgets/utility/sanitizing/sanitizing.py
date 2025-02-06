@@ -26,9 +26,10 @@ _REGEXP_SEMI = re.compile(
 
 
 # Entities that are always replaced during sanitization. These are: &, <, >, /,
-# according to rule 13.1.2.6 of the HTML5 specification.
+# according to rule 13.1.2.6 of the HTML5 specification, and new line characters
+# '\n'.
 # Source: https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions
-_ALWAYS_SANITIZED = ("\u0026", "\u003C", "\u003E", "\u002F")
+_ALWAYS_SANITIZED = ("\u0026", "\u003C", "\u003E", "\u002F", "\n")
 
 
 # Entities other than the semicolon (which requires special treatment) that are
