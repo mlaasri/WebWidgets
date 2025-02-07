@@ -28,9 +28,17 @@ HTML_ENTITY_NAMES = tuple(k.replace('&', '').replace(';', '')
                           for k in HTML_ENTITIES)
 
 
-# Maps characters to their corresponding character references. Character references
-# are sorted by increasing length, so short references (preferred) come first.
-HTML_ENTITIES_INVERTED = {v["characters"]: tuple(sorted((
+# Maps characters to their corresponding character references. If a character can be
+# represented by multiple entities, the preferred one is placed first in the tuple.
+# Preference is given to the shortest one with a semicolon, in lowercase if possible
+# (e.g. "&amp;").
+HTML_ENTITIES_INVERTED = {v["characters"]: sorted([
     k for k in HTML_ENTITIES
     if HTML_ENTITIES[k]["characters"] == v["characters"]
-), key=len)) for v in HTML_ENTITIES.values()}
+], key=len) for v in HTML_ENTITIES.values()}
+for _, entities in HTML_ENTITIES_INVERTED.items():
+    e = next((e for e in entities if ';' in e), entities[0])
+    i = entities.index(e.lower() if e.lower() in entities else e)
+    entities[i], entities[0] = entities[0], entities[i]
+HTML_ENTITIES_INVERTED = {k: tuple(v)
+                          for k, v in HTML_ENTITIES_INVERTED.items()}

@@ -26,9 +26,13 @@ class TestSanitizingHTMLText:
         assert name in HTML_ENTITY_NAMES
 
     def test_html_entities_inverted(self):
-        assert HTML_ENTITIES_INVERTED['&'] == (
-            '&AMP', '&amp', '&AMP;', '&amp;')
-        assert HTML_ENTITIES_INVERTED['>'] == ('&GT', '&gt', '&GT;', '&gt;')
+        assert set(HTML_ENTITIES_INVERTED['&']) == set((
+            '&amp;', '&AMP', '&amp', '&AMP;'))
+        assert HTML_ENTITIES_INVERTED['&'][0] == '&amp;'
+        assert set(HTML_ENTITIES_INVERTED['>']) == set((
+            '&gt;', '&GT', '&gt', '&GT;'))
+        assert HTML_ENTITIES_INVERTED['>'][0] == '&gt;'
+        assert HTML_ENTITIES_INVERTED['\u0391'] == ('&Alpha;',)
 
     @pytest.mark.parametrize("html_entity", [
         '&AMP', '&lt;', '&gt;', '&sol;'
