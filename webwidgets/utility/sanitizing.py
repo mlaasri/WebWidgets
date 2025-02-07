@@ -84,7 +84,7 @@ def replace_html_entities(text: str, characters: Tuple[str]) -> str:
     return text
 
 
-def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
+def sanitize_html_text(text: str, replace_all_entities: bool = False) -> str:
     """Sanitizes raw HTML text by replacing certain characters with HTML-friendly equivalents.
 
     Sanitization affects the following characters:
@@ -107,7 +107,7 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
     :type text: str
     :param replace_all_entities: Whether to replace every character that can be
         represented by an HTML entity. Use False to skip non-mandatory characters
-        and increase speed. Default is True.
+        and increase speed. Default is False.
     :type replace_all_entities: bool
     :return: The sanitized HTML text.
     :rtype: str
