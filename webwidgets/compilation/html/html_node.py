@@ -11,7 +11,7 @@
 # =======================================================================
 
 import itertools
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 from webwidgets.utility.sanitizing import sanitize_html_text
 
 
@@ -83,7 +83,8 @@ class HTMLNode:
 
     def to_html(self, collapse_empty: bool = True,
                 indent_size: int = 4, indent_level: int = 0,
-                force_one_line: bool = False, return_lines: bool = False) -> Union[str, List[str]]:
+                force_one_line: bool = False, return_lines: bool = False,
+                **kwargs: Any) -> Union[str, List[str]]:
         """Converts the HTML node into HTML code.
 
         :param collapse_empty: If True, collapses empty elements into a single line.
@@ -98,6 +99,8 @@ class HTMLNode:
         :type force_one_line: bool
         :param return_lines: Whether to return the lines of HTML code individually. Defaults to False.
         :type return_lines: bool
+        :param **kwargs: Additional keyword arguments to pass down to child elements.
+        :type **kwargs: Any
         :return: A string containing the HTML representation of the element if
             `return_lines` is `False` (default), or the list of individual lines
             from that HTML code if `return_lines` is `True`.
@@ -112,7 +115,8 @@ class HTMLNode:
                                                and not self.children):
             html_lines += list(itertools.chain.from_iterable(
                 [c.to_html(collapse_empty=collapse_empty,
-                           indent_level=0, force_one_line=True, return_lines=True)
+                           indent_level=0, force_one_line=True, return_lines=True,
+                           **kwargs)
                  for c in self.children]))
             html_lines += [self.end_tag]
             html_lines = [''.join(html_lines)]  # Flattening the line
@@ -123,7 +127,8 @@ class HTMLNode:
                 [c.to_html(collapse_empty=collapse_empty,
                            indent_size=indent_size,
                            indent_level=indent_level + 1,
-                           return_lines=True)
+                           return_lines=True,
+                           **kwargs)
                  for c in self.children]))
             html_lines += [indentation + self.end_tag]
             html_lines = [l for l in html_lines if any(
@@ -177,7 +182,8 @@ class RawText(HTMLNode):
         self.text = text
 
     def to_html(self, indent_size: int = 4, indent_level: int = 0,
-                return_lines: bool = False, *args, **kwargs) -> Union[str, List[str]]:
+                return_lines: bool = False, replace_all_entities: bool = False,
+                **kwargs: Any) -> Union[str, List[str]]:
         """Converts the raw text node to HTML.
 
         The text is sanitized by the :py:func:`sanitize_html_text` function before
@@ -189,10 +195,15 @@ class RawText(HTMLNode):
         :type indent_level: int
         :param return_lines: See :py:meth:`HTMLNode.to_html`.
         :type return_lines: bool
+        :param replace_all_entities: See :py:func:`sanitize_html_text`.
+        :type replace_all_entities: bool
+        :param kwargs: Other keyword arguments. These are ignored.
+        :type kwargs: Any
         :return: See :py:meth:`HTMLNode.to_html`.
         :rtype: str or List[str]
         """
-        sanitized = sanitize_html_text(self.text)
+        sanitized = sanitize_html_text(
+            self.text, replace_all_entities=replace_all_entities)
         line = ' ' * indent_size * indent_level + sanitized
         if return_lines:
             return [line]
