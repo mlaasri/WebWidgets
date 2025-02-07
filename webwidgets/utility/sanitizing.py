@@ -88,12 +88,12 @@ def sanitize_html_text(text: str, replace_all_entities: bool = False) -> str:
     """Sanitizes raw HTML text by replacing certain characters with HTML-friendly equivalents.
 
     Sanitization affects the following characters:
-    - `<`, `/`, and `>`, replaced with their corresponding HTML entities
-        ("&lt;", "&gt;", "&sol;") according to rule 13.1.2.6 of the HTML5
-        specification (see source:
+    - `<`, `/`, and `>`, replaced with their corresponding HTML entities `lt;`,
+        `gt;`, and `sol;` according to rule 13.1.2.6 of the HTML5 specification
+        (see source:
         https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions)
     - single quotes `'` and double quotes `"`, replaced with their corresponding
-        HTML entities ("&apos;" and "&quot;")
+        HTML entities `apos;` and `quot;`
     - new line characters '\\n', replaced with `br` tags
     - if `replace_all_entities` is True, every character that can be represented by
         an HTML entity is replaced with that entity. If a character can be
