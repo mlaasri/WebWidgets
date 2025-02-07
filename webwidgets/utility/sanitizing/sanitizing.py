@@ -12,6 +12,7 @@
 
 from .html_entities import HTML_ENTITIES_INVERTED, HTML_ENTITY_NAMES
 import re
+from typing import Tuple
 
 
 # Regular expression mathing all isolated '&' characters that are not part of an
@@ -25,18 +26,46 @@ _REGEXP_SEMI = re.compile(
     ''.join(f"(?<!&{e})" for e in HTML_ENTITY_NAMES) + ';')
 
 
-# Entities that are always replaced during sanitization. These are: &, <, >, /,
+# Entities that are always replaced during sanitization. These are: <, >, /,
 # according to rule 13.1.2.6 of the HTML5 specification, as well as single quotes
 # ', double quotes ", and new line characters '\n'.
 # Source: https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions
-_ALWAYS_SANITIZED = ("\u0026", "\u003C", "\u003E", "\u002F", "'", "\"", "\n")
+_ALWAYS_SANITIZED = ("\u003C", "\u003E", "\u002F", "'", "\"", "\n")
 
 
-# Entities other than the semicolon (which requires special treatment) that are
-# replaced by default during sanitization but can also be skipped for speed. This
-# set of entities consists of all remaining entities but the semicolon.
-_OPTIONALLY_SANITIZED_BUT_SEMI = tuple(
-    set(HTML_ENTITIES_INVERTED.keys()) - set(_ALWAYS_SANITIZED) - set(';'))
+# Entities other than new line characters '\n' (which requires special treatment)
+# that are always replaced during sanitization.
+_ALWAYS_SANITIZED_BUT_NEW_LINES = tuple(
+    e for e in _ALWAYS_SANITIZED if e != '\n')
+
+
+# Entities other than the ampersand and semicolon (which require special treatment
+# because they are part of other entities) that are replaced by default during
+# sanitization but can also be skipped for speed. This set of entities consists of
+# all remaining entities but the ampersand and semicolon.
+_OPTIONALLY_SANITIZED_BUT_AMP_SEMI = tuple(
+    set(HTML_ENTITIES_INVERTED.keys()) - set(_ALWAYS_SANITIZED) - set({'&', ';'}))
+
+
+def replace_html_entities(text: str, characters: Tuple[str]) -> str:
+    """Replaces characters with their corresponding HTML entities in the given text.
+
+    If a character can be represented by multiple entities, preference is given to
+    the shortest one that contains a semicolon, in lowercase if possible.
+
+    :param text: The input text containing HTML entities.
+    :type text: str
+    :param characters: The characters to be replaced by their HTML entity. Usually
+        each item in the tuple is a single character, but some entities span
+        multiple characters.
+    :type characters: Tuple[str]
+    :return: The text with HTML entities replaced.
+    :rtype: str
+    """
+    for c in characters:
+        entity = HTML_ENTITIES_INVERTED[c][0]  # Preferred is first
+        text = text.replace(c, entity)
+    return text
 
 
 def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
@@ -48,7 +77,7 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
         specification (see source:
         https://html.spec.whatwg.org/multipage/syntax.html#cdata-rcdata-restrictions)
     - single quotes `'` and double quotes `"`, replaced with their corresponding
-      HTML entities ("&apos;" and "&quot;")
+        HTML entities ("&apos;" and "&quot;")
     - new line characters '\\n', replaced with `br` tags
     - if `replace_all_entities` is True, every character that can be represented by
         an HTML entity is replaced with that entity. If a character can be
@@ -67,39 +96,21 @@ def sanitize_html_text(text: str, replace_all_entities: bool = True) -> str:
     :return: The sanitized HTML text.
     :rtype: str
     """
+    # We start with all optional HTML entities, which enables us to replace all '&'
+    # and ';' before subsequently introducing more of them.
     if replace_all_entities:
 
         # Replacing '&' ONLY when not part of an HTML entity itself
         text = _REGEX_AMP.sub('&amp;', text)
 
-    # Then we replace <, /, >, ', and " with their corresponding HTML entities.
-    text = text.replace('<', '&lt;').replace(
-        '>', '&gt;').replace("\u002F", '&sol;').replace(
-            "'", '&apos;').replace('"', '&quot;')
-
-    # If requested, we then replace all remaining HTML entities
-    if replace_all_entities:
-
         # Replacing ';' ONLY when not part of an HTML entity itself
         text = _REGEXP_SEMI.sub('&semi;', text)
 
         # Replacing the remaining HTML entities
-        for characters in _OPTIONALLY_SANITIZED_BUT_SEMI:
+        text = replace_html_entities(text, _OPTIONALLY_SANITIZED_BUT_AMP_SEMI)
 
-            # Retrieving the HTML entity(s) for these characters
-            entities = HTML_ENTITIES_INVERTED[characters]
-
-            # Preferred format is shortest, lowercase with semicolon (e.g. "&amp;").
-            # Entities are sorted by increasing length in HTML_ENTITIES_INVERTED, so
-            # we can just use next() to retrieved the preferred entity.
-            e = next((e for e in entities if ';' in e), entities[0])
-            if e.lower() in entities:
-                e = e.lower()
-
-            # Replacing the characters with the preferred HTML entity
-            text = text.replace(characters, e)
-
-    # Finally we replace every new line with <br>
-    text = text.replace('\n', '<br>')
+    # Then we replace all mandatory HTML entities
+    text = replace_html_entities(text, _ALWAYS_SANITIZED_BUT_NEW_LINES)
+    text = text.replace('\n', '<br>')  # Has to be last because of < and >
 
     return text
