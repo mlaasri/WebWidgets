@@ -11,28 +11,28 @@
 # =======================================================================
 
 import pytest
-from webwidgets.utility.sanitizing import HTML_ENTITY_NAMES, \
-    HTML_ENTITIES_INVERTED, sanitize_html_text
+from webwidgets.utility.sanitizing import HTML_ENTITIES, \
+    CHAR_TO_HTML_ENTITIES, sanitize_html_text
 
 
 class TestSanitizingHTMLText:
     def test_no_empty_html_entities(self):
-        assert all(e for _, e in HTML_ENTITIES_INVERTED.items())
+        assert all(e for _, e in CHAR_TO_HTML_ENTITIES.items())
 
     @pytest.mark.parametrize("name", [
-        'amp', 'lt', 'gt', 'semi', 'sol', 'apos', 'quot'
+        'amp;', 'lt;', 'gt;', 'semi;', 'sol;', 'apos;', 'quot;'
     ])
     def test_html_entity_names(self, name):
-        assert name in HTML_ENTITY_NAMES
+        assert name in HTML_ENTITIES
 
     def test_html_entities_inverted(self):
-        assert set(HTML_ENTITIES_INVERTED['&']) == set((
-            '&amp;', '&AMP', '&amp', '&AMP;'))
-        assert HTML_ENTITIES_INVERTED['&'][0] == '&amp;'
-        assert set(HTML_ENTITIES_INVERTED['>']) == set((
-            '&gt;', '&GT', '&gt', '&GT;'))
-        assert HTML_ENTITIES_INVERTED['>'][0] == '&gt;'
-        assert HTML_ENTITIES_INVERTED['\u0391'] == ('&Alpha;',)
+        assert set(CHAR_TO_HTML_ENTITIES['&']) == set((
+            'amp;', 'AMP', 'amp', 'AMP;'))
+        assert CHAR_TO_HTML_ENTITIES['&'][0] == 'amp;'
+        assert set(CHAR_TO_HTML_ENTITIES['>']) == set((
+            'gt;', 'GT', 'gt', 'GT;'))
+        assert CHAR_TO_HTML_ENTITIES['>'][0] == 'gt;'
+        assert CHAR_TO_HTML_ENTITIES['\u0391'] == ('Alpha;',)
 
     @pytest.mark.parametrize("html_entity", [
         '&AMP', '&lt;', '&gt;', '&sol;'

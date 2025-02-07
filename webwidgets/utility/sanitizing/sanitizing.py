@@ -10,20 +10,36 @@
 #
 # =======================================================================
 
-from .html_entities import HTML_ENTITIES_INVERTED, HTML_ENTITY_NAMES
+from html.entities import html5 as HTML_ENTITIES
 import re
 from typing import Tuple
 
 
+# Maps characters to their corresponding character references. If a character can be
+# represented by multiple entities, the preferred one is placed first in the tuple.
+# Preference is given to the shortest one with a semicolon, in lowercase if possible
+# (e.g. "&amp;").
+CHAR_TO_HTML_ENTITIES = {v: sorted([
+    k for k in HTML_ENTITIES if HTML_ENTITIES[k] == v
+], key=len) for v in HTML_ENTITIES.values()}
+for _, entities in CHAR_TO_HTML_ENTITIES.items():
+    e = next((e for e in entities if ';' in e), entities[0])
+    i = entities.index(e.lower() if e.lower() in entities else e)
+    entities[i], entities[0] = entities[0], entities[i]
+CHAR_TO_HTML_ENTITIES = {k: tuple(v)
+                         for k, v in CHAR_TO_HTML_ENTITIES.items()}
+
+
 # Regular expression mathing all isolated '&' characters that are not part of an
 # HTML entity.
-_REGEX_AMP = re.compile(f"&(?!({'|'.join(HTML_ENTITY_NAMES)});?)")
+_REGEX_AMP = re.compile(f"&(?!({'|'.join(HTML_ENTITIES.keys())}))")
 
 
 # Regular expression matching all isolated ';' characters that are not part of an
 # HTML entity. The expression essentially concatenates one lookbehind per entity.
 _REGEXP_SEMI = re.compile(
-    ''.join(f"(?<!&{e})" for e in HTML_ENTITY_NAMES) + ';')
+    ''.join(f"(?<!&{e.replace(';', '')})"
+            for e in HTML_ENTITIES if ';' in e) + ';')
 
 
 # Entities that are always replaced during sanitization. These are: <, >, /,
@@ -44,7 +60,7 @@ _ALWAYS_SANITIZED_BUT_NEW_LINES = tuple(
 # sanitization but can also be skipped for speed. This set of entities consists of
 # all remaining entities but the ampersand and semicolon.
 _OPTIONALLY_SANITIZED_BUT_AMP_SEMI = tuple(
-    set(HTML_ENTITIES_INVERTED.keys()) - set(_ALWAYS_SANITIZED) - set({'&', ';'}))
+    set(CHAR_TO_HTML_ENTITIES.keys()) - set(_ALWAYS_SANITIZED) - set({'&', ';'}))
 
 
 def replace_html_entities(text: str, characters: Tuple[str]) -> str:
@@ -63,8 +79,8 @@ def replace_html_entities(text: str, characters: Tuple[str]) -> str:
     :rtype: str
     """
     for c in characters:
-        entity = HTML_ENTITIES_INVERTED[c][0]  # Preferred is first
-        text = text.replace(c, entity)
+        entity = CHAR_TO_HTML_ENTITIES[c][0]  # Preferred is first
+        text = text.replace(c, '&' + entity)
     return text
 
 
