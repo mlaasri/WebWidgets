@@ -280,3 +280,17 @@ class TestHTMLNode:
             "</htmlnode>"
         ])
         assert node.to_html(collapse_empty=False) == expected_html
+
+    @pytest.mark.parametrize("raw, sanitized", [
+        ('<div>text</div>', "&lt;div&gt;text&lt;&sol;div&gt;"),
+        ('\"Yes?\" > \'No!\'', "&quot;Yes?&quot; &gt; &apos;No!&apos;"),
+        ('Yes &\nNo', "Yes &<br>No"),
+    ])
+    def test_sanitize_raw_text(self, raw, sanitized):
+        node = HTMLNode(children=[RawText(raw)])
+        expected_html = "\n".join([
+            "<htmlnode>",
+            f"    {sanitized}",
+            "</htmlnode>"
+        ])
+        assert node.to_html() == expected_html
