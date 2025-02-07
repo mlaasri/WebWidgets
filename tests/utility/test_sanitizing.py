@@ -59,7 +59,9 @@ class TestSanitizingHTMLText:
         ('<p>&nbsp;</p>',
          '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
         ("This 'quote' is not \"there\".",
-         "This &apos;quote&apos; is not &quot;there&quot;&period;")
+         "This &apos;quote&apos; is not &quot;there&quot;&period;"),
+        ("This is a mix < than 100% & 3/5",
+         "This is a mix &lt; than 100&percnt; &amp; 3&sol;5")
     ])
     def test_sanitize_html_with_full_entity_replacement(self, text, expected):
         assert sanitize_html_text(text) == expected
@@ -81,7 +83,9 @@ class TestSanitizingHTMLText:
         ('<p>&nbsp;</p>',
          '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
         ("This 'quote' is not \"there\".",
-         "This &apos;quote&apos; is not &quot;there&quot;.")
+         "This &apos;quote&apos; is not &quot;there&quot;."),
+        ("This is a mix < than 100% & 3/5",
+         "This is a mix &lt; than 100% & 3&sol;5")
     ])
     def test_sanitize_html_with_partial_entity_replacement(self, text, expected):
         assert sanitize_html_text(text, replace_all_entities=False) == expected
