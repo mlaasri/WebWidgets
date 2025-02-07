@@ -16,9 +16,14 @@ from webwidgets.utility.sanitizing import HTML_ENTITY_NAMES, \
 
 
 class TestSanitizingHTMLText:
-    def test_html_entity_names(self):
-        assert 'amp' in HTML_ENTITY_NAMES
-        assert 'semi' in HTML_ENTITY_NAMES
+    def test_no_empty_html_entities(self):
+        assert all(e for _, e in HTML_ENTITIES_INVERTED.items())
+
+    @pytest.mark.parametrize("name", [
+        'amp', 'lt', 'gt', 'semi', 'sol', 'apos', 'quot'
+    ])
+    def test_html_entity_names(self, name):
+        assert name in HTML_ENTITY_NAMES
 
     def test_html_entities_inverted(self):
         assert HTML_ENTITIES_INVERTED['&'] == (
