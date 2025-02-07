@@ -37,6 +37,13 @@ class TestHTMLNode:
     class OneLineNoStartNode(NoStartNode):
         one_line = True
 
+    class KwargsReceiverNode(HTMLNode):
+        def to_html(self, return_lines: bool, message: str,
+                    **kwargs):
+            if return_lines:
+                return [message]
+            return message
+
     def test_basic_node(self):
         node = HTMLNode()
         assert node.start_tag == "<htmlnode>"
@@ -280,6 +287,19 @@ class TestHTMLNode:
             "</htmlnode>"
         ])
         assert node.to_html(collapse_empty=False) == expected_html
+
+    def test_kwargs_pass_down(self):
+        node = HTMLNode(children=[
+            TestHTMLNode.CustomNode(),
+            TestHTMLNode.KwargsReceiverNode()
+        ])
+        expected_html = "\n".join([
+            "<htmlnode>",
+            "    <customnode></customnode>",
+            "Message is 42",
+            "</htmlnode>"
+        ])
+        assert node.to_html(message="Message is 42") == expected_html
 
     @pytest.mark.parametrize("raw, sanitized", [
         ('<div>text</div>', "&lt;div&gt;text&lt;&sol;div&gt;"),
