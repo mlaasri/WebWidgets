@@ -12,6 +12,7 @@
 
 import itertools
 from typing import Dict, List, Union
+from webwidgets.utility.sanitizing import sanitize_html_text
 
 
 class HTMLNode:
@@ -168,7 +169,8 @@ class RawText(HTMLNode):
     def __init__(self, text: str):
         """Creates a raw text node.
 
-        :param text: The text content of the node.
+        :param text: The text content of the node. It will be sanitized in
+            :py:meth:`RawText.to_html` before being written into HTML code.
         :type text: str
         """
         super().__init__()
@@ -177,6 +179,9 @@ class RawText(HTMLNode):
     def to_html(self, indent_size: int = 4, indent_level: int = 0,
                 return_lines: bool = False, *args, **kwargs) -> Union[str, List[str]]:
         """Converts the raw text node to HTML.
+
+        The text is sanitized by the :py:func:`sanitize_html_text` function before
+        being written into HTML code.
 
         :param indent_size: See :py:meth:`HTMLNode.to_html`.
         :type indent_size: int
@@ -187,7 +192,8 @@ class RawText(HTMLNode):
         :return: See :py:meth:`HTMLNode.to_html`.
         :rtype: str or List[str]
         """
-        line = ' ' * indent_size * indent_level + self.text
+        sanitized = sanitize_html_text(self.text)
+        line = ' ' * indent_size * indent_level + sanitized
         if return_lines:
             return [line]
         return line
