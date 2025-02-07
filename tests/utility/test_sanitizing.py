@@ -39,42 +39,22 @@ class TestSanitizingHTMLText:
     ])
     def test_sanitize_html_text(self, html_entity):
         text = '<div>Some text &{} and more</div>'.format(html_entity)
-        expected_text = '&lt;div&gt;Some text &amp;{} and more&lt;&sol;div&gt;'.format(
+        expected_text_partial = '&lt;div&gt;Some text &{} and more&lt;&sol;div&gt;'.format(
             html_entity)
-        assert sanitize_html_text(text) == expected_text
+        assert sanitize_html_text(text) == expected_text_partial
+        expected_text_full = '&lt;div&gt;Some text &amp;{} and more&lt;&sol;div&gt;'.format(
+            html_entity)
+        assert sanitize_html_text(
+            text, replace_all_entities=True) == expected_text_full
 
     def test_sanitize_double_delimiting_characters(self):
         text = "&&copy &&copy; &copy;; copy;;"
         expected = "&amp;&copy &amp;&copy; &copy;&semi; copy&semi;&semi;"
-        assert sanitize_html_text(text) == expected
+        assert sanitize_html_text(text, replace_all_entities=True) == expected
 
     def test_sanitize_missing_ampersand(self):
         text = "copy; lt; gt;"
         expected = "copy&semi; lt&semi; gt&semi;"
-        assert sanitize_html_text(text) == expected
-
-    @pytest.mark.parametrize("text, expected", [
-        ("Some text abcdefghijklmnopqrstuvwxyz",
-         "Some text abcdefghijklmnopqrstuvwxyz"),
-        ("0123456789.!?#",
-         "0123456789&period;&excl;&quest;&num;"),
-        ("& &; &aamp; &amp &amp; &AMP;",
-         "&amp; &amp;&semi; &amp;aamp&semi; &amp &amp; &AMP;"),
-        ("&sool; &sol;/",
-         "&amp;sool&semi; &sol;&sol;"),
-        ('<div>Some text &sol;</div>',
-         '&lt;div&gt;Some text &sol;&lt;&sol;div&gt;'),
-        ('Some text\nand more',
-         'Some text<br>and more'),
-        ('<p>&nbsp;</p>',
-         '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
-        ("This 'quote' is not \"there\".",
-         "This &apos;quote&apos; is not &quot;there&quot;&period;"),
-        ("This is a mix < than 100% & 3/5",
-         "This is a mix &lt; than 100&percnt; &amp; 3&sol;5")
-    ])
-    def test_sanitize_html_with_full_entity_replacement(self, text, expected):
-        assert sanitize_html_text(text) == expected
         assert sanitize_html_text(text, replace_all_entities=True) == expected
 
     @pytest.mark.parametrize("text, expected", [
@@ -98,4 +78,28 @@ class TestSanitizingHTMLText:
          "This is a mix &lt; than 100% & 3&sol;5")
     ])
     def test_sanitize_html_with_partial_entity_replacement(self, text, expected):
+        assert sanitize_html_text(text) == expected
         assert sanitize_html_text(text, replace_all_entities=False) == expected
+
+    @pytest.mark.parametrize("text, expected", [
+        ("Some text abcdefghijklmnopqrstuvwxyz",
+         "Some text abcdefghijklmnopqrstuvwxyz"),
+        ("0123456789.!?#",
+         "0123456789&period;&excl;&quest;&num;"),
+        ("& &; &aamp; &amp &amp; &AMP;",
+         "&amp; &amp;&semi; &amp;aamp&semi; &amp &amp; &AMP;"),
+        ("&sool; &sol;/",
+         "&amp;sool&semi; &sol;&sol;"),
+        ('<div>Some text &sol;</div>',
+         '&lt;div&gt;Some text &sol;&lt;&sol;div&gt;'),
+        ('Some text\nand more',
+         'Some text<br>and more'),
+        ('<p>&nbsp;</p>',
+         '&lt;p&gt;&nbsp;&lt;&sol;p&gt;'),
+        ("This 'quote' is not \"there\".",
+         "This &apos;quote&apos; is not &quot;there&quot;&period;"),
+        ("This is a mix < than 100% & 3/5",
+         "This is a mix &lt; than 100&percnt; &amp; 3&sol;5")
+    ])
+    def test_sanitize_html_with_full_entity_replacement(self, text, expected):
+        assert sanitize_html_text(text, replace_all_entities=True) == expected
