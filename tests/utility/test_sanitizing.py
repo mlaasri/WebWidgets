@@ -43,6 +43,16 @@ class TestSanitizingHTMLText:
             html_entity)
         assert sanitize_html_text(text) == expected_text
 
+    def test_sanitize_double_delimiting_characters(self):
+        text = "&&copy &&copy; &copy;; copy;;"
+        expected = "&amp;&copy &amp;&copy; &copy;&semi; copy&semi;&semi;"
+        assert sanitize_html_text(text) == expected
+
+    def test_sanitize_missing_ampersand(self):
+        text = "copy; lt; gt;"
+        expected = "copy&semi; lt&semi; gt&semi;"
+        assert sanitize_html_text(text) == expected
+
     @pytest.mark.parametrize("text, expected", [
         ("Some text abcdefghijklmnopqrstuvwxyz",
          "Some text abcdefghijklmnopqrstuvwxyz"),
