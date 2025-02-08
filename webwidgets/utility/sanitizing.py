@@ -49,7 +49,7 @@ _REGEXP_SEMI = re.compile(
 _ALWAYS_SANITIZED = ("\u003C", "\u003E", "\u002F", "'", "\"", "\n")
 
 
-# Entities other than new line characters '\n' (which requires special treatment)
+# Entities other than new line characters '\n' (which require special treatment)
 # that are always replaced during sanitization.
 _ALWAYS_SANITIZED_BUT_NEW_LINES = tuple(
     e for e in _ALWAYS_SANITIZED if e != '\n')
