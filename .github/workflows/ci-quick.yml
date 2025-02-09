@@ -46,7 +46,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
   
   test_build:
-    needs: test_source
+    needs: lint_source
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
