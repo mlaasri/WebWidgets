@@ -33,10 +33,9 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-      run: |
-        python -c "import sys; print('Python version', sys.version)"
     - name: Install dependencies
       run: |
+        python -c "import sys; print('Python version', sys.version)"
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install -r requirements.txt -c constraints.txt
