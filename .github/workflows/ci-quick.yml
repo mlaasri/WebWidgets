@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-    name: Test source on Python ${{ matrix.python-version }}
+    name: Lint and test source on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -74,6 +74,7 @@ jobs:
         ls -la
         pip install .
         rm -r webwidgets
+        # Removing webwidgets directory - imports should come from build now
         echo "Removed webwidgets directory. New content:"
         ls -la
     - name: Test with pytest
