@@ -73,7 +73,7 @@ jobs:
     - name: Build and install
       run: |
         pip install .
-        # Removing webwidgets directory - imports should come from build now
+        # Removing webwidgets directory so imports come from build
         rm -r webwidgets
     - name: Test with pytest
       run: |

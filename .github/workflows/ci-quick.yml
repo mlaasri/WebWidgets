@@ -69,8 +69,8 @@ jobs:
         echo "Current directory:"
         ls -la
         pip install .
+        # Removing webwidgets directory so imports come from build
         rm -r webwidgets
-        # Removing webwidgets directory - imports should come from build now
         echo "Removed webwidgets directory. New content:"
         ls -la
     - name: Test with pytest
