@@ -72,13 +72,9 @@ jobs:
         pip install pytest
     - name: Build and install
       run: |
-        echo "Current directory:"
-        ls -la
         pip install .
-        rm -r webwidgets
         # Removing webwidgets directory - imports should come from build now
-        echo "Removed webwidgets directory. New content:"
-        ls -la
+        rm -r webwidgets
     - name: Test with pytest
       run: |
         pytest tests
