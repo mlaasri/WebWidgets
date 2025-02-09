@@ -314,6 +314,7 @@ class TestHTMLNode:
             "</htmlnode>"
         ])
         assert node.to_html() == expected_html
+        assert node.to_html(replace_all_entities=False) == expected_html
 
     @pytest.mark.parametrize("raw, sanitized", [
         ('<div>text</div>',
