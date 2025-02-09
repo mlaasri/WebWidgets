@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-name: Test on few Python versions and latest Ubuntu
+name: Test Python 3.9-11 on latest Ubuntu
 
 on:
   push:
@@ -21,11 +21,11 @@ permissions:
 
 jobs:
   test_source:
-    name: Test source on latest Ubuntu (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
+    name: Test source on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
