@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-name: "Quick CI: Python 3.9-11 on latest Ubuntu"
+name: "Quick CI: Python 3.9-11 on Ubuntu"
 
 on:
   push:
