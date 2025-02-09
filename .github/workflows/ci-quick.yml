@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   test_source:
-    name: Test source code on latest Ubuntu
+    name: Test source on latest Ubuntu (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
