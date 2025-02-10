@@ -11,7 +11,8 @@
 # =======================================================================
 
 import pytest
-from webwidgets.compilation.html.html_node import HTMLNode, no_start_tag, no_end_tag, RawText
+from webwidgets.compilation.html.html_node import HTMLNode, no_start_tag, \
+    no_end_tag, one_line, RawText
 
 
 class TestHTMLNode:
@@ -36,6 +37,10 @@ class TestHTMLNode:
 
     class OneLineNoStartNode(NoStartNode):
         one_line = True
+
+    @one_line
+    class OneLineDecoratorNode(HTMLNode):
+        pass
 
     class KwargsReceiverNode(HTMLNode):
         def to_html(self, return_lines: bool, message: str,
@@ -97,6 +102,15 @@ class TestHTMLNode:
                                                 RawText('child2')])
         expected_html = "<noendnode>child1child2"
         assert node.to_html(force_one_line=True) == expected_html
+
+    def test_one_line_decorator(self):
+        inner_node = HTMLNode(children=[RawText('inner_child')])
+        node = TestHTMLNode.OneLineDecoratorNode(
+            children=[inner_node]
+        )
+        expected_html = "<onelinedecoratornode>" + \
+            "<htmlnode>inner_child</htmlnode></onelinedecoratornode>"
+        assert node.to_html() == expected_html
 
     def test_recursive_rendering(self):
         inner_node = HTMLNode(children=[RawText('inner_child')])
