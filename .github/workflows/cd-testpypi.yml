@@ -46,7 +46,11 @@ jobs:
     - name: Install pypa/hatch
       run: python3 -m pip install hatch
     - name: Set version with hatch
-      run: hatch version 0.0.1.dev0 #$(git describe --tags --abbrev=0)
+      run: |
+        # Using variable instead of GitHub-specific contexts
+        TAG=$(git describe --tags --abbrev=0)
+        echo "Setting version from tag: $TAG"
+        hatch version $TAG
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
