@@ -46,7 +46,7 @@ jobs:
     - name: Install pypa/hatch
       run: python3 -m pip install hatch
     - name: Set version with hatch
-      run: hatch version 0.0.0.dev0 #$(git describe --tags --abbrev=0)
+      run: hatch version 0.0.1.dev0 #$(git describe --tags --abbrev=0)
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
