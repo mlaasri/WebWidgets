@@ -14,11 +14,19 @@ name: "CD: Publish to TestPyPI"
 
 on:
   push:
-    branches: stable
+    tags: "*"
 
 jobs:
+  ensure-main:
+    if: github.event.base_ref != "refs/heads/main"
+    name: Ensure tag was pushed to main
+    steps:
+    - name: Log that tag was pushed to main
+      run: echo "Tag was pushed to main branch. Starting CD workflow."
+
   build:
     name: Build package
+    needs: ensure-main
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
