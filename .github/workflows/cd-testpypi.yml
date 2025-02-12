@@ -18,7 +18,7 @@ on:
 
 jobs:
   ensure-main:
-    if: github.event.base_ref != "refs/heads/main"
+    if: github.event.base_ref != "refs/heads/stable"
     name: Ensure tag was pushed to main
     steps:
     - name: Log that tag was pushed to main
