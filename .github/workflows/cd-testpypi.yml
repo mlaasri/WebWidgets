@@ -20,6 +20,7 @@ jobs:
   ensure-main:
     if: github.event.base_ref != "refs/heads/stable"
     name: Ensure tag was pushed to main
+    runs-on: ubuntu-latest
     steps:
     - name: Log that tag was pushed to main
       run: echo "Tag was pushed to main branch. Starting CD workflow."
