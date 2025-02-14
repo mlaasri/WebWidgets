@@ -14,7 +14,7 @@ name: "Quick CI: Python 3.9-11 on Ubuntu"
 
 on:
   push:
-    branches-ignore: [ stable ]
+    branches: '*'
 
 permissions:
   contents: read

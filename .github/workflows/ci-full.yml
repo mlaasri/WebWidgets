@@ -14,9 +14,9 @@ name: "Full CI: Python 3.9-13 on all OSes"
 
 on:
   push:
-    branches: [ main, stable ]
+    branches: main
   pull_request:
-    branches: [ main, stable ]
+    branches: main
 
 permissions:
   contents: read
