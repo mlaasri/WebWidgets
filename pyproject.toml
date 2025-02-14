@@ -6,12 +6,20 @@ build-backend = "hatchling.build"
 name = "webwidgets"
 dynamic = ["version"]
 description = "A Python package for designing web UIs."
-keywords = ["webui", "design"]
+readme = "README.md"
+requires-python = ">=3.9"
+license-files = { paths = ["LICENSE"] }
 authors = [
     { name="mlaasri" }
 ]
-license-files = { paths = ["LICENSE"] }
-requires-python = ">=3.9"
+keywords = ["webui", "design"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Source code" = "https://github.com/mlaasri/WebWidgets"
 
 [tool.hatch.version]
 path = "webwidgets/__init__.py"
