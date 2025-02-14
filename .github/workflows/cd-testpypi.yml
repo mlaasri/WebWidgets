@@ -24,7 +24,7 @@ on:
 
 jobs:
   ensure-main:
-    if: github.event.base_ref == 'refs/heads/stable'
+    if: github.event.base_ref == 'refs/heads/main'
     name: Ensure tag was pushed to main
     runs-on: ubuntu-latest
     steps:
