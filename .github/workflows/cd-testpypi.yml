@@ -102,7 +102,7 @@ jobs:
 
   publish-to-testpypi:
     if: startsWith(github.ref_name, 'testpypi/')
-    name: Publish package to TestPyPI
+    name: Publish to TestPyPI
     needs:
     - build
     runs-on: ubuntu-latest
