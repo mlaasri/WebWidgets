@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-name: "CD: Publish to PyPI (or Test PyPI)"
+name: "CD: Publish to PyPI (or TestPyPI)"
 
 on:
   push:
