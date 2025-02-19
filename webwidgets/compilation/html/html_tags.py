@@ -51,12 +51,6 @@ class A(TextNode):
         super().__init__(text=text, attributes=attributes)
 
 
-class Aside(HTMLNode):
-    """An `<aside>` element containing supplementary content related to the
-    main content of the page."""
-    pass
-
-
 class Body(HTMLNode):
     """The `<body>` element containing the visible content of a document."""
     pass
@@ -67,11 +61,6 @@ class Button(TextNode):
     pass
 
 
-class Details(HTMLNode):
-    """An `<details>` element providing additional information."""
-    pass
-
-
 class Div(HTMLNode):
     """A `<div>` element used for grouping elements."""
     pass
@@ -79,18 +68,6 @@ class Div(HTMLNode):
 
 class Em(TextNode):
     """An `<em>` element representing emphasized text."""
-    pass
-
-
-@one_line
-class Figcaption(HTMLNode):
-    """A `<figcaption>` element providing a caption for a figure."""
-    pass
-
-
-class Figure(HTMLNode):
-    """A `<figure>` element containing an image or other media along with its
-    caption."""
     pass
 
 
@@ -137,11 +114,6 @@ class Head(HTMLNode):
 
 class Header(HTMLNode):
     """A `<header>` element containing introductory content."""
-    pass
-
-
-class Hgroup(HTMLNode):
-    """An `<hgroup>` element grouping related headings."""
     pass
 
 
@@ -211,32 +183,4 @@ class Section(HTMLNode):
 
 class Span(TextNode):
     """An `<span>` element for inline elements and content."""
-    pass
-
-
-class Summary(TextNode):
-    """A `<summary>` element providing a brief summary of the contents of a
-    `<details>` element."""
-    pass
-
-
-class Table(HTMLNode):
-    """A `<table>` element representing tabular data."""
-    pass
-
-
-@one_line
-class Td(HTMLNode):
-    """A `<td>` element representing a data cell in a table."""
-    pass
-
-
-@one_line
-class Th(HTMLNode):
-    """A `<th>` element representing a header cell in a table."""
-    pass
-
-
-class Tr(HTMLNode):
-    """An `<tr>` element representing a row in a table."""
     pass
