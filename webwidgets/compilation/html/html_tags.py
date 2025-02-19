@@ -184,3 +184,13 @@ class Section(HTMLNode):
 class Span(TextNode):
     """An `<span>` element for inline elements and content."""
     pass
+
+
+class Title(TextNode):
+    """The `<title>` element providing the title of a document."""
+    pass
+
+
+class Ul(HTMLNode):
+    """An `<ul>` element representing an unordered list."""
+    pass
