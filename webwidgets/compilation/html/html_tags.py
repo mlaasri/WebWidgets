@@ -79,9 +79,20 @@ class Div(HTMLNode):
     pass
 
 
+@one_line
 class Em(HTMLNode):
     """An `<em>` element representing emphasized text."""
-    pass
+
+    def __init__(self, text: str, attributes: Dict[str, str] = {}):
+        """Create a new `<em>` node with the given text and attributes.
+
+        :param text: The text content of the `<em>` node.
+        :type text: str
+        :param attributes: See :py:meth:`HTMLNode.__init__`. Default is an
+            empty dictionary. 
+        :type attributes: Dict[str, str]
+        """
+        super().__init__(children=[RawText(text)], attributes=attributes)
 
 
 @one_line
