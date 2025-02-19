@@ -29,7 +29,7 @@ class A(TextNode):
 
     def __init__(self, text: str, hyperlink: str,
                  other_attributes: Dict[str, str] = {}):
-        """Creates a new anchor node `<a>` with the given text and link.
+        """Creates a new anchor element `<a>` with the given text and link.
 
         :param text: The text content of the anchor.
         :type text: str
@@ -129,7 +129,34 @@ class Html(HTMLNode):
 @no_end_tag
 class Img(HTMLNode):
     """An `<img>` element representing an image."""
-    pass
+
+    def __init__(self, src: str, alt: str = None,
+                 other_attributes: Dict[str, str] = {}):
+        """Creates a new `<img>` element.
+
+        :param src: The URL of the image.
+        :type src: str
+        :param alt: A text description of the image. If empty or None, it will not
+            be added to the element at all. Default is None.
+        :type alt: str
+        :param other_attributes: Additional attributes to be added to the `<img>`
+            element. Must not contain any key named `'src'` or `'alt'`. Default is
+            an empty dictionary.
+        :type other_attributes: Dict[str, str]
+        :raise AssertionError: If `other_attributes` contains the key `'src'` or
+            `'alt'`. These attributes should be specified using the `src` and `alt`
+            arguments.
+        """
+        for k in ("src", "alt"):
+            assert k not in other_attributes, "'other_attributes' cannot " \
+                f"contain a key named '{k}'. Use the '{k}' argument to " \
+                "specify the value instead."
+        attributes = {"alt": alt} if alt else {}
+        attributes |= {
+            "src": src,
+            **other_attributes
+        }
+        super().__init__(attributes=attributes)
 
 
 @one_line
