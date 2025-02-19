@@ -27,7 +27,29 @@ class HeadingNode(HTMLNode):
 @one_line
 class A(HTMLNode):
     """An `<a>` element representing a hyperlink."""
-    pass
+
+    def __init__(self, text: str, hyperlink: str,
+                 other_attributes: Dict[str, str] = {}):
+        """Creates a new anchor node `<a>` with the given text and link.
+
+        :param text: The text content of the anchor.
+        :type text: str
+        :param hyperlink: The URL to which the anchor points. This value is
+            used to populate the `href` attribute.
+        :type hyperlink: str
+        :param other_attributes: Other attributes to be added on top of the
+            hyperlink. Must not contain a `href` key. Default is an empty
+            dictionary.
+        :type other_attributes: Dict[str, str]
+        """
+
+        assert "href" not in other_attributes, "'other_attributes' cannot " \
+            "contain 'href' key."
+        attributes = {
+            "href": hyperlink,
+            **other_attributes
+        }
+        super().__init__(children=[RawText(text)], attributes=attributes)
 
 
 class Aside(HTMLNode):
