@@ -40,6 +40,9 @@ class A(TextNode):
             hyperlink. Must not contain a `href` key. Default is an empty
             dictionary.
         :type other_attributes: Dict[str, str]
+        :raise AssertionError: If `other_attributes` contains the key `'href'`.
+            The `href` attribute should be specified using the `hyperlink`
+            argument.
         """
         assert "href" not in other_attributes, "'other_attributes' cannot " \
             "contain a key named 'href'. Use the 'hyperlink' argument to " \
