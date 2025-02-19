@@ -41,9 +41,9 @@ class A(TextNode):
             dictionary.
         :type other_attributes: Dict[str, str]
         """
-
         assert "href" not in other_attributes, "'other_attributes' cannot " \
-            "contain 'href' key."
+            "contain a key named 'href'. Use the 'hyperlink' argument to " \
+            "specify the link instead."
         attributes = {
             "href": hyperlink,
             **other_attributes
