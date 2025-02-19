@@ -3,17 +3,17 @@ from typing import Dict
 
 
 @one_line
-class HeadingNode(HTMLNode):
-    """A heading element like `<h1>`, `<h2>`, etc.
+class TextNode(HTMLNode):
+    """A one-line HTML element that only contains raw text (like `<h1>`).
 
-    A heading node renders on one line and only contains one child: a
-    :py:class:`RawText` node with the heading text.
+    A text node renders on one line and only contains one child: a
+    :py:class:`RawText` node with the text to be rendered.
     """
 
     def __init__(self, text: str, attributes: Dict[str, str] = {}):
-        """Creates a new heading node with the given text and attributes.
+        """Creates a new text node with the given text and attributes.
 
-        :param text: The text content of the heading.
+        :param text: The text content of the node.
         :type text: str
         :param attributes: See :py:meth:`HTMLNode.__init__`. Default is an
             empty dictionary.
@@ -113,32 +113,32 @@ class Form(HTMLNode):
     pass
 
 
-class H1(HeadingNode):
+class H1(TextNode):
     """An `<h1>` element representing the most important heading."""
     pass
 
 
-class H2(HeadingNode):
+class H2(TextNode):
     """An `<h2>` element representing a secondary heading."""
     pass
 
 
-class H3(HeadingNode):
+class H3(TextNode):
     """An `<h3>` element representing a tertiary heading."""
     pass
 
 
-class H4(HeadingNode):
+class H4(TextNode):
     """An `<h4>` element representing a fourth-level heading."""
     pass
 
 
-class H5(HeadingNode):
+class H5(TextNode):
     """An `<h5>` element representing a fifth-level heading."""
     pass
 
 
-class H6(HeadingNode):
+class H6(TextNode):
     """An `<h6>` element representing the least important heading."""
     pass
 
