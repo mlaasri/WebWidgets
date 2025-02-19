@@ -24,8 +24,7 @@ class TextNode(HTMLNode):
         ], attributes=attributes)
 
 
-@one_line
-class A(HTMLNode):
+class A(TextNode):
     """An `<a>` element representing a hyperlink."""
 
     def __init__(self, text: str, hyperlink: str,
@@ -49,7 +48,7 @@ class A(HTMLNode):
             "href": hyperlink,
             **other_attributes
         }
-        super().__init__(children=[RawText(text)], attributes=attributes)
+        super().__init__(text=text, attributes=attributes)
 
 
 class Aside(HTMLNode):
@@ -63,8 +62,7 @@ class Body(HTMLNode):
     pass
 
 
-@one_line
-class Button(HTMLNode):
+class Button(TextNode):
     """A `<button>` element representing a clickable button."""
     pass
 
@@ -79,20 +77,9 @@ class Div(HTMLNode):
     pass
 
 
-@one_line
-class Em(HTMLNode):
+class Em(TextNode):
     """An `<em>` element representing emphasized text."""
-
-    def __init__(self, text: str, attributes: Dict[str, str] = {}):
-        """Create a new `<em>` node with the given text and attributes.
-
-        :param text: The text content of the `<em>` node.
-        :type text: str
-        :param attributes: See :py:meth:`HTMLNode.__init__`. Default is an
-            empty dictionary. 
-        :type attributes: Dict[str, str]
-        """
-        super().__init__(children=[RawText(text)], attributes=attributes)
+    pass
 
 
 @one_line
@@ -163,20 +150,22 @@ class Html(HTMLNode):
     pass
 
 
-@no_end_tag
 @one_line
+@no_end_tag
 class Img(HTMLNode):
     """An `<img>` element representing an image."""
     pass
 
 
 @one_line
+@no_end_tag
 class Input(HTMLNode):
     """An `<input>` element for user input."""
     pass
 
 
 @one_line
+@no_end_tag
 class Link(HTMLNode):
     """An `<link>` element for linking to external resources."""
     pass
@@ -188,6 +177,7 @@ class Main(HTMLNode):
 
 
 @one_line
+@no_end_tag
 class Meta(HTMLNode):
     """A `<meta>` element providing metadata about a document."""
     pass
@@ -208,6 +198,7 @@ class P(HTMLNode):
     pass
 
 
+@one_line
 class Script(HTMLNode):
     """A `<script>` element containing script code."""
     pass
@@ -218,13 +209,12 @@ class Section(HTMLNode):
     pass
 
 
-@one_line
-class Span(HTMLNode):
+class Span(TextNode):
     """An `<span>` element for inline elements and content."""
     pass
 
 
-class Summary(HTMLNode):
+class Summary(TextNode):
     """A `<summary>` element providing a brief summary of the contents of a
     `<details>` element."""
     pass
