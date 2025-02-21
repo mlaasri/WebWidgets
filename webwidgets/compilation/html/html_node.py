@@ -25,7 +25,9 @@ class HTMLNode:
         """Creates an HTMLNode with optional children and attributes.
 
         :param children: List of child HTML nodes. Defaults to an empty list.
+        :type children: List[HTMLNode]
         :param attributes: Dictionary of attributes for the node. Defaults to an empty dictionary.
+        :type attributes: Dict[str, str]
         """
         self.children = children
         self.attributes = attributes
