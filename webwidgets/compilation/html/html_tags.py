@@ -28,7 +28,7 @@ class TextNode(HTMLNode):
 
         :param text: The text content of the node.
         :type text: str
-        :param attributes: See :py:meth:`HTMLNode.__init__`. Default is an
+        :param attributes: See :py:meth:`HTMLNode.__init__`. Defaults to an
             empty dictionary.
         :type attributes: Dict[str, str]
         :param style: Dictionary of CSS properties for the node. Defaults to an
