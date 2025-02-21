@@ -347,6 +347,14 @@ class TestHTMLNode:
         ])
         assert node.to_html(replace_all_entities=True) == expected_html
 
+    def test_get_styles_no_children(self):
+        node = HTMLNode()
+        assert node.get_styles() == {id(node): {}}
+
+    def test_get_styles_no_children_with_style(self):
+        node = HTMLNode(style={"color": "red"})
+        assert node.get_styles() == {id(node): {"color": "red"}}
+
     def test_get_styles(self):
         inner_1 = HTMLNode(style={"color": "red"})
         inner_2 = HTMLNode(style={"margin": "0"})
