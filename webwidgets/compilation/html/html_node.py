@@ -164,12 +164,21 @@ def no_end_tag(cls):
     return cls
 
 
+def one_line(cls):
+    """Decorator to make an HTMLNode subclass a one-line element.
+
+    :param cls: A subclass of HTMLNode.
+    :return: The given class with the `one_line` attribute set to True.
+    """
+    cls.one_line = True
+    return cls
+
+
 @no_start_tag
 @no_end_tag
+@one_line
 class RawText(HTMLNode):
     """A raw text node that contains text without any HTML tags."""
-
-    one_line = True
 
     def __init__(self, text: str):
         """Creates a raw text node.
