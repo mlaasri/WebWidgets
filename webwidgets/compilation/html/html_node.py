@@ -57,12 +57,26 @@ class HTMLNode:
         )
 
     def add(self, child: 'HTMLNode') -> None:
-        """
-        Adds a child to the HTML node.
+        """Adds a child to the HTML node.
 
         :param child: The child to be added.
         """
         self.children.append(child)
+
+    def get_styles(self) -> Dict[int, Dict[str, str]]:
+        """Returns a dictionary mapping the node and all its children to their styles.
+
+        The node and its children are all referenced by their id, as obtained from
+        Python's built-in `id()` function. 
+
+        :return: A dictionary mapping the id of the node and all its children
+            to their styles.
+        :rtype: Dict[int, Dict[str, str]]
+        """
+        styles = {id(self): self.style}
+        for child in self.children:
+            styles.update(child.get_styles())
+        return styles
 
     @property
     def start_tag(self) -> str:
