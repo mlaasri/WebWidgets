@@ -31,8 +31,8 @@ class TextNode(HTMLNode):
         :param attributes: See :py:meth:`HTMLNode.__init__`. Defaults to an
             empty dictionary.
         :type attributes: Dict[str, str]
-        :param style: Dictionary of CSS properties for the node. Defaults to an
-            empty dictionary.
+        :param style: See :py:meth:`HTMLNode.__init__`. Defaults to an empty
+            dictionary.
         :type style: Dict[str, str]
         """
         super().__init__(children=[
