@@ -64,13 +64,13 @@ class HTMLNode:
         self.children.append(child)
 
     def get_styles(self) -> Dict[int, Dict[str, str]]:
-        """Returns a dictionary mapping the node and all its children to their styles.
+        """Returns a dictionary mapping the node and all its children,
+        recursively, to their style.
 
-        The node and its children are all referenced by their id, as obtained from
-        Python's built-in `id()` function. 
+        Nodes are identified by their ID as obtained from Python's built-in
+        `id()` function.
 
-        :return: A dictionary mapping the id of the node and all its children
-            to their styles.
+        :return: A dictionary mapping node IDs to styles.
         :rtype: Dict[int, Dict[str, str]]
         """
         styles = {id(self): self.style}
