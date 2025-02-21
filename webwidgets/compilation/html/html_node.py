@@ -21,16 +21,20 @@ class HTMLNode:
 
     one_line: bool = False
 
-    def __init__(self, children: List['HTMLNode'] = [], attributes: Dict[str, str] = {}):
-        """Creates an HTMLNode with optional children and attributes.
+    def __init__(self, children: List['HTMLNode'] = [],
+                 attributes: Dict[str, str] = {}, style: Dict[str, str] = {}):
+        """Creates an HTMLNode with optional children, attributes, and style.
 
         :param children: List of child HTML nodes. Defaults to an empty list.
         :type children: List[HTMLNode]
         :param attributes: Dictionary of attributes for the node. Defaults to an empty dictionary.
         :type attributes: Dict[str, str]
+        :param style: Dictionary of CSS properties for the node. Defaults to an empty dictionary.
+        :type style: Dict[str, str]
         """
         self.children = children
         self.attributes = attributes
+        self.style = style
 
     def _get_tag_name(self) -> str:
         """Returns the tag name of the HTML node.
