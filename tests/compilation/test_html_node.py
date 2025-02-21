@@ -365,3 +365,23 @@ class TestHTMLNode:
             id(inner_2): {"margin": "0"},
             id(node): {"font-size": "20px"},
         }
+
+    def test_get_styles_deeper_tree(self):
+        grandchild_1 = HTMLNode(style={"color": "red"})
+        grandchild_2 = HTMLNode(style={"margin": "0"})
+        child_1 = HTMLNode(children=[grandchild_1, grandchild_2],
+                           style={"font-size": "20px"})
+        grandchild_3 = HTMLNode(style={"background-color": "blue"})
+        child_2 = HTMLNode(children=[grandchild_3],
+                           style={"font-weight": "bold"})
+        node = HTMLNode(children=[child_1, child_2],
+                        style={"padding": "5px"})
+
+        assert node.get_styles() == {
+            id(grandchild_1): {"color": "red"},
+            id(grandchild_2): {"margin": "0"},
+            id(child_1): {"font-size": "20px"},
+            id(grandchild_3): {"background-color": "blue"},
+            id(child_2): {"font-weight": "bold"},
+            id(node): {"padding": "5px"},
+        }
