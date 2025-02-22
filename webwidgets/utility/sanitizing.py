@@ -30,7 +30,7 @@ CHAR_TO_HTML_ENTITIES = {k: tuple(v)
                          for k, v in CHAR_TO_HTML_ENTITIES.items()}
 
 
-# Regular expression mathing all isolated '&' characters that are not part of an
+# Regular expression matching all isolated '&' characters that are not part of an
 # HTML entity.
 _REGEX_AMP = re.compile(f"&(?!({'|'.join(HTML_ENTITIES.keys())}))")
 
