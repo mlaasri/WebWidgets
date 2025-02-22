@@ -17,7 +17,7 @@ from webwidgets.utility.sanitizing import HTML_ENTITIES, \
 
 class TestSanitizingHTMLText:
     def test_no_empty_html_entities(self):
-        assert all(e for _, e in CHAR_TO_HTML_ENTITIES.items())
+        assert all(e for e in CHAR_TO_HTML_ENTITIES.values())
 
     @pytest.mark.parametrize("name", [
         'amp;', 'lt;', 'gt;', 'semi;', 'sol;', 'apos;', 'quot;'
