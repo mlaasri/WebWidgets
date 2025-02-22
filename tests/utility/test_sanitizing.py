@@ -22,10 +22,10 @@ class TestSanitizingHTMLText:
     @pytest.mark.parametrize("name", [
         'amp;', 'lt;', 'gt;', 'semi;', 'sol;', 'apos;', 'quot;'
     ])
-    def test_html_entity_names(self, name):
+    def test_known_html_entities(self, name):
         assert name in HTML_ENTITIES
 
-    def test_html_entities_inverted(self):
+    def test_char_to_html_entities(self):
         assert set(CHAR_TO_HTML_ENTITIES['&']) == set((
             'amp;', 'AMP', 'amp', 'AMP;'))
         assert CHAR_TO_HTML_ENTITIES['&'][0] == 'amp;'
