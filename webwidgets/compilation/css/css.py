@@ -19,15 +19,14 @@ class CompiledCSS:
     """A utility class to hold compiled CSS rules.
     """
 
-    def __init__(self, nodes: List[HTMLNode],
+    def __init__(self, trees: List[HTMLNode],
                  rules: Dict[str, Dict[str, str]] = {},
                  mapping: Dict[int, List[str]] = {}):
         """Stores compiled CSS rules.
 
-        :param nodes: The HTML nodes at the origin of the compilation. These
-            are typically the elements that have been styled with CSS
-            properties.
-        :type nodes: List[HTMLNode]
+        :param trees: The HTML trees at the origin of the compilation. These
+            are the elements that have been styled with CSS properties.
+        :type trees: List[HTMLNode]
         :param rules: The compiled CSS rules, specified as a dictionary mapping
             the rule's selector to its corresponding CSS declarations. For
             example: `{'g0': {'color': 'red'}}`.
@@ -36,13 +35,13 @@ class CompiledCSS:
             that achieve the same style. Rules are specified by their selector.
         :type mapping: Dict[int, List[str]]
         """
-        self.nodes = nodes
+        self.trees = trees
         self.rules = rules
         self.mapping = mapping
 
 
-def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
-    """Computes optimized CSS rules from the given nodes.
+def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
+    """Computes optimized CSS rules from the given HTML trees.
 
     The main purpose of this function is to reduce the number of CSS rules
     required to achieve a particular style across one or more HTML trees. The
@@ -55,7 +54,7 @@ def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
 
     .. code-block:: python
 
-        node = HTMLNode(
+        tree = HTMLNode(
             style={"margin": "0", "padding": "0"},
             children=[
                 HTMLNode(style={"margin": "0", "padding": "0"}),
@@ -67,7 +66,7 @@ def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
 
     .. code-block:: python
 
-        >>> compiled_css = compile_css([node])
+        >>> compiled_css = compile_css([tree])
         >>> print(compiled_css.rules)
         {
             'g0': ('color', 'blue'),
@@ -75,19 +74,19 @@ def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
             'g2': ('padding', '0')
         }
 
-    :param nodes: The nodes to optimize over. All children are recursively
+    :param trees: The trees to optimize over. All children are recursively
         included in the compilation.
-    :type nodes: List[HTMLNode]
+    :type trees: List[HTMLNode]
     :return: The CompiledCSS object containing the optimized rules.
     :rtype: CompiledCSS
     """
 
     # For now, we just return a simple mapping where each CSS property defines
     # its own ruleset
-    styles = {k: v for node in nodes for k, v in node.get_styles().items()}
+    styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
     rules = {f"g{i}": p for i, p in enumerate(sorted(properties))}
     mapping = {node_id: [n for n, p in rules.items() if p in style.items()]
                for node_id, style in styles.items()}
-    return CompiledCSS(nodes, rules, mapping)
+    return CompiledCSS(trees, rules, mapping)
