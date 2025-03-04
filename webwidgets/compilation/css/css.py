@@ -42,10 +42,17 @@ class CompiledCSS:
 
 
 def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
-    """Computes optimal CSS rules from the given styled nodes.
+    """Computes optimized CSS rules from the given nodes.
+
+    The main purpose of this function is to reduce the number of CSS rules
+    required to achieve a particular style across one or more HTML trees. The
+    function takes a list of HTML nodes as input (not necessarily from the same
+    tree) and computes an optimized set of CSS rules that achieve the same
+    style across all nodes. The resulting :py:class:`CompiledCSS` object
+    contains the optimized rules and their mapping to each node.
 
     :param nodes: The nodes to optimize over. All children are recursively
-        included.
+        included in the compilation.
     :type nodes: List[HTMLNode]
     :return: The CompiledCSS object containing the optimized rules.
     :rtype: CompiledCSS
