@@ -47,9 +47,33 @@ def compile_css(nodes: List[HTMLNode]) -> CompiledCSS:
     The main purpose of this function is to reduce the number of CSS rules
     required to achieve a particular style across one or more HTML trees. The
     function takes a list of HTML nodes as input (not necessarily from the same
-    tree) and computes an optimized set of CSS rules that achieve the same
+    tree) and computes an optimized set of CSS rules that achieves the same
     style across all nodes. The resulting :py:class:`CompiledCSS` object
     contains the optimized rules and their mapping to each node.
+
+    For example, the following tree:
+
+    .. code-block:: python
+
+        node = HTMLNode(
+            style={"margin": "0", "padding": "0"},
+            children=[
+                HTMLNode(style={"margin": "0", "padding": "0"}),
+                HTMLNode(style={"margin": "0", "color": "blue"}),
+            ]
+        )
+
+    can be stylistically described with only 3 CSS rules:
+
+    .. code-block:: python
+
+        >>> compiled_css = compile_css([node])
+        >>> print(compiled_css.rules)
+        {
+            'g0': ('color', 'blue'),
+            'g1': ('margin', '0'),
+            'g2': ('padding', '0')
+        }
 
     :param nodes: The nodes to optimize over. All children are recursively
         included in the compilation.
