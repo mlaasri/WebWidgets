@@ -69,9 +69,9 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
         >>> compiled_css = compile_css([tree])
         >>> print(compiled_css.rules)
         {
-            'g0': ('color', 'blue'),
-            'g1': ('margin', '0'),
-            'g2': ('padding', '0')
+            'g0': {'color': 'blue'},
+            'g1': {'margin': '0'},
+            'g2': {'padding': '0'}
         }
 
     :param trees: The trees to optimize over. All children are recursively
@@ -86,7 +86,7 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = {f"g{i}": p for i, p in enumerate(sorted(properties))}
+    rules = {f"g{i}": dict([p]) for i, p in enumerate(sorted(properties))}
     mapping = {node_id: [n for n, p in rules.items() if p in style.items()]
                for node_id, style in styles.items()}
     return CompiledCSS(trees, rules, mapping)
