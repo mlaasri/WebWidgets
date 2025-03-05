@@ -80,7 +80,6 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
     :return: The CompiledCSS object containing the optimized rules.
     :rtype: CompiledCSS
     """
-
     # For now, we just return a simple mapping where each CSS property defines
     # its own ruleset
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
