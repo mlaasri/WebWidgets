@@ -17,7 +17,6 @@ from webwidgets.compilation.css.css import compile_css
 
 class TestCompileCSS:
     def test_basic_compilation(self):
-
         # Create some HTML nodes with different styles
         node1 = HTMLNode(style={"margin": "0", "padding": "0"})
         node2 = HTMLNode(style={"margin": "0", "color": "blue"})
@@ -45,7 +44,6 @@ class TestCompileCSS:
         assert compiled_css.mapping == expected_mapping
 
     def test_nested_compilation_one_tree(self):
-
         # Create some nested HTML nodes
         tree = HTMLNode(
             style={"margin": "0", "padding": "0"},
@@ -84,7 +82,6 @@ class TestCompileCSS:
         assert compiled_css.mapping == expected_mapping
 
     def test_nested_compilation_two_trees(self):
-
         # Create 2 trees
         tree1 = HTMLNode(
             style={"margin": "10", "padding": "0"},
@@ -124,3 +121,54 @@ class TestCompileCSS:
             id(tree2.children[0]): ['g1']
         }
         assert compiled_css.mapping == expected_mapping
+
+    def test_rules_numbered_in_order(self):
+        """Test that rules are numbered in lexicographical order"""
+        tree = HTMLNode(
+            style={"a": "5", "b": "4"},
+            children=[
+                HTMLNode(style={"a": "10"}),
+                HTMLNode(style={"b": "10"}),
+                HTMLNode(style={"c": "5"})
+            ]
+        )
+        compiled_css = compile_css([tree])
+        expected_rules = {
+            'g0': {'a': '10'},
+            'g1': {'a': '5'},
+            'g2': {'b': '10'},
+            'g3': {'b': '4'},
+            'g4': {'c': '5'}
+        }
+        assert compiled_css.rules == expected_rules
+
+    def test_duplicate_node(self):
+        """Test that adding the same node twice does not impact compilation"""
+        # Compiling a tree
+        tree = HTMLNode(
+            style={"a": "5", "b": "4"},
+            children=[
+                HTMLNode(style={"a": "5"}),
+                HTMLNode(style={"b": "10"}),
+            ]
+        )
+        expected_rules = {
+            'g0': {'a': '5'},
+            'g1': {'b': '10'},
+            'g2': {'b': '4'}
+        }
+        expected_mapping = {
+            id(tree): ['g0', 'g2'],
+            id(tree.children[0]): ['g0'],
+            id(tree.children[1]): ['g1']
+        }
+        compiled_css = compile_css([tree])
+        assert compiled_css.rules == expected_rules
+        assert compiled_css.mapping == expected_mapping
+
+        # Compiling the tree and one of its children, which should already be
+        # included recursively from the tree itself and should not affect the
+        # result
+        compiled_css2 = compile_css([tree, tree.children[0]])
+        assert compiled_css2.rules == expected_rules
+        assert compiled_css2.mapping == expected_mapping
