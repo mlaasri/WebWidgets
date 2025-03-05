@@ -21,14 +21,20 @@ class HTMLNode:
 
     one_line: bool = False
 
-    def __init__(self, children: List['HTMLNode'] = [], attributes: Dict[str, str] = {}):
-        """Creates an HTMLNode with optional children and attributes.
+    def __init__(self, children: List['HTMLNode'] = [],
+                 attributes: Dict[str, str] = {}, style: Dict[str, str] = {}):
+        """Creates an HTMLNode with optional children, attributes, and style.
 
         :param children: List of child HTML nodes. Defaults to an empty list.
+        :type children: List[HTMLNode]
         :param attributes: Dictionary of attributes for the node. Defaults to an empty dictionary.
+        :type attributes: Dict[str, str]
+        :param style: Dictionary of CSS properties for the node. Defaults to an empty dictionary.
+        :type style: Dict[str, str]
         """
         self.children = children
         self.attributes = attributes
+        self.style = style
 
     def _get_tag_name(self) -> str:
         """Returns the tag name of the HTML node.
@@ -51,12 +57,26 @@ class HTMLNode:
         )
 
     def add(self, child: 'HTMLNode') -> None:
-        """
-        Adds a child to the HTML node.
+        """Adds a child to the HTML node.
 
         :param child: The child to be added.
         """
         self.children.append(child)
+
+    def get_styles(self) -> Dict[int, Dict[str, str]]:
+        """Returns a dictionary mapping the node and all its children,
+        recursively, to their style.
+
+        Nodes are identified by their ID as obtained from Python's built-in
+        `id()` function.
+
+        :return: A dictionary mapping node IDs to styles.
+        :rtype: Dict[int, Dict[str, str]]
+        """
+        styles = {id(self): self.style}
+        for child in self.children:
+            styles.update(child.get_styles())
+        return styles
 
     @property
     def start_tag(self) -> str:

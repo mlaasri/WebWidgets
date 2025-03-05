@@ -10,5 +10,4 @@
 #
 # =======================================================================
 
-from . import css
-from . import html
+from .css import compile_css, CompiledCSS
