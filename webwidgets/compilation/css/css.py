@@ -87,7 +87,7 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
     rules = {f"g{i}": dict([p]) for i, p in enumerate(sorted(properties))}
-    mapping = {node_id: [n for n, r in rules.items() if
-                         set(r.items()).issubset(style.items())]
+    mapping = {node_id: sorted([n for n, r in rules.items() if
+                                set(r.items()).issubset(style.items())])
                for node_id, style in styles.items()}
     return CompiledCSS(trees, rules, mapping)
