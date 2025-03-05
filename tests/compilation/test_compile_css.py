@@ -16,6 +16,35 @@ from webwidgets.compilation.css.css import compile_css
 
 
 class TestCompileCSS:
+    def test_argument_type(self):
+        """Compares compilation when given a node object versus a list of
+        nodes.
+        """
+        tree = HTMLNode(
+            style={"a": "5", "b": "4"},
+            children=[
+                HTMLNode(style={"a": "5"})
+            ]
+        )
+        expected_rules = {
+            'g0': {'a': '5'},
+            'g1': {'b': '4'}
+        }
+        expected_mapping = {
+            id(tree): ['g0', 'g1'],
+            id(tree.children[0]): ['g0']
+        }
+        compiled_css = compile_css(tree)
+        assert compiled_css.trees == [tree]
+        assert [id(t) for t in compiled_css.trees] == [id(tree)]
+        assert compiled_css.rules == expected_rules
+        assert compiled_css.mapping == expected_mapping
+        compiled_css2 = compile_css([tree])
+        assert compiled_css2.trees == [tree]
+        assert [id(t) for t in compiled_css2.trees] == [id(tree)]
+        assert compiled_css2.rules == expected_rules
+        assert compiled_css2.mapping == expected_mapping
+
     def test_basic_compilation(self):
         # Create some HTML nodes with different styles
         node1 = HTMLNode(style={"margin": "0", "padding": "0"})
@@ -56,7 +85,7 @@ class TestCompileCSS:
         )
 
         # Compile the CSS for the tree
-        compiled_css = compile_css([tree])
+        compiled_css = compile_css(tree)
 
         # Check that the tree is correctly saved
         assert compiled_css.trees == [tree]
@@ -132,7 +161,7 @@ class TestCompileCSS:
                 HTMLNode(style={"c": "5"})
             ]
         )
-        compiled_css = compile_css([tree])
+        compiled_css = compile_css(tree)
         expected_rules = {
             'g0': {'a': '10'},
             'g1': {'a': '5'},

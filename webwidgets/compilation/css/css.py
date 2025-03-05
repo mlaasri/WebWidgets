@@ -11,7 +11,7 @@
 # =======================================================================
 
 import itertools
-from typing import Dict, List
+from typing import Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
 
 
@@ -40,7 +40,7 @@ class CompiledCSS:
         self.mapping = mapping
 
 
-def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
+def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     """Computes optimized CSS rules from the given HTML trees.
 
     The main purpose of this function is to reduce the number of CSS rules
@@ -66,7 +66,7 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
 
     .. code-block:: python
 
-        >>> compiled_css = compile_css([tree])
+        >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.rules)
         {
             'g0': {'color': 'blue'},
@@ -74,12 +74,16 @@ def compile_css(trees: List[HTMLNode]) -> CompiledCSS:
             'g2': {'padding': '0'}
         }
 
-    :param trees: The trees to optimize over. All children are recursively
-        included in the compilation.
-    :type trees: List[HTMLNode]
+    :param trees: A single tree or a list of trees to optimize over. All
+        children are recursively included in the compilation.
+    :type trees: Union[HTMLNode, List[HTMLNode]]
     :return: The CompiledCSS object containing the optimized rules.
     :rtype: CompiledCSS
     """
+    # Handling case of a single tree
+    if isinstance(trees, HTMLNode):
+        trees = [trees]
+
     # For now, we just return a simple mapping where each CSS property defines
     # its own ruleset
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
