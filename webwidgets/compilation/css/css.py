@@ -27,8 +27,8 @@ class CompiledCSS:
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
         :param rules: The compiled CSS rules, specified as a dictionary mapping
-            the rule's selector to its corresponding CSS declarations. For
-            example: `{'g0': {'color': 'red'}}`.
+            the rule's name to its corresponding CSS declarations. For example:
+            `{'g0': {'color': 'red'}}`.
         :type rules: Dict[str, Dict[str, str]]
         :param mapping: A dictionary mapping each node ID to a list of rules
             that achieve the same style. Rules are specified by their selector.
