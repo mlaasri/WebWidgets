@@ -10,6 +10,7 @@
 #
 # =======================================================================
 
+import copy
 import itertools
 from typing import Any, Dict, List, Union
 from webwidgets.utility.sanitizing import sanitize_html_text
@@ -62,6 +63,22 @@ class HTMLNode:
         :param child: The child to be added.
         """
         self.children.append(child)
+
+    def copy(self, deep: bool = False) -> 'HTMLNode':
+        """Returns a copy of the HTML node.
+
+        This method is just a convenient wrapper around Python's
+        `copy.copy()` and `copy.deepcopy()` methods.
+
+        :param deep: If True, creates a deep copy of the node and its children,
+            recursively. Otherwise, creates a shallow copy. Defaults to False.
+        :type deep: bool
+        :return: A new HTMLNode object that is a copy of the original.
+        :rtype: HTMLNode
+        """
+        if deep:
+            return copy.deepcopy(self)
+        return copy.copy(self)
 
     def get_styles(self) -> Dict[int, Dict[str, str]]:
         """Returns a dictionary mapping the node and all its children,

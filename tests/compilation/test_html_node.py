@@ -385,3 +385,59 @@ class TestHTMLNode:
             id(child_2): {"font-weight": "bold"},
             id(node): {"padding": "5px"},
         }
+
+    def test_shallow_copy(self):
+        node = HTMLNode(style={"color": "red"})
+        copied_node = node.copy(deep=False)
+        assert id(copied_node) != id(node)
+        assert copied_node.style == {"color": "red"}
+        child = RawText("text")
+        copied_node.children.append(child)
+        assert len(copied_node.children) == 1
+        assert id(copied_node.children[0]) == id(child)
+        assert len(node.children) == 1
+        assert id(node.children[0]) == id(child)
+
+    def test_shallow_copy_nested(self):
+        node = HTMLNode(
+            style={"a": "0"},
+            children=[HTMLNode(style={"a": "1"})]
+        )
+        copied_node = node.copy(deep=False)
+        assert id(copied_node) != id(node)
+        assert copied_node.style == {"a": "0"}
+        assert [id(c) for c in copied_node.children] == [
+            id(c) for c in node.children]
+        copied_node.children[0].style["a"] = "2"
+        assert node.children[0].style == {"a": "2"}
+
+    def test_deep_copy(self):
+        node = HTMLNode(style={"color": "red"})
+        copied_node = node.copy(deep=True)
+        assert id(copied_node) != id(node)
+        assert copied_node.style == {"color": "red"}
+        copied_node.children.append(RawText("text"))
+        assert len(copied_node.children) == 1
+        assert len(node.children) == 0
+
+    def test_deep_copy_nested(self):
+        node = HTMLNode(
+            style={"a": "0"},
+            children=[HTMLNode(style={"a": "1"})]
+        )
+        copied_node = node.copy(deep=True)
+        assert id(copied_node) != id(node)
+        assert copied_node.style == {"a": "0"}
+        assert id(copied_node.children[0]) != id(node.children[0])
+        assert copied_node.children[0].style == {"a": "1"}
+        copied_node.children[0].style["a"] = "2"
+        assert node.children[0].style == {"a": "1"}
+
+    def test_copy_default(self):
+        """Tests that the default copy is a shallow copy"""
+        node = HTMLNode(style={"color": "red"})
+        copied_node = node.copy()
+        child = RawText("text")
+        copied_node.children.append(child)
+        assert len(node.children) == 1
+        assert id(node.children[0]) == id(child)
