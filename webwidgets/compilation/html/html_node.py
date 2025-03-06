@@ -10,6 +10,7 @@
 #
 # =======================================================================
 
+import copy
 import itertools
 from typing import Any, Dict, List, Union
 from webwidgets.utility.sanitizing import sanitize_html_text
@@ -21,8 +22,8 @@ class HTMLNode:
 
     one_line: bool = False
 
-    def __init__(self, children: List['HTMLNode'] = [],
-                 attributes: Dict[str, str] = {}, style: Dict[str, str] = {}):
+    def __init__(self, children: List['HTMLNode'] = None,
+                 attributes: Dict[str, str] = None, style: Dict[str, str] = None):
         """Creates an HTMLNode with optional children, attributes, and style.
 
         :param children: List of child HTML nodes. Defaults to an empty list.
@@ -32,9 +33,9 @@ class HTMLNode:
         :param style: Dictionary of CSS properties for the node. Defaults to an empty dictionary.
         :type style: Dict[str, str]
         """
-        self.children = children
-        self.attributes = attributes
-        self.style = style
+        self.children = [] if children is None else children
+        self.attributes = {} if attributes is None else attributes
+        self.style = {} if style is None else style
 
     def _get_tag_name(self) -> str:
         """Returns the tag name of the HTML node.
@@ -62,6 +63,22 @@ class HTMLNode:
         :param child: The child to be added.
         """
         self.children.append(child)
+
+    def copy(self, deep: bool = False) -> 'HTMLNode':
+        """Returns a copy of the HTML node.
+
+        This method is just a convenient wrapper around Python's
+        `copy.copy()` and `copy.deepcopy()` methods.
+
+        :param deep: If True, creates a deep copy of the node and its children,
+            recursively. Otherwise, creates a shallow copy. Defaults to False.
+        :type deep: bool
+        :return: A new HTMLNode object that is a copy of the original.
+        :rtype: HTMLNode
+        """
+        if deep:
+            return copy.deepcopy(self)
+        return copy.copy(self)
 
     def get_styles(self) -> Dict[int, Dict[str, str]]:
         """Returns a dictionary mapping the node and all its children,

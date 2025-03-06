@@ -107,7 +107,7 @@ def sanitize_html_text(text: str, replace_all_entities: bool = False) -> str:
     :type text: str
     :param replace_all_entities: Whether to replace every character that can be
         represented by an HTML entity. Use False to skip non-mandatory characters
-        and increase speed. Default is False.
+        and increase speed. Defaults to False.
     :type replace_all_entities: bool
     :return: The sanitized HTML text.
     :rtype: str

@@ -19,9 +19,8 @@ class CompiledCSS:
     """A utility class to hold compiled CSS rules.
     """
 
-    def __init__(self, trees: List[HTMLNode],
-                 rules: Dict[str, Dict[str, str]] = {},
-                 mapping: Dict[int, List[str]] = {}):
+    def __init__(self, trees: List[HTMLNode], rules: Dict[str, Dict[str, str]],
+                 mapping: Dict[int, List[str]]):
         """Stores compiled CSS rules.
 
         :param trees: The HTML trees at the origin of the compilation. These
