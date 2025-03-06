@@ -28,7 +28,7 @@ class CompiledCSS:
         :type trees: List[HTMLNode]
         :param rules: The compiled CSS rules, specified as a dictionary mapping
             the rule's name to its corresponding CSS declarations. For example:
-            `{'g0': {'color': 'red'}}`.
+            `{'r0': {'color': 'red'}}`.
         :type rules: Dict[str, Dict[str, str]]
         :param mapping: A dictionary mapping each node ID to a list of rules
             that achieve the same style. Rules are specified by their name.
@@ -68,9 +68,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
         >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.rules)
         {
-            'g0': {'color': 'blue'},
-            'g1': {'margin': '0'},
-            'g2': {'padding': '0'}
+            'r0': {'color': 'blue'},
+            'r1': {'margin': '0'},
+            'r2': {'padding': '0'}
         }
 
     :param trees: A single tree or a list of trees to optimize over. All
@@ -88,7 +88,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = {f"g{i}": dict([p]) for i, p in enumerate(sorted(properties))}
+    rules = {f"r{i}": dict([p]) for i, p in enumerate(sorted(properties))}
     mapping = {node_id: sorted([n for n, r in rules.items() if
                                 set(r.items()).issubset(style.items())])
                for node_id, style in styles.items()}
