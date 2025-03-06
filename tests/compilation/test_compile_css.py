@@ -20,12 +20,15 @@ class TestCompileCSS:
         """Compares compilation when given a node object versus a list of
         nodes.
         """
+        # Create a tree
         tree = HTMLNode(
             style={"a": "5", "b": "4"},
             children=[
                 HTMLNode(style={"a": "5"})
             ]
         )
+
+        # Define expected compilation results
         expected_rules = {
             'g0': {'a': '5'},
             'g1': {'b': '4'}
@@ -34,12 +37,20 @@ class TestCompileCSS:
             id(tree): ['g0', 'g1'],
             id(tree.children[0]): ['g0']
         }
+
+        # Compile tree as single node object
         compiled_css = compile_css(tree)
+
+        # Check results of compilation
         assert compiled_css.trees == [tree]
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
         assert compiled_css.rules == expected_rules
         assert compiled_css.mapping == expected_mapping
+
+        # Compile tree as list of one node
         compiled_css2 = compile_css([tree])
+
+        # Check results of compilation again (should be unchanged)
         assert compiled_css2.trees == [tree]
         assert [id(t) for t in compiled_css2.trees] == [id(tree)]
         assert compiled_css2.rules == expected_rules
