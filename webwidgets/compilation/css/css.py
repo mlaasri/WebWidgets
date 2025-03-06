@@ -31,7 +31,7 @@ class CompiledCSS:
             `{'g0': {'color': 'red'}}`.
         :type rules: Dict[str, Dict[str, str]]
         :param mapping: A dictionary mapping each node ID to a list of rules
-            that achieve the same style. Rules are specified by their selector.
+            that achieve the same style. Rules are specified by their name.
         :type mapping: Dict[int, List[str]]
         """
         self.trees = trees
