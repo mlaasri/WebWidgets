@@ -203,6 +203,8 @@ class TestCompileCSS:
             id(tree.children[1]): ['g1']
         }
         compiled_css = compile_css([tree])
+        assert compiled_css.trees == [tree]
+        assert [id(t) for t in compiled_css.trees] == [id(tree)]
         assert compiled_css.rules == expected_rules
         assert compiled_css.mapping == expected_mapping
 
@@ -210,5 +212,8 @@ class TestCompileCSS:
         # included recursively from the tree itself and should not affect the
         # result
         compiled_css2 = compile_css([tree, tree.children[0]])
+        assert compiled_css2.trees == [tree, tree.children[0]]
+        assert [id(t) for t in compiled_css2.trees] == [
+            id(tree), id(tree.children[0])]
         assert compiled_css2.rules == expected_rules
         assert compiled_css2.mapping == expected_mapping
