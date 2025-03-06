@@ -22,8 +22,8 @@ class TextNode(HTMLNode):
     :py:class:`RawText` node with the text to be rendered.
     """
 
-    def __init__(self, text: str, attributes: Dict[str, str] = {},
-                 style: Dict[str, str] = {}):
+    def __init__(self, text: str, attributes: Dict[str, str] = None,
+                 style: Dict[str, str] = None):
         """Creates a new text node with the given text and attributes.
 
         :param text: The text content of the node.
