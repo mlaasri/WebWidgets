@@ -124,8 +124,8 @@ class HTMLNode:
                 **kwargs: Any) -> Union[str, List[str]]:
         """Converts the HTML node into HTML code.
 
-        :param collapse_empty: If True, collapses empty elements into a single line.
-            Defaults to True.
+        :param collapse_empty: If True, collapses elements without any children
+            into a single line. Defaults to True.
         :type collapse_empty: bool
         :param indent_size: The number of spaces to use for each indentation level.
         :type indent_size: int
