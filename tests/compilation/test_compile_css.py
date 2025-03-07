@@ -30,12 +30,12 @@ class TestCompileCSS:
 
         # Define expected compilation results
         expected_rules = {
-            'g0': {'a': '5'},
-            'g1': {'b': '4'}
+            'r0': {'a': '5'},
+            'r1': {'b': '4'}
         }
         expected_mapping = {
-            id(tree): ['g0', 'g1'],
-            id(tree.children[0]): ['g0']
+            id(tree): ['r0', 'r1'],
+            id(tree.children[0]): ['r0']
         }
 
         # Compile tree as single node object
@@ -72,15 +72,15 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = {
-            'g0': {'color': 'blue'},
-            'g1': {'margin': '0'},
-            'g2': {'padding': '0'}
+            'r0': {'color': 'blue'},
+            'r1': {'margin': '0'},
+            'r2': {'padding': '0'}
         }
         assert compiled_css.rules == expected_rules
 
         # Check that the mapping is correctly generated
-        expected_mapping = {id(node1): ['g1', 'g2'], id(
-            node2): ['g0', 'g1'], id(node3): ['g1', 'g2']}
+        expected_mapping = {id(node1): ['r1', 'r2'], id(
+            node2): ['r0', 'r1'], id(node3): ['r1', 'r2']}
         assert compiled_css.mapping == expected_mapping
 
     def test_nested_compilation_one_tree(self):
@@ -104,18 +104,18 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = {
-            'g0': {'color': 'blue'},
-            'g1': {'margin': '0'},
-            'g2': {'margin': '5'},
-            'g3': {'padding': '0'}
+            'r0': {'color': 'blue'},
+            'r1': {'margin': '0'},
+            'r2': {'margin': '5'},
+            'r3': {'padding': '0'}
         }
         assert compiled_css.rules == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
-            id(tree): ['g1', 'g3'],
-            id(tree.children[0]): ['g0', 'g2'],
-            id(tree.children[1]): ['g0', 'g3'],
+            id(tree): ['r1', 'r3'],
+            id(tree.children[0]): ['r0', 'r2'],
+            id(tree.children[1]): ['r0', 'r3'],
             id(tree.children[0].children[0]): [],
             id(tree.children[1].children[0]): []
         }
@@ -146,19 +146,19 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = {
-            'g0': {'color': 'red'},
-            'g1': {'margin': '10'},
-            'g2': {'margin': '5'},
-            'g3': {'padding': '0'}
+            'r0': {'color': 'red'},
+            'r1': {'margin': '10'},
+            'r2': {'margin': '5'},
+            'r3': {'padding': '0'}
         }
         assert compiled_css.rules == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
-            id(tree1): ['g1', 'g3'],
-            id(tree1.children[0]): ['g0'],
-            id(tree2): ['g2', 'g3'],
-            id(tree2.children[0]): ['g1']
+            id(tree1): ['r1', 'r3'],
+            id(tree1.children[0]): ['r0'],
+            id(tree2): ['r2', 'r3'],
+            id(tree2.children[0]): ['r1']
         }
         assert compiled_css.mapping == expected_mapping
 
@@ -174,11 +174,11 @@ class TestCompileCSS:
         )
         compiled_css = compile_css(tree)
         expected_rules = {
-            'g0': {'a': '10'},
-            'g1': {'a': '5'},
-            'g2': {'b': '10'},
-            'g3': {'b': '4'},
-            'g4': {'c': '5'}
+            'r0': {'a': '10'},
+            'r1': {'a': '5'},
+            'r2': {'b': '10'},
+            'r3': {'b': '4'},
+            'r4': {'c': '5'}
         }
         assert compiled_css.rules == expected_rules
 
@@ -193,16 +193,18 @@ class TestCompileCSS:
             ]
         )
         expected_rules = {
-            'g0': {'a': '5'},
-            'g1': {'b': '10'},
-            'g2': {'b': '4'}
+            'r0': {'a': '5'},
+            'r1': {'b': '10'},
+            'r2': {'b': '4'}
         }
         expected_mapping = {
-            id(tree): ['g0', 'g2'],
-            id(tree.children[0]): ['g0'],
-            id(tree.children[1]): ['g1']
+            id(tree): ['r0', 'r2'],
+            id(tree.children[0]): ['r0'],
+            id(tree.children[1]): ['r1']
         }
         compiled_css = compile_css([tree])
+        assert compiled_css.trees == [tree]
+        assert [id(t) for t in compiled_css.trees] == [id(tree)]
         assert compiled_css.rules == expected_rules
         assert compiled_css.mapping == expected_mapping
 
@@ -210,5 +212,8 @@ class TestCompileCSS:
         # included recursively from the tree itself and should not affect the
         # result
         compiled_css2 = compile_css([tree, tree.children[0]])
+        assert compiled_css2.trees == [tree, tree.children[0]]
+        assert [id(t) for t in compiled_css2.trees] == [
+            id(tree), id(tree.children[0])]
         assert compiled_css2.rules == expected_rules
         assert compiled_css2.mapping == expected_mapping
