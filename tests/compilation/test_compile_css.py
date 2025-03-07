@@ -12,7 +12,7 @@
 
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css
+from webwidgets.compilation.css.css import compile_css, apply_css
 
 
 class TestCompileCSS:
@@ -217,3 +217,39 @@ class TestCompileCSS:
             id(tree), id(tree.children[0])]
         assert compiled_css2.rules == expected_rules
         assert compiled_css2.mapping == expected_mapping
+
+
+class TestApplyCSS:
+    def test_apply_css_nested(self):
+        # Creating a tree with some nodes and styles
+        tree = HTMLNode(
+            style={"margin": "0", "padding": "0"},
+            children=[
+                HTMLNode(style={"margin": "0", "color": "blue"}),
+                HTMLNode(style={"margin": "0", "color": "green"})
+            ]
+        )
+
+        # Compiling and applying CSS to the tree
+        compiled_css = compile_css(tree)
+        assert compiled_css.rules == {
+            "r0": {"color": "blue"},
+            "r1": {"color": "green"},
+            "r2": {"margin": "0"},
+            "r3": {"padding": "0"}
+        }
+        apply_css(compiled_css, tree)
+
+        # Checking the tree's new classes
+        assert tree.attributes["class"] == "r2 r3"
+        assert tree.children[0].attributes["class"] == "r0 r2"
+        assert tree.children[1].attributes["class"] == "r1 r2"
+
+        # Checking the final HTML code
+        expected_html = '\n'.join([
+            '<htmlnode class="r2 r3">',
+            '    <htmlnode class="r0 r2"></htmlnode>',
+            '    <htmlnode class="r1 r2"></htmlnode>',
+            '</htmlnode>'
+        ])
+        assert tree.to_html() == expected_html

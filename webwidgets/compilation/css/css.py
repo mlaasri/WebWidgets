@@ -98,3 +98,38 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
                                 set(r.items()).issubset(style.items())])
                for node_id, style in styles.items()}
     return CompiledCSS(trees, rules, mapping)
+
+
+def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
+    """Applies the CSS rules to the given tree.
+
+    Rules are added as HTML classes to each node with a style in the tree. If a
+    node does not have a `class` attribute yet, it will be created for that
+    node. Nodes that do not have any style are left untouched.
+
+    Note that this function is recursive and calls itself on each child node of
+    the tree.
+
+    :param css: The compiled CSS object containing the rules to apply and the
+        mapping to each node. It should be created using :py:func:`compile_css`
+        first, but it can be modified before passing it to this function, as
+        long as its content remains consistent.
+    :type css: CompiledCSS
+    :param tree: The tree to which the CSS rules should be applied. It will be
+        modified in place by this function. If you want to keep the original
+        tree unchanged, make a deep copy of it using its
+        :py:meth:`HTMLNode.copy` method and pass this copy instead.
+    :type tree: HTMLNode
+    """
+    # Only modifying nodes if they have a style
+    if tree.style:
+
+        # Updating the class attribute. If it already exists and is not empty,
+        # we need to insert a space before adding the CSS classes.
+        maybe_space = ' ' if tree.attributes.get('class', None) else ''
+        tree.attributes['class'] = tree.attributes.get(
+            'class', '') + maybe_space + ' '.join(css.mapping[id(tree)])
+
+    # Recursively applying the CSS rules to all child nodes of the tree
+    for child in tree.children:
+        apply_css(css, child)
