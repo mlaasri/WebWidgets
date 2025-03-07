@@ -435,3 +435,86 @@ class TestApplyCSS:
             '</htmlnode>'
         ])
         assert tree.to_html() == expected_html
+
+    def test_apply_css_multiple_times(self):
+        tree = HTMLNode(style={"a": "0", "b": "1"})
+        assert tree.to_html() == '<htmlnode></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+
+    def test_apply_css_multiple_times_with_empty_class(self):
+        tree = HTMLNode(attributes={"class": ""},
+                        style={"a": "0", "b": "1"})
+        assert tree.to_html() == '<htmlnode class=""></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+
+    def test_apply_css_multiple_times_with_existing_r0(self):
+        tree = HTMLNode(attributes={"class": "r0"},
+                        style={"a": "0", "b": "1"})
+        assert tree.to_html() == '<htmlnode class="r0"></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r0 r1"
+        assert tree.to_html() == '<htmlnode class="r0 r1"></htmlnode>'
+
+    def test_apply_css_multiple_times_with_existing_r1(self):
+        tree = HTMLNode(attributes={"class": "r1"},
+                        style={"a": "0", "b": "1"})
+        assert tree.to_html() == '<htmlnode class="r1"></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r1 r0"
+        assert tree.to_html() == '<htmlnode class="r1 r0"></htmlnode>'
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == "r1 r0"
+        assert tree.to_html() == '<htmlnode class="r1 r0"></htmlnode>'
+
+    def test_apply_css_with_existing_rules(self):
+        # Creating a tree with some nodes and styles
+        tree = HTMLNode(
+            attributes={"class": "r3"},
+            style={"margin": "0", "padding": "0"},
+            children=[
+                TextNode("a", style={"margin": "0", "color": "blue"}),
+                HTMLNode(attributes={"class": "r1 z"},
+                         style={"margin": "0", "color": "green"})
+            ]
+        )
+
+        # Compiling and applying CSS to the tree
+        compiled_css = compile_css(tree)
+        assert compiled_css.rules == {
+            "r0": {"color": "blue"},
+            "r1": {"color": "green"},
+            "r2": {"margin": "0"},
+            "r3": {"padding": "0"}
+        }
+        apply_css(compiled_css, tree)
+
+        # Checking the tree's new classes
+        assert tree.attributes["class"] == "r3 r2"
+        assert tree.children[0].attributes["class"] == "r0 r2"
+        assert tree.children[1].attributes["class"] == "r1 z r2"
+
+        # Checking the final HTML code
+        expected_html = '\n'.join([
+            '<htmlnode class="r3 r2">',
+            '    <textnode class="r0 r2">a</textnode>',
+            '    <htmlnode class="r1 z r2"></htmlnode>',
+            '</htmlnode>'
+        ])
+        assert tree.to_html() == expected_html

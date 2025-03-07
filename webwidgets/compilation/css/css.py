@@ -124,11 +124,17 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
     # Only modifying nodes if they have a style
     if tree.style:
 
+        # Listing rules to add as classes. We do not add rules that are already
+        # there.
+        rules_to_add = [r for r in css.mapping[id(tree)] if r and r not in
+                        tree.attributes.get('class', '').split(' ')]
+
         # Updating the class attribute. If it already exists and is not empty,
         # we need to insert a space before adding the CSS classes.
-        maybe_space = ' ' if tree.attributes.get('class', None) else ''
+        maybe_space = ' ' if tree.attributes.get(
+            'class', None) and rules_to_add else ''
         tree.attributes['class'] = tree.attributes.get(
-            'class', '') + maybe_space + ' '.join(css.mapping[id(tree)])
+            'class', '') + maybe_space + ' '.join(rules_to_add)
 
     # Recursively applying the CSS rules to all child nodes of the tree
     for child in tree.children:
