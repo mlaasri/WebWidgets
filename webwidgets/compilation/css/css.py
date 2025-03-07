@@ -31,7 +31,8 @@ class CompiledCSS:
             `{'r0': {'color': 'red'}}`.
         :type rules: Dict[str, Dict[str, str]]
         :param mapping: A dictionary mapping each node ID to a list of rules
-            that achieve the same style. Rules are specified by their name.
+            that achieve the same style. Rules must be specified by their name.
+            For example: `{123: ['r0', 'r2'], 456: ['r1']}`.
         :type mapping: Dict[int, List[str]]
         """
         self.trees = trees
@@ -76,7 +77,11 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     :param trees: A single tree or a list of trees to optimize over. All
         children are recursively included in the compilation.
     :type trees: Union[HTMLNode, List[HTMLNode]]
-    :return: The CompiledCSS object containing the optimized rules.
+    :return: The :py:class:`CompiledCSS` object containing the optimized rules.
+        Every HTML node present in one or more of the input trees is included
+        in the :py:attr:`CompiledCSS.mapping` attribute, even if the node does
+        not have a style. Rules are alphabetically ordered by name in the
+        mapping.
     :rtype: CompiledCSS
     """
     # Handling case of a single tree
