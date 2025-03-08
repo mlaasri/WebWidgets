@@ -10,9 +10,10 @@
 #
 # =======================================================================
 
+import pytest
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css
+from webwidgets.compilation.css.css import compile_css, apply_css
 
 
 class TestCompileCSS:
@@ -217,3 +218,166 @@ class TestCompileCSS:
             id(tree), id(tree.children[0])]
         assert compiled_css2.rules == expected_rules
         assert compiled_css2.mapping == expected_mapping
+
+
+class TestApplyCSS:
+    @pytest.mark.parametrize("class_in, class_out", [
+        (None, "r0 r1"),  # No class attribute
+        ("", "r0 r1"),  # Empty class
+        ("z", "z r0 r1"),  # Existing class
+        ("r1", "r1 r0"),  # Existing rule
+        ("z r1", "z r1 r0"),  # Existing class and rule
+        ("r1 z", "r1 z r0")  # Existing rule and class
+    ])
+    def test_apply_css_to_node(self, class_in, class_out):
+        tree = HTMLNode(attributes=None if class_in is None else {"class": class_in},
+                        style={"a": "0", "b": "1"})
+        apply_css(compile_css(tree), tree)
+        assert tree.attributes["class"] == class_out
+        assert tree.to_html() == f'<htmlnode class="{class_out}"></htmlnode>'
+
+    @pytest.mark.parametrize("cl1_in, cl1_out", [
+        (None, "r2 r3"),  # No class attribute
+        ("", "r2 r3"),  # Empty class
+        ("c", "c r2 r3"),  # Existing class
+        ("r3", "r3 r2"),  # Existing rule
+        ("c r3", "c r3 r2"),  # Existing class and rule
+        ("r3 c", "r3 c r2"),  # Existing rule and class
+        ("r 3", "r 3 r2 r3")  # Rule decoy
+    ])
+    @pytest.mark.parametrize("cl2_in, cl2_out", [
+        (None, "r1 r2"),  # No class attribute
+        ("", "r1 r2"),  # Empty class
+        ("z", "z r1 r2"),  # Existing class
+        ("r1", "r1 r2"),  # Existing rule
+        ("z r1", "z r1 r2"),  # Existing class and rule
+        ("r1 z", "r1 z r2"),  # Existing rule and class
+        ("r 1", "r 1 r1 r2")  # Rule decoy
+    ])
+    @pytest.mark.parametrize("mix", [False, True])
+    def test_apply_css_to_tree(self, cl1_in, cl1_out, cl2_in, cl2_out, mix):
+        # Creating a tree with some nodes and styles
+        tree = HTMLNode(
+            attributes=None if cl1_in is None else {"class": cl1_in},
+            style={"margin": "0", "padding": "0"},
+            children=[
+                TextNode("a", style={"margin": "0", "color": "blue"}) if mix
+                else HTMLNode(style={"margin": "0", "color": "blue"}),
+                HTMLNode(attributes=None if cl2_in is None else {"class": cl2_in},
+                         style={"margin": "0", "color": "green"})
+            ]
+        )
+
+        # Compiling and applying CSS to the tree
+        compiled_css = compile_css(tree)
+        assert compiled_css.rules == {
+            "r0": {"color": "blue"},
+            "r1": {"color": "green"},
+            "r2": {"margin": "0"},
+            "r3": {"padding": "0"}
+        }
+        apply_css(compiled_css, tree)
+
+        # Checking the tree's new classes
+        assert tree.attributes["class"] == cl1_out
+        assert tree.children[0].attributes["class"] == "r0 r2"
+        assert tree.children[1].attributes["class"] == cl2_out
+
+        # Checking the final HTML code
+        mix_node = '<textnode class="r0 r2">a</textnode>' if mix else \
+            '<htmlnode class="r0 r2"></htmlnode>'
+        expected_html = '\n'.join([
+            f'<htmlnode class="{cl1_out}">',
+            f'    {mix_node}',
+            f'    <htmlnode class="{cl2_out}"></htmlnode>',
+            '</htmlnode>'
+        ])
+        assert tree.to_html() == expected_html
+
+    def test_apply_css_without_styles(self):
+        # Compiling and applying CSS to a tree with no styles
+        tree = HTMLNode(
+            children=[
+                TextNode("a"),
+                HTMLNode(attributes={"class": "z"})
+            ]
+        )
+        html_before = tree.to_html()
+        compiled_css = compile_css(tree)
+        assert compiled_css.rules == {}
+        apply_css(compiled_css, tree)
+        html_after = tree.to_html()
+
+        # Checking the tree's new classes
+        assert "class" not in tree.attributes
+        assert "class" not in tree.children[0].attributes
+        assert tree.children[1].attributes["class"] == "z"
+
+        # Checking the final HTML code
+        expected_html = '\n'.join([
+            '<htmlnode>',
+            '    <textnode>a</textnode>',
+            '    <htmlnode class="z"></htmlnode>',
+            '</htmlnode>'
+        ])
+        assert html_before == expected_html
+        assert html_after == expected_html
+
+    def test_apply_css_with_partial_styles(self):
+        # Compiling and applying CSS to a tree where some nodes have styles but
+        # others do not
+        tree = HTMLNode(
+            children=[
+                TextNode("a", style={"margin": "0", "color": "blue"}),
+                HTMLNode(attributes={"class": "z"})
+            ]
+        )
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+
+        # Checking the tree's new classes
+        assert "class" not in tree.attributes
+        assert tree.children[0].attributes["class"] == "r0 r1"
+        assert tree.children[1].attributes["class"] == "z"
+
+        # Checking the final HTML code
+        expected_html = '\n'.join([
+            '<htmlnode>',
+            '    <textnode class="r0 r1">a</textnode>',
+            '    <htmlnode class="z"></htmlnode>',
+            '</htmlnode>'
+        ])
+        assert tree.to_html() == expected_html
+
+    @pytest.mark.parametrize("class_in, class_out", [
+        (None, "r0 r1"),
+        ("", "r0 r1"),
+        ("z", "z r0 r1"),
+        ("r0", "r0 r1"),
+        ("r1", "r1 r0"),
+    ])
+    def test_apply_css_multiple_times(self, class_in, class_out):
+        tree = HTMLNode(style={"a": "0", "b": "1"}) if class_in is None else \
+            HTMLNode(attributes={"class": class_in},
+                     style={"a": "0", "b": "1"})
+        html_before = '<htmlnode></htmlnode>' if class_in is None else \
+            f'<htmlnode class="{class_in}"></htmlnode>'
+        html_after = f'<htmlnode class="{class_out}"></htmlnode>'
+
+        assert tree.to_html() == html_before
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == class_out
+        assert tree.to_html() == html_after
+        apply_css(compiled_css, tree)
+        assert tree.attributes["class"] == class_out
+        assert tree.to_html() == html_after
+
+    def test_empty_style(self):
+        """Tests that no classes are added if style exists but is empty."""
+        tree = HTMLNode(style={})
+        assert tree.to_html() == '<htmlnode></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert "class" not in tree.attributes
+        assert tree.to_html() == '<htmlnode></htmlnode>'
