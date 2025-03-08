@@ -111,9 +111,9 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
     the tree.
 
     :param css: The compiled CSS object containing the rules to apply and the
-        mapping to each node. It should be created using :py:func:`compile_css`
-        first, but it can be modified before passing it to this function, as
-        long as its content remains consistent.
+        mapping to each node. It should have been created by invoking
+        :py:func:`compile_css` on the given tree, but it can be modified before
+        passing it to this function, as long as its content remains consistent.
     :type css: CompiledCSS
     :param tree: The tree to which the CSS rules should be applied. It will be
         modified in place by this function. If you want to keep the original
@@ -121,7 +121,8 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
         :py:meth:`HTMLNode.copy` method and pass this copy instead.
     :type tree: HTMLNode
     """
-    # Only modifying nodes if they have a style
+    # Only modifying nodes if they have a style (and therefore if the list of
+    # rules mapped to them in `css.mapping` is not empty)
     if tree.style:
 
         # Listing rules to add as classes. We do not add rules that are already
