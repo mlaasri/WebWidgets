@@ -221,17 +221,17 @@ class TestCompileCSS:
 
 
 class TestApplyCSS:
-    @pytest.mark.parametrize("class_in, class_out, html", [
-        (None, "r0 r1", '<htmlnode class="r0 r1"></htmlnode>'),
-        ("", "r0 r1", '<htmlnode class="r0 r1"></htmlnode>'),
-        ("z", "z r0 r1", '<htmlnode class="z r0 r1"></htmlnode>')
+    @pytest.mark.parametrize("class_in, class_out", [
+        (None, "r0 r1"),
+        ("", "r0 r1"),
+        ("z", "z r0 r1")
     ])
-    def test_apply_css_to_node(self, class_in, class_out, html):
+    def test_apply_css_to_node(self, class_in, class_out):
         tree = HTMLNode(attributes=None if class_in is None else {"class": class_in},
                         style={"a": "0", "b": "1"})
         apply_css(compile_css(tree), tree)
         assert tree.attributes["class"] == class_out
-        assert tree.to_html() == html
+        assert tree.to_html() == f'<htmlnode class="{class_out}"></htmlnode>'
 
     @pytest.mark.parametrize("cl1_in, cl1_out, cl2_in, cl2_out, mix", [
         (None, "r2 r3", None, "r1 r2", False),  # No class attribute
