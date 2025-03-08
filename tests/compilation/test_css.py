@@ -222,9 +222,9 @@ class TestCompileCSS:
 
 class TestApplyCSS:
     @pytest.mark.parametrize("class_in, class_out", [
-        (None, "r0 r1"),
-        ("", "r0 r1"),
-        ("z", "z r0 r1")
+        (None, "r0 r1"),  # No class attribute
+        ("", "r0 r1"),  # Empty class
+        ("z", "z r0 r1")  # Existing classes
     ])
     def test_apply_css_to_node(self, class_in, class_out):
         tree = HTMLNode(attributes=None if class_in is None else {"class": class_in},
@@ -235,8 +235,8 @@ class TestApplyCSS:
 
     @pytest.mark.parametrize("cl1_in, cl1_out, cl2_in, cl2_out, mix", [
         (None, "r2 r3", None, "r1 r2", False),  # No class attribute
-        ("", "r2 r3", "", "r1 r2", False),  # Empty classes
-        ("c", "c r2 r3", "z", "z r1 r2", False),
+        ("", "r2 r3", "", "r1 r2", False),  # Empty class
+        ("c", "c r2 r3", "z", "z r1 r2", False),  # Existing classes
         (None, "r2 r3", "z", "z r1 r2", True),  # Mixed tree
         ("r3", "r3 r2", "r1 z", "r1 z r2", False),  # Existing rules
     ])
