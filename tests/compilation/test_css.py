@@ -224,7 +224,8 @@ class TestApplyCSS:
     @pytest.mark.parametrize("class_in, class_out", [
         (None, "r0 r1"),  # No class attribute
         ("", "r0 r1"),  # Empty class
-        ("z", "z r0 r1")  # Existing classes
+        ("z", "z r0 r1"),  # Existing classes
+        ("r1 z", "r1 z r0")  # Existing rules
     ])
     def test_apply_css_to_node(self, class_in, class_out):
         tree = HTMLNode(attributes=None if class_in is None else {"class": class_in},
@@ -235,6 +236,8 @@ class TestApplyCSS:
 
     @pytest.mark.parametrize("cl1_in, cl1_out, cl2_in, cl2_out, mix", [
         (None, "r2 r3", None, "r1 r2", False),  # No class attribute
+        (None, "r2 r3", "z", "z r1 r2", False),  # One with a class
+        ("z", "z r2 r3", None, "r1 r2", False),  # Other with a class
         ("", "r2 r3", "", "r1 r2", False),  # Empty class
         ("c", "c r2 r3", "z", "z r1 r2", False),  # Existing classes
         (None, "r2 r3", "z", "z r1 r2", True),  # Mixed tree
@@ -339,6 +342,8 @@ class TestApplyCSS:
          '<htmlnode class="r0 r1"></htmlnode>'),
         ("", "r0 r1", '<htmlnode class=""></htmlnode>',
          '<htmlnode class="r0 r1"></htmlnode>'),
+        ("z", "z r0 r1", '<htmlnode class="z"></htmlnode>',
+         '<htmlnode class="z r0 r1"></htmlnode>'),
         ("r0", "r0 r1", '<htmlnode class="r0"></htmlnode>',
          '<htmlnode class="r0 r1"></htmlnode>'),
         ("r1", "r1 r0", '<htmlnode class="r1"></htmlnode>',
