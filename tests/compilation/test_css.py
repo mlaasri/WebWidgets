@@ -224,8 +224,10 @@ class TestApplyCSS:
     @pytest.mark.parametrize("class_in, class_out", [
         (None, "r0 r1"),  # No class attribute
         ("", "r0 r1"),  # Empty class
-        ("z", "z r0 r1"),  # Existing classes
-        ("r1 z", "r1 z r0")  # Existing rules
+        ("z", "z r0 r1"),  # Existing class
+        ("r1", "r1 r0"),  # Existing rule
+        ("z r1", "z r1 r0"),  # Existing class and rule
+        ("r1 z", "r1 z r0")  # Existing rule and class
     ])
     def test_apply_css_to_node(self, class_in, class_out):
         tree = HTMLNode(attributes=None if class_in is None else {"class": class_in},
@@ -239,6 +241,7 @@ class TestApplyCSS:
         ("", "r2 r3"),  # Empty class
         ("c", "c r2 r3"),  # Existing class
         ("r3", "r3 r2"),  # Existing rule
+        ("c r3", "c r3 r2"),  # Existing class and rule
         ("r3 c", "r3 c r2")  # Existing rule and class
     ])
     @pytest.mark.parametrize("cl2_in, cl2_out", [
@@ -246,7 +249,8 @@ class TestApplyCSS:
         ("", "r1 r2"),  # Empty class
         ("z", "z r1 r2"),  # Existing class
         ("r1", "r1 r2"),  # Existing rule
-        ("r1 z", "r1 z r2"),  # Existing rule and class
+        ("z r1", "z r1 r2"),  # Existing class and rule
+        ("r1 z", "r1 z r2")  # Existing rule and class
     ])
     @pytest.mark.parametrize("mix", [False, True])
     def test_apply_css_to_tree(self, cl1_in, cl1_out, cl2_in, cl2_out, mix):
