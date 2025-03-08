@@ -518,3 +518,12 @@ class TestApplyCSS:
             '</htmlnode>'
         ])
         assert tree.to_html() == expected_html
+
+    def test_empty_style(self):
+        """Tests that no classes are added if style exists but is empty."""
+        tree = HTMLNode(style={})
+        assert tree.to_html() == '<htmlnode></htmlnode>'
+        compiled_css = compile_css(tree)
+        apply_css(compiled_css, tree)
+        assert "class" not in tree.attributes
+        assert tree.to_html() == '<htmlnode></htmlnode>'
