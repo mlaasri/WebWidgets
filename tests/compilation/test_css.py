@@ -337,23 +337,21 @@ class TestApplyCSS:
         ])
         assert tree.to_html() == expected_html
 
-    @pytest.mark.parametrize("class_in, class_out, html_before, html_after", [
-        (None, "r0 r1", '<htmlnode></htmlnode>',
-         '<htmlnode class="r0 r1"></htmlnode>'),
-        ("", "r0 r1", '<htmlnode class=""></htmlnode>',
-         '<htmlnode class="r0 r1"></htmlnode>'),
-        ("z", "z r0 r1", '<htmlnode class="z"></htmlnode>',
-         '<htmlnode class="z r0 r1"></htmlnode>'),
-        ("r0", "r0 r1", '<htmlnode class="r0"></htmlnode>',
-         '<htmlnode class="r0 r1"></htmlnode>'),
-        ("r1", "r1 r0", '<htmlnode class="r1"></htmlnode>',
-         '<htmlnode class="r1 r0"></htmlnode>'),
+    @pytest.mark.parametrize("class_in, class_out", [
+        (None, "r0 r1"),
+        ("", "r0 r1"),
+        ("z", "z r0 r1"),
+        ("r0", "r0 r1"),
+        ("r1", "r1 r0"),
     ])
-    def test_apply_css_multiple_times(self, class_in, class_out,
-                                      html_before, html_after):
+    def test_apply_css_multiple_times(self, class_in, class_out):
         tree = HTMLNode(style={"a": "0", "b": "1"}) if class_in is None else \
             HTMLNode(attributes={"class": class_in},
                      style={"a": "0", "b": "1"})
+        html_before = '<htmlnode></htmlnode>' if class_in is None else \
+            f'<htmlnode class="{class_in}"></htmlnode>'
+        html_after = f'<htmlnode class="{class_out}"></htmlnode>'
+
         assert tree.to_html() == html_before
         compiled_css = compile_css(tree)
         apply_css(compiled_css, tree)
