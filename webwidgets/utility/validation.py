@@ -46,7 +46,7 @@ def validate_css_identifier(identifier: str) -> None:
     if not re.match(r'^[a-zA-Z_]+|--', identifier):
         raise ValueError("CSS identifier must start with either a letter, an "
                          "underscore, or a double hyphen (`--`), but got: "
-                         f"{identifier}")
+                         f"'{identifier}'")
 
     # Check if identifier contains invalid characters
     if not re.match(r'^[a-zA-Z0-9_-]+$', identifier):
@@ -76,12 +76,12 @@ def validate_html_class(class_attribute: str) -> None:
     # Check if the class attribute starts or ends with a space
     if class_attribute.startswith(' ') or class_attribute.endswith(' '):
         raise ValueError("Class attribute cannot start nor end with a space, "
-                         f"but got: {class_attribute}")
+                         f"but got: '{class_attribute}'")
 
     # Check for double spaces in the class attribute
     if '  ' in class_attribute:
         raise ValueError("Class attribute cannot contain double spaces, "
-                         f"but got: {class_attribute}")
+                         f"but got: '{class_attribute}'")
 
     # Check each class individually
     for c in class_attribute.split(' '):
