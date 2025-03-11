@@ -78,6 +78,10 @@ def validate_html_class(class_attribute: str) -> None:
     :raises ValueError: If the class attribute is invalid and does not respect
         the specified rules.
     """
+    # Allow for empty attribute
+    if not class_attribute:
+        return
+
     # Check if the class attribute starts or ends with a space
     if class_attribute.startswith(' ') or class_attribute.endswith(' '):
         raise ValueError("Class attribute cannot start nor end with a space, "

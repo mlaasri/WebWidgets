@@ -78,6 +78,7 @@ class TestValidate:
 
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
+        validate_html_class("")
         validate_html_class("z e r")
         validate_html_class("myClass myOtherClass")
         validate_html_class("myClass z myOtherClass3")
