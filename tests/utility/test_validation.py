@@ -98,7 +98,9 @@ class TestValidate:
         with pytest.raises(ValueError, match="cannot contain double spaces"):
             validate_html_class("myClass  myOtherClass")
 
-    def test_invalid_html_class_with_invalid_identifier(self):
+    def test_invalid_html_class_with_invalid_identifiers(self):
         """Test that an invalid HTML class attribute with invalid CSS identifiers raises an exception"""
         with pytest.raises(ValueError, match=r"Invalid character\(s\).*!, @, #"):
             validate_html_class("my-class123 my-other-class-!@#")
+        with pytest.raises(ValueError, match="must start with"):
+            validate_html_class("my-class123 -er4 my-other-class")
