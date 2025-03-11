@@ -34,7 +34,7 @@ def validate_css_identifier(identifier: str) -> None:
     https://www.w3.org/TR/css-syntax-3/#tokenization - note that this chapter
     remains the same in the current draft for Level 4). For example, this
     function does not allow escaped special characters nor identifier tokens
-    starting with a single hyphen while the specification does.
+    starting with a single hyphen whereas the specification does.
 
     :param identifier: The string to be validated as an identifier token.
     :type identifier: str
@@ -64,8 +64,14 @@ def validate_html_class(class_attribute: str) -> None:
     This function enforces the following rules:
     - the class attribute cannot start nor end with a space
     - the class attribute cannot contain double spaces
-    - each class name in the attribute must be a valid CSS identifier, as
-      validated by the :py:func:`validate_css_identifier` function.
+    - each class in the attribute must be a valid CSS identifier, as validated
+      by the :py:func:`validate_css_identifier` function.
+
+    Note that this function imposes stricter rules than rule 2.3.7 of the HTML5
+    specification (see source:
+    https://html.spec.whatwg.org/#set-of-space-separated-tokens). For example,
+    it does not allow for leading nor trailing spaces whereas the specification
+    does.
 
     :param class_attribute: The HTML class attribute to be validated.
     :type class_attribute: str
