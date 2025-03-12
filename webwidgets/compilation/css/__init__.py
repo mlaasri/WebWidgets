@@ -10,4 +10,4 @@
 #
 # =======================================================================
 
-from .css import compile_css, CompiledCSS
+from .css import compile_css, CompiledCSS, apply_css
