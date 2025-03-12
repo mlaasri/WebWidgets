@@ -12,6 +12,8 @@
 
 import pytest
 import re
+from webwidgets.compilation.css import compile_css, apply_css
+from webwidgets.compilation.html import HTMLNode
 from webwidgets.utility.validation import validate_css_identifier, validate_html_class
 
 
@@ -105,3 +107,48 @@ class TestValidate:
             validate_html_class("my-class123 my-other-class-!@#")
         with pytest.raises(ValueError, match="must start with"):
             validate_html_class("my-class123 -er4 my-other-class")
+
+    @pytest.mark.parametrize("class_in, valid", [
+        (None, True),
+        ("", True),
+        ("c", True),
+        ("c-2_", True),
+        ("--c-", True),
+        ("--c d mn r", True),
+        (" ", False),  # Starts with space
+        ("c 2", False),  # Starts with digit
+        ("-c", False),  # Starts with single hyphen
+        ("--c ", False),  # Ends with space
+        ("--c d! r", False),  # Contains invalid character
+    ])
+    @pytest.mark.parametrize("add_r2_in", [False, True])
+    def test_validation_within_apply_css(self, class_in, valid, add_r2_in):
+        """Tests that valid class attributes make it through rendering"""
+        # Compiling and applying CSS to a tree
+        c_in = None if class_in is None else ' '.join(
+            ([class_in] if class_in else []) + (["r2"] if add_r2_in else []))
+        tree = HTMLNode(
+            attributes=None if c_in is None else {"class": c_in},
+            style={"margin": "0", "padding": "0"},
+            children=[
+                HTMLNode(style={"margin": "0", "color": "blue"})
+            ]
+        )
+        apply_css(compile_css(tree), tree)
+
+        # Checking the final HTML code
+        class_out = "r1 r2" if not c_in else (c_in +
+                                              " r1" + ("" if add_r2_in else " r2"))
+        expected_html = '\n'.join([
+            f'<htmlnode class="{class_out}">',
+            f'    <htmlnode class="r0 r1"></htmlnode>',
+            '</htmlnode>'
+        ])
+        if valid:
+            tree.validate_attributes()
+            assert tree.to_html() == expected_html
+        else:
+            with pytest.raises(ValueError):
+                tree.validate_attributes()
+            with pytest.raises(ValueError):
+                tree.to_html()
