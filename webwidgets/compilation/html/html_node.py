@@ -14,6 +14,7 @@ import copy
 import itertools
 from typing import Any, Dict, List, Union
 from webwidgets.utility.sanitizing import sanitize_html_text
+from webwidgets.utility.validation import validate_html_class
 
 
 class HTMLNode:
@@ -99,10 +100,14 @@ class HTMLNode:
     def start_tag(self) -> str:
         """Returns the opening tag of the HTML node, including any attributes.
 
+        Attributes are validated with :py:meth:`HTMLNode.validate_attributes`
+        before rendering.
+
         :return: A string containing the opening tag of the element with its attributes.
         :rtype: str
         """
         # Rendering attributes
+        self.validate_attributes()
         attributes = self._render_attributes()
         maybe_space = ' ' if attributes else ''
 
@@ -177,6 +182,13 @@ class HTMLNode:
 
         # Otherwise, return a single string
         return '\n'.join(html_lines)
+
+    def validate_attributes(self) -> None:
+        """Validate the node's attributes and raises an exception with a
+        descriptive error message if any attribute is invalid.
+        """
+        if "class" in self.attributes:
+            validate_html_class(self.attributes["class"])
 
 
 def no_start_tag(cls):
