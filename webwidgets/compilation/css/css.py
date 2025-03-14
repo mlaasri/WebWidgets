@@ -13,6 +13,7 @@
 import itertools
 from typing import Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
+from webwidgets.utility.validation import validate_css_identifier
 
 
 class CompiledCSS:
@@ -38,6 +39,34 @@ class CompiledCSS:
         self.trees = trees
         self.rules = rules
         self.mapping = mapping
+
+    def to_css(self, indent_size: int = 4) -> str:
+        """Converts the `rules` dictionary of the :py:class:`CompiledCSS`
+        object into CSS code.
+
+        Each rule name is converted to a class selector and each property name
+        is validated with :py:func:`validate_css_identifier` before being
+        converted.
+
+        :param indent_size: The number of spaces to use for indentation in the
+            CSS code. Defaults to 4.
+        :type indent_size: int
+        :return: The CSS code as a string.
+        :rtype: str
+        """
+        # Initializing code and defining indentation
+        css_code = ""
+        indentation = ' ' * indent_size
+
+        # Writing down each rule from the rules dictionary
+        for i, (name, declarations) in enumerate(self.rules.items()):
+            css_code += f".{name}" + " {\n"
+            for property_name, value in declarations.items():
+                validate_css_identifier(property_name)
+                css_code += f"{indentation}{property_name}: {value};\n"
+            css_code += "}" + ('\n\n' if i < len(self.rules) - 1 else '')
+
+        return css_code
 
 
 def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
