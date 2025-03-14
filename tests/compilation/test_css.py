@@ -13,7 +13,7 @@
 import pytest
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css, apply_css
+from webwidgets.compilation.css.css import compile_css, CompiledCSS, apply_css
 
 
 class TestCompileCSS:
@@ -218,6 +218,76 @@ class TestCompileCSS:
             id(tree), id(tree.children[0])]
         assert compiled_css2.rules == expected_rules
         assert compiled_css2.mapping == expected_mapping
+
+
+class TestCompiledCSS:
+    def test_export_custom_compiled_css(self):
+        rules = {
+            "r0": {
+                "margin": "0",
+                "padding": "0"
+            },
+            "r1": {
+                "color": "blue"
+            },
+            "r2": {
+                "background-color": "white",
+                "font-size": "16px"
+            }
+        }
+        compiled_css = CompiledCSS(trees=None,
+                                   rules=rules,
+                                   mapping=None)
+        expected_css = '\n'.join([
+            ".r0 {",
+            "    margin: 0;",
+            "    padding: 0;",
+            "}",
+            "",
+            ".r1 {",
+            "    color: blue;",
+            "}",
+            "",
+            ".r2 {",
+            "    background-color: white;",
+            "    font-size: 16px;",
+            "}"
+        ])
+        assert compiled_css.to_css() == expected_css
+
+    def test_export_real_compiled_css(self):
+        tree = HTMLNode(
+            style={"margin": "0", "padding": "0"},
+            children=[
+                TextNode("a", style={"margin": "0", "color": "blue"}),
+                HTMLNode(style={"margin": "0", "color": "green"})
+            ]
+        )
+        compiled_css = compile_css(tree)
+        expected_css = '\n'.join([
+            ".r0 {",
+            "    color: blue;",
+            "}",
+            "",
+            ".r1 {",
+            "    color: green;",
+            "}",
+            "",
+            ".r2 {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".r3 {",
+            "    padding: 0;",
+            "}"
+        ])
+        assert compiled_css.to_css() == expected_css
+
+    def test_export_invalid_style(self):
+        node = HTMLNode(style={"marg!in": "0", "padding": "0"})
+        compiled_css = compile_css(node)
+        with pytest.raises(ValueError, match="marg!in"):
+            compiled_css.to_css()
 
 
 class TestApplyCSS:
