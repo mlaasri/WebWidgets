@@ -287,6 +287,10 @@ class TestCompiledCSS:
         node = HTMLNode()
         css = compile_css(node).to_css()
         assert css == ""
+        other_css = CompiledCSS(trees=None,
+                                rules={},
+                                mapping=None).to_css()
+        assert other_css == ""
 
     def test_export_invalid_style(self):
         node = HTMLNode(style={"marg!in": "0", "padding": "0"})
