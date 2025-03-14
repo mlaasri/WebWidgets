@@ -283,11 +283,31 @@ class TestCompiledCSS:
         ])
         assert compiled_css.to_css() == expected_css
 
+    def test_export_empty_style(self):
+        node = HTMLNode()
+        css = compile_css(node).to_css()
+        assert css == ""
+
     def test_export_invalid_style(self):
         node = HTMLNode(style={"marg!in": "0", "padding": "0"})
         compiled_css = compile_css(node)
         with pytest.raises(ValueError, match="marg!in"):
             compiled_css.to_css()
+
+    @pytest.mark.parametrize("indent_size", [0, 2, 4, 8])
+    def test_css_indentation(self, indent_size):
+        node = HTMLNode(style={"a": "0", "b": "1"})
+        expected_css = '\n'.join([
+            ".r0 {",
+            f"{' ' * indent_size}a: 0;",
+            "}",
+            "",
+            ".r1 {",
+            f"{' ' * indent_size}b: 1;",
+            "}"
+        ])
+        css = compile_css(node).to_css(indent_size=indent_size)
+        assert css == expected_css
 
 
 class TestApplyCSS:
