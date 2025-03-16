@@ -13,10 +13,11 @@
 import itertools
 from typing import Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
+from webwidgets.utility.representation import RepresentedWithVars
 from webwidgets.utility.validation import validate_css_identifier
 
 
-class CSSRule:
+class CSSRule(RepresentedWithVars):
     """A rule in a style sheet.
     """
 
@@ -30,11 +31,12 @@ class CSSRule:
             corresponding values. For example: `{'color': 'red'}`
         :type declarations: Dict[str, str]
         """
+        super().__init__()
         self.name = name
         self.declarations = declarations
 
 
-class CompiledCSS:
+class CompiledCSS(RepresentedWithVars):
     """A utility class to hold compiled CSS rules.
     """
 
@@ -51,6 +53,7 @@ class CompiledCSS:
             that achieve the same style.
         :type mapping: Dict[int, List[CSSRule]]
         """
+        super().__init__()
         self.trees = trees
         self.rules = rules
         self.mapping = mapping
