@@ -38,21 +38,18 @@ class CompiledCSS:
     """A utility class to hold compiled CSS rules.
     """
 
-    def __init__(self, trees: List[HTMLNode], rules: Dict[str, Dict[str, str]],
-                 mapping: Dict[int, List[str]]):
+    def __init__(self, trees: List[HTMLNode], rules: List[CSSRule],
+                 mapping: Dict[int, List[CSSRule]]):
         """Stores compiled CSS rules.
 
         :param trees: The HTML trees at the origin of the compilation. These
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
-        :param rules: The compiled CSS rules, specified as a dictionary mapping
-            the rule's name to its corresponding CSS declarations. For example:
-            `{'r0': {'color': 'red'}}`.
-        :type rules: Dict[str, Dict[str, str]]
+        :param rules: The compiled CSS rules.
+        :type rules: List[CSSRule]
         :param mapping: A dictionary mapping each node ID to a list of rules
-            that achieve the same style. Rules must be specified by their name.
-            For example: `{123: ['r0', 'r2'], 456: ['r1']}`.
-        :type mapping: Dict[int, List[str]]
+            that achieve the same style.
+        :type mapping: Dict[int, List[CSSRule]]
         """
         self.trees = trees
         self.rules = rules
@@ -76,10 +73,10 @@ class CompiledCSS:
         css_code = ""
         indentation = ' ' * indent_size
 
-        # Writing down each rule from the rules dictionary
-        for i, (name, declarations) in enumerate(self.rules.items()):
-            css_code += f".{name}" + " {\n"
-            for property_name, value in declarations.items():
+        # Writing down each rule
+        for i, rule in enumerate(self.rules):
+            css_code += f".{rule.name}" + " {\n"
+            for property_name, value in rule.declarations.items():
                 validate_css_identifier(property_name)
                 css_code += f"{indentation}{property_name}: {value};\n"
             css_code += "}" + ('\n\n' if i < len(self.rules) - 1 else '')
@@ -140,9 +137,11 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = {f"r{i}": dict([p]) for i, p in enumerate(sorted(properties))}
-    mapping = {node_id: sorted([n for n, r in rules.items() if
-                                set(r.items()).issubset(style.items())])
+    rules = [CSSRule(f"r{i}", dict([p]))
+             for i, p in enumerate(sorted(properties))]
+    mapping = {node_id: sorted([r for r in rules if
+                                set(r.declarations.items()).issubset(style.items())],
+                               key=lambda r: r.name)
                for node_id, style in styles.items()}
     return CompiledCSS(trees, rules, mapping)
 
@@ -174,7 +173,7 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
 
         # Listing rules to add as classes. We do not add rules that are already
         # there.
-        rules_to_add = [r for r in css.mapping[id(tree)] if r and r not in
+        rules_to_add = [r.name for r in css.mapping[id(tree)] if r.name not in
                         tree.attributes.get('class', '').split(' ')]
 
         # Updating the class attribute. If it already exists and is not empty,
