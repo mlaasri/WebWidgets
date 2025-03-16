@@ -20,11 +20,9 @@ class CSSRule:
     """A rule in a style sheet.
     """
 
-    def __init__(self, id: int, name: str, declarations: Dict[str, str]):
-        """Stores the id, name, and declarations of a rule.
+    def __init__(self, name: str, declarations: Dict[str, str]):
+        """Stores the name and declarations of the rule.
 
-        :param id: The unique identifier for the rule.
-        :type id: int
         :param name: The name of the rule.
         :type name: str
         :param declarations: The CSS declarations for the rule, specified as a
@@ -32,7 +30,6 @@ class CSSRule:
             corresponding values. For example: `{'color': 'red'}`
         :type declarations: Dict[str, str]
         """
-        self.id = id
         self.name = name
         self.declarations = declarations
 
