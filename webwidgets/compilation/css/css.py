@@ -115,11 +115,11 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
 
         >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.rules)
-        {
-            'r0': {'color': 'blue'},
-            'r1': {'margin': '0'},
-            'r2': {'padding': '0'}
-        }
+        [
+            CSSRule(name='r0', declarations={'color': 'blue'}),
+            CSSRule(name='r1', declarations={'margin': '0'}),
+            CSSRule(name='r2', declarations={'padding': '0'})
+        ]
 
     :param trees: A single tree or a list of trees to optimize over. All
         children are recursively included in the compilation.
