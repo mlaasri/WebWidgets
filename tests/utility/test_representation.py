@@ -73,3 +73,46 @@ class TestRepresentation:
                 self.obj = obj
         complex_obj = Outer(obj=Inner(a=1, b=2))
         assert str(complex_obj) == "Outer(obj=Inner(a=1, b=2))"
+
+    def test_repr_with_nested_list(self):
+        """Test case with list of objects as attribute"""
+        class Inner(RepresentedWithVars):
+            def __init__(self, a):
+                self.a = a
+
+        class Outer(RepresentedWithVars):
+            def __init__(self):
+                self.obj = [Inner(1), Inner(2)]
+        obj = Outer()
+        assert str(obj) == "Outer(obj=[Inner(a=1), Inner(a=2)])"
+
+    def test_repr_with_nested_dict(self):
+        """Test case with list of objects as attribute"""
+        class Inner(RepresentedWithVars):
+            def __init__(self, a):
+                self.a = a
+
+        class Outer(RepresentedWithVars):
+            def __init__(self):
+                self.d = {
+                    "1": Inner(1),
+                    "2": Inner(2)
+                }
+        obj = Outer()
+        assert str(obj) == "Outer(d={'1': Inner(a=1), '2': Inner(a=2)})"
+
+    def test_repr_with_nested_dict_of_list(self):
+        """Test case with dict - containing list of objects - as attribute"""
+        class Inner(RepresentedWithVars):
+            def __init__(self, a):
+                self.a = a
+
+        class Outer(RepresentedWithVars):
+            def __init__(self):
+                self.d = {
+                    "odd": [Inner(1), Inner(3)],
+                    "even": [Inner(2)]
+                }
+        obj = Outer()
+        assert str(obj) == "Outer(d={'odd': [Inner(a=1), " \
+            "Inner(a=3)], 'even': [Inner(a=2)]})"
