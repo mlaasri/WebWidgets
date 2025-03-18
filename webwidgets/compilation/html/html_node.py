@@ -35,6 +35,7 @@ class HTMLNode(RepresentedWithVars):
         :param style: Dictionary of CSS properties for the node. Defaults to an empty dictionary.
         :type style: Dict[str, str]
         """
+        super().__init__()
         self.children = [] if children is None else children
         self.attributes = {} if attributes is None else attributes
         self.style = {} if style is None else style
