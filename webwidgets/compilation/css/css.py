@@ -91,7 +91,8 @@ def default_rule_namer(rules: List[CSSRule], index: int) -> str:
     """Default rule naming function. Returns a string like "r{i}" where {i} is
     the index of the rule.
 
-    :param rules: List of all compiled CSSRule objects.
+    :param rules: List of all compiled CSSRule objects. This argument is not
+        used in this function, but it can be used in other naming strategies.
     :type rules: List[CSSRule]
     :param index: Index of the rule being named.
     :type index: int
@@ -147,7 +148,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         other than the default `"r0"`, `"r1"`, etc. For example, it can be used
         to achieve something similar to Tailwind CSS and name rules according
         to what they achieve, e.g. by prefixing their name with `"m"` for
-        margin rules or `"p"` for padding rules.
+        margin rules or `"p"` for padding rules. Note that all rule names will
+        be validated with the :py:func:`validate_css_identifier` function
+        before being written into CSS code.
 
         Defaults to the :py:func:`default_rule_namer` function which implements
         a default naming strategy where each rule is named `"r{i}"` where `i`
