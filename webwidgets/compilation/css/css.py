@@ -140,8 +140,10 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = [CSSRule(f"r{i}", dict([p]))
+    rules = [CSSRule(None, dict([p]))  # Initializing with no name
              for i, p in enumerate(sorted(properties))]
+    for i, rule in enumerate(rules):  # Assigning name from callback
+        rule.name = default_rule_namer(rules=rules, index=i)
     mapping = {node_id: sorted([r for r in rules if
                                 set(r.declarations.items()).issubset(style.items())],
                                key=lambda r: r.name)
@@ -189,3 +191,10 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
     # Recursively applying the CSS rules to all child nodes of the tree
     for child in tree.children:
         apply_css(css, child)
+
+
+def default_rule_namer(rules: List[CSSRule], index: int) -> str:
+    """Default rule naming function. Returns a string like "r{id}" where {id}
+    is the index of the rule.
+    """
+    return f'r{index}'

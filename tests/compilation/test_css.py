@@ -14,7 +14,8 @@ import pytest
 from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, apply_css
+from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, \
+    apply_css, default_rule_namer
 
 
 class TestCompileCSS:
@@ -508,3 +509,23 @@ class TestApplyCSS:
         apply_css(compiled_css, tree)
         assert "class" not in tree.attributes
         assert tree.to_html() == '<htmlnode></htmlnode>'
+
+
+class TestRuleNaming:
+    def test_default_rule_namer(self):
+        rules = [CSSRule(None, {"color": "red"}),
+                 CSSRule(None, {"margin": "0"})]
+        for i, rule in enumerate(rules):
+            rule.name = default_rule_namer(rules=rules, index=i)
+        assert rules[0].name == "r0"
+        assert rules[1].name == "r1"
+
+    def test_default_rule_namer_override(self):
+        rules = [CSSRule("first", {"color": "red"}),
+                 CSSRule("second", {"margin": "0"})]
+        assert rules[0].name == "first"
+        assert rules[1].name == "second"
+        for i, rule in enumerate(rules):
+            rule.name = default_rule_namer(rules=rules, index=i)
+        assert rules[0].name == "r0"
+        assert rules[1].name == "r1"
