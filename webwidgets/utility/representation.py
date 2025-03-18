@@ -10,8 +10,8 @@
 #
 # =======================================================================
 
-class RepresentedWithVars:
-    """A utility class that is represented with its variables when printed.
+class ReprMixin:
+    """A mixin class that is represented with its variables when printed.
 
     For example:
 

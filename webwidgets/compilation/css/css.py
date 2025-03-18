@@ -13,11 +13,11 @@
 import itertools
 from typing import Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
-from webwidgets.utility.representation import RepresentedWithVars
+from webwidgets.utility.representation import ReprMixin
 from webwidgets.utility.validation import validate_css_identifier
 
 
-class CSSRule(RepresentedWithVars):
+class CSSRule(ReprMixin):
     """A rule in a style sheet.
     """
 
@@ -36,7 +36,7 @@ class CSSRule(RepresentedWithVars):
         self.declarations = declarations
 
 
-class CompiledCSS(RepresentedWithVars):
+class CompiledCSS(ReprMixin):
     """A utility class to hold compiled CSS rules.
     """
 
