@@ -11,7 +11,7 @@
 # =======================================================================
 
 import itertools
-from typing import Dict, List, Union
+from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.utility.validation import validate_css_identifier
@@ -87,7 +87,22 @@ class CompiledCSS(ReprMixin):
         return css_code
 
 
-def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
+def default_rule_namer(rules: List[CSSRule], index: int) -> str:
+    """Default rule naming function. Returns a string like "r{i}" where {i} is
+    the index of the rule.
+
+    :param rules: List of all compiled CSSRule objects.
+    :type rules: List[CSSRule]
+    :param index: Index of the rule being named.
+    :type index: int
+    :return: A string like `"r{i}"` where `i` is the index of the rule.
+    """
+    return f'r{index}'
+
+
+def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
+                rule_namer: Callable[[List[CSSRule], int],
+                                     str] = default_rule_namer) -> CompiledCSS:
     """Computes optimized CSS rules from the given HTML trees.
 
     The main purpose of this function is to reduce the number of CSS rules
@@ -124,6 +139,20 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     :param trees: A single tree or a list of trees to optimize over. All
         children are recursively included in the compilation.
     :type trees: Union[HTMLNode, List[HTMLNode]]
+    :param rule_namer: A callable that takes two arguments, which are the list
+        of all compiled rules and an index within that list, and returns a
+        unique name for the rule at the given index.
+
+        This argument allows to customize the rule naming process and use names
+        other than the default `"r0"`, `"r1"`, etc. For example, it can be used
+        to achieve something similar to Tailwind CSS and name rules according
+        to what they achieve, e.g. by prefixing their name with `"m"` for
+        margin rules or `"p"` for padding rules.
+
+        Defaults to the :py:func:`default_rule_namer` function which implements
+        a default naming strategy where each rule is named `"r{i}"` where `i`
+        is the index of the rule in the list.
+    :type rule_namer: Callable[[List[CSSRule], int], str]
     :return: The :py:class:`CompiledCSS` object containing the optimized rules.
         Every HTML node present in one or more of the input trees is included
         in the :py:attr:`CompiledCSS.mapping` attribute, even if the node does
@@ -143,7 +172,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]]) -> CompiledCSS:
     rules = [CSSRule(None, dict([p]))  # Initializing with no name
              for i, p in enumerate(sorted(properties))]
     for i, rule in enumerate(rules):  # Assigning name from callback
-        rule.name = default_rule_namer(rules=rules, index=i)
+        rule.name = rule_namer(rules, i)
     mapping = {node_id: sorted([r for r in rules if
                                 set(r.declarations.items()).issubset(style.items())],
                                key=lambda r: r.name)
@@ -191,10 +220,3 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
     # Recursively applying the CSS rules to all child nodes of the tree
     for child in tree.children:
         apply_css(css, child)
-
-
-def default_rule_namer(rules: List[CSSRule], index: int) -> str:
-    """Default rule naming function. Returns a string like "r{id}" where {id}
-    is the index of the rule.
-    """
-    return f'r{index}'
