@@ -30,6 +30,5 @@ class RepresentedWithVars:
         :return: A string representing the class with its variables.
         :rtype: str
         """
-        variables = ', '.join(
-            f'{k}={v.__repr__()}' for k, v in vars(self).items())
+        variables = ', '.join(f'{k}={repr(v)}' for k, v in vars(self).items())
         return f"{self.__class__.__name__}({variables})"
