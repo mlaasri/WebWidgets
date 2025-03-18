@@ -87,23 +87,9 @@ class CompiledCSS(ReprMixin):
         return css_code
 
 
-def default_rule_namer(rules: List[CSSRule], index: int) -> str:
-    """Default rule naming function. Returns a string like "r{i}" where {i} is
-    the index of the rule.
-
-    :param rules: List of all compiled CSSRule objects. This argument is not
-        used in this function, but it can be used in other naming strategies.
-    :type rules: List[CSSRule]
-    :param index: Index of the rule being named.
-    :type index: int
-    :return: A string like `"r{i}"` where `i` is the index of the rule.
-    """
-    return f'r{index}'
-
-
 def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
                 rule_namer: Callable[[List[CSSRule], int],
-                                     str] = default_rule_namer) -> CompiledCSS:
+                                     str] = None) -> CompiledCSS:
     """Computes optimized CSS rules from the given HTML trees.
 
     The main purpose of this function is to reduce the number of CSS rules
@@ -167,6 +153,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     if isinstance(trees, HTMLNode):
         trees = [trees]
 
+    # Handling default rule_namer
+    rule_namer = default_rule_namer if rule_namer is None else rule_namer
+
     # For now, we just return a simple mapping where each CSS property defines
     # its own ruleset
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
@@ -223,3 +212,17 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
     # Recursively applying the CSS rules to all child nodes of the tree
     for child in tree.children:
         apply_css(css, child)
+
+
+def default_rule_namer(rules: List[CSSRule], index: int) -> str:
+    """Default rule naming function. Returns a string like "r{i}" where {i} is
+    the index of the rule.
+
+    :param rules: List of all compiled CSSRule objects. This argument is not
+        used in this function, but it can be used in other naming strategies.
+    :type rules: List[CSSRule]
+    :param index: Index of the rule being named.
+    :type index: int
+    :return: A string like `"r{i}"` where `i` is the index of the rule.
+    """
+    return f'r{index}'
