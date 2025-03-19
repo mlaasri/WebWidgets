@@ -162,7 +162,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
     rules = [CSSRule(None, dict([p]))  # Initializing with no name
-             for i, p in enumerate(sorted(properties))]
+             for p in sorted(properties)]
     for i, rule in enumerate(rules):  # Assigning name from callback
         rule.name = rule_namer(rules, i)
     mapping = {node_id: sorted([r for r in rules if
