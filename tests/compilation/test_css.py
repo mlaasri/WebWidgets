@@ -532,7 +532,7 @@ class TestApplyCSS:
         assert tree.to_html() == '<htmlnode></htmlnode>'
 
 
-class TestRuleNaming:
+class TestDefaultRuleNamer:
     def test_default_rule_namer(self):
         rules = [CSSRule(None, {"color": "red"}),
                  CSSRule(None, {"margin": "0"})]
