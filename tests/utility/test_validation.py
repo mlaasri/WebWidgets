@@ -78,6 +78,23 @@ class TestValidate:
         with pytest.raises(ValueError, match=re.escape(', '.join(chars))):
             validate_css_identifier(f"my-class-{chars}")
 
+    @pytest.mark.parametrize("code, chars, raise_on_start", [
+        # Injection in rule name
+        ("rule{}custom-code", "{, }", False),
+        ("rule {}custom-code", "  , {, }", False),
+
+        # Injection in property name
+        ("}custom-code", None, True),
+        ("} custom-code", None, True),
+        ("url(\"somewhere.com\")", "(, \", ., \", )", False),
+    ])
+    def test_code_injection_in_css_identifier(self, code, chars, raise_on_start):
+        """Test that code injected into CSS identifier raises an exception"""
+        match = (r"must start with.*:.*" + code) if raise_on_start else \
+            (r"Invalid character\(s\).*" + re.escape(chars))
+        with pytest.raises(ValueError, match=match):
+            validate_css_identifier(code)
+
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
         validate_html_class("")
@@ -107,6 +124,23 @@ class TestValidate:
             validate_html_class("my-class123 my-other-class-!@#")
         with pytest.raises(ValueError, match="must start with"):
             validate_html_class("my-class123 -er4 my-other-class")
+
+    @pytest.mark.parametrize("code, chars, raise_on_start", [
+        # Exception are raised on first offending class before space
+        (">custom-code", None, True),
+        ("\">custom-code", None, True),
+        ("c>custom-code", ">", False),
+        ("c\">custom-code", "\", >", False),
+        ("c\"> custom-code", "\", >", False),
+        ("c\">custom-code<div class=\"", "\", >, <", False),
+        ("c\"><script src=\"file.js\"></script>", "\", >, <", False),
+    ])
+    def test_code_injection_in_html_class(self, code, chars, raise_on_start):
+        """Test that HTML code injected into class attribute raises an exception"""
+        match = (r"must start with.*:.*" + code) if raise_on_start else \
+            (r"Invalid character\(s\).*" + re.escape(chars))
+        with pytest.raises(ValueError, match=match):
+            validate_html_class(code)
 
     @pytest.mark.parametrize("class_in, valid", [
         (None, True),
