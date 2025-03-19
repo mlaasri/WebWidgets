@@ -62,9 +62,9 @@ class CompiledCSS(ReprMixin):
         """Converts the `rules` dictionary of the :py:class:`CompiledCSS`
         object into CSS code.
 
-        Each rule name is converted to a class selector and each property name
-        is validated with :py:func:`validate_css_identifier` before being
-        converted.
+        Rule names are converted to class selectors. Note that each rule and
+        property name is validated with :py:func:`validate_css_identifier`
+        before being converted. 
 
         :param indent_size: The number of spaces to use for indentation in the
             CSS code. Defaults to 4.
@@ -78,6 +78,7 @@ class CompiledCSS(ReprMixin):
 
         # Writing down each rule
         for i, rule in enumerate(self.rules):
+            validate_css_identifier(rule.name)
             css_code += f".{rule.name}" + " {\n"
             for property_name, value in rule.declarations.items():
                 validate_css_identifier(property_name)
