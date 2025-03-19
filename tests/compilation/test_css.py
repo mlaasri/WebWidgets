@@ -260,6 +260,27 @@ class TestCompileCSS:
         assert TestCompileCSS._serialize_mapping(
             compiled_css2.mapping) == expected_mapping
 
+    @pytest.mark.parametrize("rule_namer, names", [
+        (lambda _, i: f"rule{i}", ["rule0", "rule1", "rule2"]),
+        (lambda _, i: f"rule-{i + 1}", ["rule-1", "rule-2", "rule-3"]),
+        (lambda r, i: f"{list(r[i].declarations.items())[0][0]}{i}", [
+            "az0", "bz1", "bz2"]),
+        (lambda r, i: f"{list(r[i].declarations.items())[0][0][0]}{i}", [
+            "a0", "b1", "b2"]),
+        (lambda r, i: f"r{list(r[i].declarations.items())[0][1]}-{i}", [
+            "r10-1", "r4-2", "r5-0"]),
+    ])
+    def test_custom_rule_names(self, rule_namer, names):
+        tree = HTMLNode(
+            style={"az": "5", "bz": "4"},
+            children=[
+                HTMLNode(style={"az": "5"}),
+                HTMLNode(style={"bz": "10"}),
+            ]
+        )
+        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        assert [r.name for r in compiled_css.rules] == names
+
 
 class TestCompiledCSS:
     def test_export_custom_compiled_css(self):
