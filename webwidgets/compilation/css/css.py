@@ -165,9 +165,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
              for p in sorted(properties)]
     for i, rule in enumerate(rules):  # Assigning name from callback
         rule.name = rule_namer(rules, i)
-    mapping = {node_id: sorted([r for r in rules if
-                                set(r.declarations.items()).issubset(style.items())],
-                               key=lambda r: r.name)
+    rules = sorted(rules, key=lambda r: r.name)  # Sorting by name
+    mapping = {node_id: [r for r in rules if
+                         set(r.declarations.items()).issubset(style.items())]
                for node_id, style in styles.items()}
     return CompiledCSS(trees, rules, mapping)
 
