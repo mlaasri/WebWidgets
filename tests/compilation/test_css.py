@@ -11,12 +11,38 @@
 # =======================================================================
 
 import pytest
+from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css, CompiledCSS, apply_css
+from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, \
+    apply_css, default_rule_namer
 
 
 class TestCompileCSS:
+    @staticmethod
+    def _serialize_rules(rules: List[CSSRule]) -> List[Dict[str, Any]]:
+        """Utility function to convert a list of :py:class:`CSSRule` objects
+        into a dictionary that can be used in testing.
+
+        :param rules: List of :py:class:`CSSRule` objects.
+        :type rules: List[CSSRule]
+        :return: List of the member variables of each :py:class:`CSSRule`.
+        :rtype: Dict[int, Any]
+        """
+        return [vars(rule) for rule in rules]
+
+    @staticmethod
+    def _serialize_mapping(mapping: Dict[int, List[CSSRule]]) -> Dict[int, List[str]]:
+        """Utility function to convert a :py:attr:`CompiledCSS.mapping` object
+        into a dictionary that can be used in testing.
+
+        :param mapping: :py:attr:`CompiledCSS.mapping` object.
+        :type mapping: Dict[int, List[CSSRule]]
+        :return: Dictionary mapping each node ID to the name of the rules that
+            achieve the same style.
+        """
+        return {i: [r.name for r in rules] for i, rules in mapping.items()}
+
     def test_argument_type(self):
         """Compares compilation when given a node object versus a list of
         nodes.
@@ -30,10 +56,10 @@ class TestCompileCSS:
         )
 
         # Define expected compilation results
-        expected_rules = {
-            'r0': {'a': '5'},
-            'r1': {'b': '4'}
-        }
+        expected_rules = [
+            {"name": "r0", "declarations": {"a": "5"}},
+            {"name": "r1", "declarations": {"b": "4"}}
+        ]
         expected_mapping = {
             id(tree): ['r0', 'r1'],
             id(tree.children[0]): ['r0']
@@ -45,8 +71,10 @@ class TestCompileCSS:
         # Check results of compilation
         assert compiled_css.trees == [tree]
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
-        assert compiled_css.rules == expected_rules
-        assert compiled_css.mapping == expected_mapping
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css.mapping) == expected_mapping
 
         # Compile tree as list of one node
         compiled_css2 = compile_css([tree])
@@ -54,8 +82,10 @@ class TestCompileCSS:
         # Check results of compilation again (should be unchanged)
         assert compiled_css2.trees == [tree]
         assert [id(t) for t in compiled_css2.trees] == [id(tree)]
-        assert compiled_css2.rules == expected_rules
-        assert compiled_css2.mapping == expected_mapping
+        assert TestCompileCSS._serialize_rules(
+            compiled_css2.rules) == expected_rules
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css2.mapping) == expected_mapping
 
     def test_basic_compilation(self):
         # Create some HTML nodes with different styles
@@ -72,17 +102,19 @@ class TestCompileCSS:
             id(node1), id(node2), id(node3)]
 
         # Check that the rules are correctly generated
-        expected_rules = {
-            'r0': {'color': 'blue'},
-            'r1': {'margin': '0'},
-            'r2': {'padding': '0'}
-        }
-        assert compiled_css.rules == expected_rules
+        expected_rules = [
+            {"name": "r0", "declarations": {"color": "blue"}},
+            {"name": "r1", "declarations": {"margin": "0"}},
+            {"name": "r2", "declarations": {"padding": "0"}}
+        ]
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {id(node1): ['r1', 'r2'], id(
             node2): ['r0', 'r1'], id(node3): ['r1', 'r2']}
-        assert compiled_css.mapping == expected_mapping
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css.mapping) == expected_mapping
 
     def test_nested_compilation_one_tree(self):
         # Create some nested HTML nodes
@@ -104,13 +136,14 @@ class TestCompileCSS:
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
 
         # Check that the rules are correctly generated
-        expected_rules = {
-            'r0': {'color': 'blue'},
-            'r1': {'margin': '0'},
-            'r2': {'margin': '5'},
-            'r3': {'padding': '0'}
-        }
-        assert compiled_css.rules == expected_rules
+        expected_rules = [
+            {"name": "r0", "declarations": {"color": "blue"}},
+            {"name": "r1", "declarations": {"margin": "0"}},
+            {"name": "r2", "declarations": {"margin": "5"}},
+            {"name": "r3", "declarations": {"padding": "0"}}
+        ]
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
@@ -120,7 +153,8 @@ class TestCompileCSS:
             id(tree.children[0].children[0]): [],
             id(tree.children[1].children[0]): []
         }
-        assert compiled_css.mapping == expected_mapping
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css.mapping) == expected_mapping
 
     def test_nested_compilation_two_trees(self):
         # Create 2 trees
@@ -146,13 +180,14 @@ class TestCompileCSS:
             id(tree1), id(tree2)]
 
         # Check that the rules are correctly generated
-        expected_rules = {
-            'r0': {'color': 'red'},
-            'r1': {'margin': '10'},
-            'r2': {'margin': '5'},
-            'r3': {'padding': '0'}
-        }
-        assert compiled_css.rules == expected_rules
+        expected_rules = [
+            {"name": "r0", "declarations": {"color": "red"}},
+            {"name": "r1", "declarations": {"margin": "10"}},
+            {"name": "r2", "declarations": {"margin": "5"}},
+            {"name": "r3", "declarations": {"padding": "0"}}
+        ]
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
@@ -161,7 +196,8 @@ class TestCompileCSS:
             id(tree2): ['r2', 'r3'],
             id(tree2.children[0]): ['r1']
         }
-        assert compiled_css.mapping == expected_mapping
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css.mapping) == expected_mapping
 
     def test_rules_numbered_in_order(self):
         """Test that rules are numbered in lexicographical order"""
@@ -174,14 +210,15 @@ class TestCompileCSS:
             ]
         )
         compiled_css = compile_css(tree)
-        expected_rules = {
-            'r0': {'a': '10'},
-            'r1': {'a': '5'},
-            'r2': {'b': '10'},
-            'r3': {'b': '4'},
-            'r4': {'c': '5'}
-        }
-        assert compiled_css.rules == expected_rules
+        expected_rules = [
+            {"name": "r0", "declarations": {"a": "10"}},
+            {"name": "r1", "declarations": {"a": "5"}},
+            {"name": "r2", "declarations": {"b": "10"}},
+            {"name": "r3", "declarations": {"b": "4"}},
+            {"name": "r4", "declarations": {"c": "5"}},
+        ]
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
 
     def test_duplicate_node(self):
         """Test that adding the same node twice does not impact compilation"""
@@ -193,11 +230,11 @@ class TestCompileCSS:
                 HTMLNode(style={"b": "10"}),
             ]
         )
-        expected_rules = {
-            'r0': {'a': '5'},
-            'r1': {'b': '10'},
-            'r2': {'b': '4'}
-        }
+        expected_rules = [
+            {"name": "r0", "declarations": {"a": "5"}},
+            {"name": "r1", "declarations": {"b": "10"}},
+            {"name": "r2", "declarations": {"b": "4"}}
+        ]
         expected_mapping = {
             id(tree): ['r0', 'r2'],
             id(tree.children[0]): ['r0'],
@@ -206,8 +243,10 @@ class TestCompileCSS:
         compiled_css = compile_css([tree])
         assert compiled_css.trees == [tree]
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
-        assert compiled_css.rules == expected_rules
-        assert compiled_css.mapping == expected_mapping
+        assert TestCompileCSS._serialize_rules(
+            compiled_css.rules) == expected_rules
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css.mapping) == expected_mapping
 
         # Compiling the tree and one of its children, which should already be
         # included recursively from the tree itself and should not affect the
@@ -216,25 +255,41 @@ class TestCompileCSS:
         assert compiled_css2.trees == [tree, tree.children[0]]
         assert [id(t) for t in compiled_css2.trees] == [
             id(tree), id(tree.children[0])]
-        assert compiled_css2.rules == expected_rules
-        assert compiled_css2.mapping == expected_mapping
+        assert TestCompileCSS._serialize_rules(
+            compiled_css2.rules) == expected_rules
+        assert TestCompileCSS._serialize_mapping(
+            compiled_css2.mapping) == expected_mapping
+
+    @pytest.mark.parametrize("rule_namer, names", [
+        (lambda _, i: f"rule{i}", ["rule0", "rule1", "rule2"]),
+        (lambda _, i: f"rule-{i + 1}", ["rule-1", "rule-2", "rule-3"]),
+        (lambda r, i: f"{list(r[i].declarations.items())[0][0]}{i}", [
+            "az0", "bz1", "bz2"]),
+        (lambda r, i: f"{list(r[i].declarations.items())[0][0][0]}{i}", [
+            "a0", "b1", "b2"]),
+        (lambda r, i: f"r{list(r[i].declarations.items())[0][1]}-{i}", [
+            "r10-1", "r4-2", "r5-0"]),
+    ])
+    def test_custom_rule_names(self, rule_namer, names):
+        tree = HTMLNode(
+            style={"az": "5", "bz": "4"},
+            children=[
+                HTMLNode(style={"az": "5"}),
+                HTMLNode(style={"bz": "10"}),
+            ]
+        )
+        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        assert [r.name for r in compiled_css.rules] == names
 
 
 class TestCompiledCSS:
     def test_export_custom_compiled_css(self):
-        rules = {
-            "r0": {
-                "margin": "0",
-                "padding": "0"
-            },
-            "r1": {
-                "color": "blue"
-            },
-            "r2": {
-                "background-color": "white",
-                "font-size": "16px"
-            }
-        }
+        rules = [
+            CSSRule(name="r0", declarations={"margin": "0", "padding": "0"}),
+            CSSRule(name="r1", declarations={"color": "blue"}),
+            CSSRule(name="r2", declarations={
+                    "background-color": "white", "font-size": "16px"})
+        ]
         compiled_css = CompiledCSS(trees=None,
                                    rules=rules,
                                    mapping=None)
@@ -364,12 +419,12 @@ class TestApplyCSS:
 
         # Compiling and applying CSS to the tree
         compiled_css = compile_css(tree)
-        assert compiled_css.rules == {
-            "r0": {"color": "blue"},
-            "r1": {"color": "green"},
-            "r2": {"margin": "0"},
-            "r3": {"padding": "0"}
-        }
+        assert TestCompileCSS._serialize_rules(compiled_css.rules) == [
+            {"name": "r0", "declarations": {"color": "blue"}},
+            {"name": "r1", "declarations": {"color": "green"}},
+            {"name": "r2", "declarations": {"margin": "0"}},
+            {"name": "r3", "declarations": {"padding": "0"}}
+        ]
         apply_css(compiled_css, tree)
 
         # Checking the tree's new classes
@@ -398,7 +453,7 @@ class TestApplyCSS:
         )
         html_before = tree.to_html()
         compiled_css = compile_css(tree)
-        assert compiled_css.rules == {}
+        assert compiled_css.rules == []
         apply_css(compiled_css, tree)
         html_after = tree.to_html()
 
@@ -475,3 +530,23 @@ class TestApplyCSS:
         apply_css(compiled_css, tree)
         assert "class" not in tree.attributes
         assert tree.to_html() == '<htmlnode></htmlnode>'
+
+
+class TestDefaultRuleNamer:
+    def test_default_rule_namer(self):
+        rules = [CSSRule(None, {"color": "red"}),
+                 CSSRule(None, {"margin": "0"})]
+        for i, rule in enumerate(rules):
+            rule.name = default_rule_namer(rules=rules, index=i)
+        assert rules[0].name == "r0"
+        assert rules[1].name == "r1"
+
+    def test_default_rule_namer_override(self):
+        rules = [CSSRule("first", {"color": "red"}),
+                 CSSRule("second", {"margin": "0"})]
+        assert rules[0].name == "first"
+        assert rules[1].name == "second"
+        for i, rule in enumerate(rules):
+            rule.name = default_rule_namer(rules=rules, index=i)
+        assert rules[0].name == "r0"
+        assert rules[1].name == "r1"

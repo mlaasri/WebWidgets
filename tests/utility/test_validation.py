@@ -78,6 +78,23 @@ class TestValidate:
         with pytest.raises(ValueError, match=re.escape(', '.join(chars))):
             validate_css_identifier(f"my-class-{chars}")
 
+    @pytest.mark.parametrize("code, chars, raise_on_start", [
+        # Injection in rule name
+        ("rule{}custom-code", "{, }", False),
+        ("rule {}custom-code", "  , {, }", False),
+
+        # Injection in property name
+        ("}custom-code", None, True),
+        ("} custom-code", None, True),
+        ("url(\"somewhere.com\")", "(, \", ., \", )", False),
+    ])
+    def test_code_injection_in_css_identifier(self, code, chars, raise_on_start):
+        """Test that code injected into CSS identifier raises an exception"""
+        match = (r"must start with.*:.*" + code) if raise_on_start else \
+            (r"Invalid character\(s\).*" + re.escape(chars))
+        with pytest.raises(ValueError, match=match):
+            validate_css_identifier(code)
+
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
         validate_html_class("")
@@ -108,6 +125,23 @@ class TestValidate:
         with pytest.raises(ValueError, match="must start with"):
             validate_html_class("my-class123 -er4 my-other-class")
 
+    @pytest.mark.parametrize("code, chars, raise_on_start", [
+        # Exception are raised on first offending class before space
+        (">custom-code", None, True),
+        ("\">custom-code", None, True),
+        ("c>custom-code", ">", False),
+        ("c\">custom-code", "\", >", False),
+        ("c\"> custom-code", "\", >", False),
+        ("c\">custom-code<div class=\"", "\", >, <", False),
+        ("c\"><script src=\"file.js\"></script>", "\", >, <", False),
+    ])
+    def test_code_injection_in_html_class(self, code, chars, raise_on_start):
+        """Test that HTML code injected into class attribute raises an exception"""
+        match = (r"must start with.*:.*" + code) if raise_on_start else \
+            (r"Invalid character\(s\).*" + re.escape(chars))
+        with pytest.raises(ValueError, match=match):
+            validate_html_class(code)
+
     @pytest.mark.parametrize("class_in, valid", [
         (None, True),
         ("", True),
@@ -123,7 +157,7 @@ class TestValidate:
     ])
     @pytest.mark.parametrize("add_r2_in", [False, True])
     def test_validation_within_apply_css(self, class_in, valid, add_r2_in):
-        """Tests that valid class attributes make it through rendering"""
+        """Tests that valid class attributes make it through HTML rendering"""
         # Compiling and applying CSS to a tree
         c_in = None if class_in is None else ' '.join(
             ([class_in] if class_in else []) + (["r2"] if add_r2_in else []))
@@ -152,3 +186,33 @@ class TestValidate:
                 tree.validate_attributes()
             with pytest.raises(ValueError):
                 tree.to_html()
+
+    @pytest.mark.parametrize("rule_namer, valid", [
+        (None, True),  # Default rule namer
+        (lambda _, i: f"rule{i}", True),
+        (lambda _, i: f"r-{i + 1}", True),
+        (lambda _, i: f"--r-{i + 1}", True),
+        (lambda r, i: f"{list(r[i].declarations.items())[0][0][0]}{i}", True),
+        (lambda _, i: str(i), False),  # Starts with digit
+        (lambda _, i: f"-r{i}", False),  # Starts with single hyphen
+        (lambda _, i: f"rule {i + 1}", False),  # Invalid character (space)
+        (lambda _, i: f"r={i}", False),  # Invalid character (=)
+        (lambda r, i: f"{list(r[i].declarations.items())[0]}",
+         False),  # Invalid characters (comma...)
+        (lambda _, i: f"r{i}" + "{}custom-code", False),  # Code injection
+    ])
+    def test_validation_within_to_css(self, rule_namer, valid):
+        """Tests that valid class attributes make it through CSS rendering"""
+        tree = HTMLNode(
+            style={"az": "5", "bz": "4"},
+            children=[
+                HTMLNode(style={"az": "5"}),
+                HTMLNode(style={"bz": "10"}),
+            ]
+        )
+        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        if valid:
+            compiled_css.to_css()
+        else:
+            with pytest.raises(ValueError):
+                compiled_css.to_css()

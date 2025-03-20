@@ -13,11 +13,12 @@
 import copy
 import itertools
 from typing import Any, Dict, List, Union
+from webwidgets.utility.representation import ReprMixin
 from webwidgets.utility.sanitizing import sanitize_html_text
 from webwidgets.utility.validation import validate_html_class
 
 
-class HTMLNode:
+class HTMLNode(ReprMixin):
     """Represents an HTML node (for example, a div or a span).
     """
 
@@ -34,6 +35,7 @@ class HTMLNode:
         :param style: Dictionary of CSS properties for the node. Defaults to an empty dictionary.
         :type style: Dict[str, str]
         """
+        super().__init__()
         self.children = [] if children is None else children
         self.attributes = {} if attributes is None else attributes
         self.style = {} if style is None else style
