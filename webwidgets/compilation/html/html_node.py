@@ -53,11 +53,13 @@ class HTMLNode(ReprMixin):
     def _render_attributes(self) -> str:
         """Renders the attributes of the HTML node into a string that can be added to the start tag.
 
+        Attributes are sorted alphabetically by name.
+
         :return: A string containing all attribute key-value pairs separated by spaces.
         :rtype: str
         """
         return ' '.join(
-            f'{key}="{value}"' for key, value in self.attributes.items()
+            f'{k}="{v}"' for k, v in sorted(self.attributes.items())
         )
 
     def add(self, child: 'HTMLNode') -> None:

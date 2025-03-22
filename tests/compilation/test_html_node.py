@@ -63,9 +63,9 @@ class TestHTMLNode:
 
     def test_attributes(self):
         node = HTMLNode(attributes={'id': 'test-id', 'class': 'test-class'})
-        assert node.start_tag == '<htmlnode id="test-id" class="test-class">'
+        assert node.start_tag == '<htmlnode class="test-class" id="test-id">'
         assert node.end_tag == '</htmlnode>'
-        assert node.to_html() == '<htmlnode id="test-id" class="test-class"></htmlnode>'
+        assert node.to_html() == '<htmlnode class="test-class" id="test-id"></htmlnode>'
 
     def test_no_start_tag(self):
         node = TestHTMLNode.NoStartNode()
