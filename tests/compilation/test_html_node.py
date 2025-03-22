@@ -67,6 +67,10 @@ class TestHTMLNode:
         assert node.end_tag == '</htmlnode>'
         assert node.to_html() == '<htmlnode class="test-class" id="test-id"></htmlnode>'
 
+    def test_attributes_order(self):
+        node = HTMLNode(attributes={'d': '0', 'a': '1', 'c': '2', 'b': '3'})
+        assert node.to_html() == '<htmlnode a="1" b="3" c="2" d="0"></htmlnode>'
+
     def test_no_start_tag(self):
         node = TestHTMLNode.NoStartNode()
         assert node.start_tag == ''
