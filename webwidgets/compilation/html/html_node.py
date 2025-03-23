@@ -24,21 +24,6 @@ class HTMLNode(ReprMixin):
 
     one_line: bool = False
 
-    @staticmethod
-    def get_indentation(indent_level: int, indent_size: int = 4) -> str:
-        """Returns an indentation string for the given level.
-
-        :param indent_level: The level of indentation. If negative, this
-            function will return an empty string representing no indentation.
-        :type indent_level: int
-        :param indent_size: The number of spaces to use for each indentation
-            level. Defaults to 4 spaces.
-        :type indent_size: int
-        :return: A string representing the indentation.
-        :rtype: str
-        """
-        return ' ' * max(indent_level, 0) * indent_size
-
     def __init__(self, children: List['HTMLNode'] = None,
                  attributes: Dict[str, str] = None, style: Dict[str, str] = None):
         """Creates an HTMLNode with optional children, attributes, and style.

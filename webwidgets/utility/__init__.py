@@ -10,6 +10,7 @@
 #
 # =======================================================================
 
+from .indentation import *
 from .representation import *
 from .sanitizing import *
 from .validation import *
