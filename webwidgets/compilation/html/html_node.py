@@ -13,6 +13,7 @@
 import copy
 import itertools
 from typing import Any, Dict, List, Union
+from webwidgets.utility.indentation import get_indentation
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.utility.sanitizing import sanitize_html_text
 from webwidgets.utility.validation import validate_html_class
@@ -153,7 +154,8 @@ class HTMLNode(ReprMixin):
         :rtype: str or List[str]
         """
         # Opening the element
-        indentation = "" if force_one_line else ' ' * indent_size * indent_level
+        indentation = "" if force_one_line else get_indentation(
+            indent_level, indent_size)
         html_lines = [indentation + self.start_tag]
 
         # If content must be in one line
@@ -266,7 +268,7 @@ class RawText(HTMLNode):
         """
         sanitized = sanitize_html_text(
             self.text, replace_all_entities=replace_all_entities)
-        line = ' ' * indent_size * indent_level + sanitized
+        line = get_indentation(indent_level, indent_size) + sanitized
         if return_lines:
             return [line]
         return line
