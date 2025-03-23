@@ -139,7 +139,14 @@ class HTMLNode(ReprMixin):
         :type collapse_empty: bool
         :param indent_size: The number of spaces to use for each indentation level.
         :type indent_size: int
-        :param indent_level: The current level of indentation in the HTML output.
+        :param indent_level: The current level of indentation in the HTML
+            output.
+
+            This argument supports negative values as a way to flatten the HTML
+            output down to a certain depth with indentation resuming as normal
+            afterwards. If negative, `indent_level` is construed as an offset
+            on the depth in the HTML tree represented by the node, in which
+            case the node will wait for that depth before starting indentation.
         :type indent_level: int
         :param force_one_line: If True, forces all child elements to be rendered on a single line without additional
             indentation. Defaults to False.

@@ -275,6 +275,28 @@ class TestHTMLNode:
             indent_size=indent_size, indent_level=indent_level)
         assert actual_html == expected_html
 
+    @pytest.mark.parametrize("indent_level", [-3, -2, -1])
+    def test_negative_indent_level(self, indent_level: int):
+        node = HTMLNode(children=[
+            RawText('child1'),
+            RawText('child2'),
+            HTMLNode(children=[
+                RawText('grandchild1'),
+                RawText('grandchild2')
+            ])
+        ])
+        expected_html = "\n".join([
+            "<htmlnode>",
+            "child1",
+            "child2",
+            "<htmlnode>",
+            f"{'    ' if indent_level == -1 else ''}grandchild1",
+            f"{'    ' if indent_level == -1 else ''}grandchild2",
+            "</htmlnode>",
+            "</htmlnode>"
+        ])
+        assert node.to_html(indent_level=indent_level) == expected_html
+
     def test_collapse_empty(self):
         node = HTMLNode(children=[
             TestHTMLNode.CustomNode(),
