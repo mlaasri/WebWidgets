@@ -69,6 +69,7 @@ class TestHTMLNode:
 
     def test_attributes_order(self):
         node = HTMLNode(attributes={'d': '0', 'a': '1', 'c': '2', 'b': '3'})
+        assert node._render_attributes() == 'a="1" b="3" c="2" d="0"'
         assert node.to_html() == '<htmlnode a="1" b="3" c="2" d="0"></htmlnode>'
 
     def test_no_start_tag(self):
