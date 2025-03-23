@@ -21,7 +21,5 @@ class TestHTMLTags:
     def test_text_node_with_attributes(self):
         text_node = TextNode("Hello, World!",
                              attributes={"class": "my-class", "id": "my-id"})
-        assert text_node.to_html() in [
-            '<textnode class="my-class" id="my-id">Hello, World!</textnode>',
-            '<textnode id="my-id" class="my-class">Hello, World!</textnode>',
-        ]
+        assert text_node.to_html() == \
+            '<textnode class="my-class" id="my-id">Hello, World!</textnode>'
