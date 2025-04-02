@@ -13,6 +13,7 @@
 import itertools
 from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
+from webwidgets.utility.indentation import get_indentation
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.utility.validation import validate_css_identifier
 
@@ -74,7 +75,7 @@ class CompiledCSS(ReprMixin):
         """
         # Initializing code and defining indentation
         css_code = ""
-        indentation = ' ' * indent_size
+        indentation = get_indentation(level=1, size=indent_size)
 
         # Writing down each rule
         for i, rule in enumerate(self.rules):
