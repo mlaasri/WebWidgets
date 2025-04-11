@@ -23,3 +23,7 @@ class TestHTMLTags:
                              attributes={"class": "my-class", "id": "my-id"})
         assert text_node.to_html() == \
             '<textnode class="my-class" id="my-id">Hello, World!</textnode>'
+
+    def test_doctype(self):
+        doctype = Doctype()
+        assert doctype.to_html() == "<!DOCTYPE html>"

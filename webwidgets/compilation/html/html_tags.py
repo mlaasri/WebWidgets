@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-from .html_node import HTMLNode, one_line, RawText
+from .html_node import HTMLNode, no_end_tag, one_line, RawText
 from typing import Dict
 
 
@@ -38,3 +38,18 @@ class TextNode(HTMLNode):
         super().__init__(children=[
             RawText(text)
         ], attributes=attributes, style=style)
+
+
+@one_line
+@no_end_tag
+class Doctype(HTMLNode):
+    """The `<!DOCTYPE html>` doctype declaration of a document."""
+
+    def __init__(self):
+        """Creates a `<!DOCTYPE html>` doctype declaration element."""
+        super().__init__()
+
+    @property
+    def start_tag(self) -> str:
+        """Overrides the start tag for this node."""
+        return "<!DOCTYPE html>"
