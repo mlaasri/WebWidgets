@@ -40,6 +40,11 @@ class TextNode(HTMLNode):
         ], attributes=attributes, style=style)
 
 
+class Body(HTMLNode):
+    """The `<body>` element containing the visible content of a document."""
+    pass
+
+
 @one_line
 @no_end_tag
 class Doctype(HTMLNode):
@@ -53,3 +58,8 @@ class Doctype(HTMLNode):
     def start_tag(self) -> str:
         """Overrides the start tag for this node."""
         return "<!DOCTYPE html>"
+
+
+class Head(HTMLNode):
+    """The `<head>` element containing metadata about a document."""
+    pass
