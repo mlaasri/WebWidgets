@@ -28,3 +28,11 @@ class Container(Widget):
         """
         super().__init__()
         self.widgets = [] if widgets is None else widgets
+
+    def add(self, widget: Widget) -> None:
+        """Adds a widget to the container.
+
+        :param widget: The widget to add to the container.
+        :type widget: Widget
+        """
+        self.widgets.append(widget)
