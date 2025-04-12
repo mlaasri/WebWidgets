@@ -11,3 +11,4 @@
 # =======================================================================
 
 from .containers import *
+from .widget import Widget
