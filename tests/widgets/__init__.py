@@ -9,7 +9,3 @@
 #  Copyright(C) 2025, mlaasri
 #
 # =======================================================================
-
-__version__ = "0.0.0"  # Dynamically set by build backend
-
-from .widgets import *

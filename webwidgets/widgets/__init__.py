@@ -10,6 +10,4 @@
 #
 # =======================================================================
 
-__version__ = "0.0.0"  # Dynamically set by build backend
-
-from .widgets import *
+from .containers import *
