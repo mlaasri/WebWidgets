@@ -12,9 +12,10 @@
 
 from abc import ABC, abstractmethod
 from webwidgets.compilation.html.html_node import HTMLNode
+from webwidgets.utility.representation import ReprMixin
 
 
-class Widget(ABC):
+class Widget(ABC, ReprMixin):
     """
     Abstract base class for all widgets.
 
