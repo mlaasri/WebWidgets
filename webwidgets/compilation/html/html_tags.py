@@ -63,3 +63,8 @@ class Doctype(HTMLNode):
 class Head(HTMLNode):
     """The `<head>` element containing metadata about a document."""
     pass
+
+
+class Html(HTMLNode):
+    """The `<html>` element of an HTML document."""
+    pass
