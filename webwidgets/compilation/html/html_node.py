@@ -284,8 +284,10 @@ class RawText(HTMLNode):
 @no_start_tag
 @no_end_tag
 class RootNode(HTMLNode):
-    """Root node of the HTML document. This is the top-level node that contains
-    all other elements."""
+    """The root node of an HTML document.
+
+    This is the top-level node that contains all other nodes.
+    """
 
     def to_html(self, indent_level: int = 0, **kwargs: Any) -> Union[str, List[str]]:
         """Converts the root node to HTML code.
