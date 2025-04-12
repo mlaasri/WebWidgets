@@ -279,3 +279,28 @@ class RawText(HTMLNode):
         if return_lines:
             return [line]
         return line
+
+
+@no_start_tag
+@no_end_tag
+class RootNode(HTMLNode):
+    """Root node of the HTML document. This is the top-level node that contains
+    all other elements."""
+
+    def to_html(self, indent_level: int = 0, **kwargs: Any) -> Union[str, List[str]]:
+        """Converts the root node to HTML code.
+
+        This method overrides :py:meth:`HTMLNode.to_html`. The only difference
+        between this method and that of the base class is that the indentation
+        level is adjusted by one level, so the root node acts as an array of
+        elements.
+
+        :param indent_level: See :py:meth:`HTMLNode.to_html`.
+        :type indent_level: int
+        :param kwargs: Other keyword arguments. These are passed to
+            :py:meth:`HTMLNode.to_html`.
+        :type kwargs: Any
+        :return: See :py:meth:`HTMLNode.to_html`.
+        :type return: str or List[str]
+        """
+        return super().to_html(indent_level=indent_level - 1, **kwargs)

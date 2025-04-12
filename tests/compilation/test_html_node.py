@@ -12,7 +12,7 @@
 
 import pytest
 from webwidgets.compilation.html.html_node import HTMLNode, no_start_tag, \
-    no_end_tag, one_line, RawText
+    no_end_tag, one_line, RawText, RootNode
 
 
 class TestHTMLNode:
@@ -468,3 +468,16 @@ class TestHTMLNode:
         copied_node.children.append(child)
         assert len(node.children) == 1
         assert id(node.children[0]) == id(child)
+
+    def test_empty_root_node(self):
+        node = RootNode()
+        assert node.to_html() == ""
+
+    @pytest.mark.parametrize("n", [1, 2, 3])
+    def test_root_node_with_children(self, n):
+        node = RootNode(
+            children=[HTMLNode()] * n
+        )
+        expected_html = "\n".join(["<htmlnode></htmlnode>"] * n)
+        print(expected_html)
+        assert node.to_html() == expected_html
