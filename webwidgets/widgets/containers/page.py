@@ -13,7 +13,8 @@
 from .container import Container
 from webwidgets.compilation.css.css import compile_css
 from webwidgets.compilation.html.html_node import RootNode
-from webwidgets.compilation.html.html_tags import *
+from webwidgets.compilation.html.html_tags import Body, Doctype, Head, Html, \
+    Link
 
 
 class Page(Container):
