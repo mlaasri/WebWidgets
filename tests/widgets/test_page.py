@@ -28,4 +28,4 @@ class TestPage:
             "    <body></body>",
             "</html>"
         ])
-        page.build().to_html() == expected_html
+        assert page.build().to_html() == expected_html
