@@ -10,4 +10,5 @@
 #
 # =======================================================================
 
+from .compiled_website import CompiledWebsite
 from .website import Website
