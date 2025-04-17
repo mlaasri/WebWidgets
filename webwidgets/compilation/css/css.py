@@ -158,8 +158,8 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     # Handling default rule_namer
     rule_namer = default_rule_namer if rule_namer is None else rule_namer
 
-    # For now, we just return a simple mapping where each CSS property defines
-    # its own ruleset
+    # We compute a simple mapping where each CSS property defines its own
+    # ruleset
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
