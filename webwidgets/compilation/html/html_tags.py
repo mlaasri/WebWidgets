@@ -68,3 +68,10 @@ class Head(HTMLNode):
 class Html(HTMLNode):
     """The `<html>` element of an HTML document."""
     pass
+
+
+@one_line
+@no_end_tag
+class Link(HTMLNode):
+    """A `<link>` element for linking to external resources."""
+    pass

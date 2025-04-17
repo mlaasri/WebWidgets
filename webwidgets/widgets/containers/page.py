@@ -11,8 +11,10 @@
 # =======================================================================
 
 from .container import Container
+from webwidgets.compilation.css.css import compile_css
 from webwidgets.compilation.html.html_node import RootNode
-from webwidgets.compilation.html.html_tags import Body, Doctype, Head, Html
+from webwidgets.compilation.html.html_tags import Body, Doctype, Head, Html, \
+    Link
 
 
 class Page(Container):
@@ -31,14 +33,25 @@ class Page(Container):
         :return: An :py:class:`RootNode` object representing the page.
         :rtype: RootNode
         """
+        # Building nodes from the page's widgets
+        nodes = [w.build() for w in self.widgets]
+
+        # Initializing the head section of the page
+        head = Head()
+
+        # Checking if there is any style sheet to link to the page.
+        # To do so, we just check if any child node has a non-empty style.
+        if any(style for n in nodes for style in n.get_styles().values()):
+            head.add(Link(
+                attributes={"href": "styles.css", "rel": "stylesheet"}
+            ))
+
+        # Building the HTML representation of the page
         return RootNode(
             children=[
                 Doctype(),
                 Html(
-                    children=[
-                        Head(),
-                        Body(children=[w.build() for w in self.widgets])
-                    ]
+                    children=[head, Body(children=nodes)]
                 )
             ]
         )
