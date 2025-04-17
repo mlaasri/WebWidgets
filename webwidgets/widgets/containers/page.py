@@ -40,11 +40,8 @@ class Page(Container):
         head = Head()
 
         # Checking if there is any style sheet to link to the page.
-        # To do so, we compile the CSS rules from the page's widgets with
-        # default parameters (e.g. a default rule namer) just to see if any CSS
-        # rule comes up.
-        compiled_css = compile_css(nodes)
-        if compiled_css.rules:
+        # To do so, we just check if any child node has a non-empty style.
+        if any(style for n in nodes for style in n.get_styles().values()):
             head.add(Link(
                 attributes={"href": "styles.css", "rel": "stylesheet"}
             ))
