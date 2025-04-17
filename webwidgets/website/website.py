@@ -25,6 +25,7 @@ class Website(ReprMixin):
         :param pages: The pages of the website. Defaults to an empty list.
         :type pages: List[Page]
         """
+        super().__init__()
         self.pages = [] if pages is None else pages
 
     def add(self, page: Page):
