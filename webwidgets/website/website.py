@@ -10,7 +10,9 @@
 #
 # =======================================================================
 
+from .compiled_website import CompiledWebsite
 from typing import List
+from webwidgets.compilation.css import compile_css, apply_css
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.widgets.containers.page import Page
 
@@ -35,3 +37,18 @@ class Website(ReprMixin):
         :type page: Page
         """
         self.pages.append(page)
+
+    def compile(self) -> CompiledWebsite:
+        """Compiles the website into HTML and CSS code."""
+        # Building the HTML representation of each page
+        trees = [page.build() for page in self.pages]
+
+        # Compiling HTML and CSS code
+        compiled_css = compile_css(trees)
+        for tree in trees:
+            apply_css(compiled_css, tree)
+        html_code = [tree.to_html() for tree in trees]
+        css_code = compiled_css.to_css()
+
+        # Storing the result in a new CompiledWebsite object
+        return CompiledWebsite(html_code, css_code)
