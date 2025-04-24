@@ -47,8 +47,8 @@ class Website(ReprMixin):
         compiled_css = compile_css(trees)
         for tree in trees:
             apply_css(compiled_css, tree)
-        html_code = [tree.to_html() for tree in trees]
-        css_code = compiled_css.to_css()
+        html_content = [tree.to_html() for tree in trees]
+        css_content = compiled_css.to_css()
 
         # Storing the result in a new CompiledWebsite object
-        return CompiledWebsite(html_code, css_code)
+        return CompiledWebsite(html_content, css_content)

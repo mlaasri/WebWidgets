@@ -19,15 +19,16 @@ class CompiledWebsite(ReprMixin):
     :py:class:`Website` object.
     """
 
-    def __init__(self, html_code: List[str], css_code: str):
-        """Stores compiled HTML and CSS code.
+    def __init__(self, html_content: List[str], css_content: str):
+        """Stores compiled HTML and CSS content.
 
-        :param html_code: The compiled HTML code of each page in the website.
-        :type html_code: List[str]
-        :param css_code: The compiled CSS code of the website, shared across
+        :param html_content: The compiled HTML code of each page in the
+            website.
+        :type html_content: List[str]
+        :param css_content: The compiled CSS code of the website, shared across
             all pages.
-        :type css_code: str
+        :type css_content: str
         """
         super().__init__()
-        self.html_code = html_code
-        self.css_code = css_code
+        self.html_content = html_content
+        self.css_content = css_content

@@ -52,11 +52,11 @@ class TestWebsite:
             "    </body>",
             "</html>"
         ])
-        assert len(compiled.html_code) == num_pages
-        assert all(c == expected_html for c in compiled.html_code)
+        assert len(compiled.html_content) == num_pages
+        assert all(c == expected_html for c in compiled.html_content)
 
         # Check if the compiled CSS contains the expected code
-        assert compiled.css_code == ""  # No CSS in this case
+        assert compiled.css_content == ""  # No CSS in this case
 
     @pytest.mark.parametrize("num_pages", [1, 2, 3, 4, 5, 6])
     @pytest.mark.parametrize("num_widgets", [1, 2, 3])
@@ -102,7 +102,7 @@ class TestWebsite:
                 "    </body>",
                 "</html>"
             ])) for i in range(num_pages)]
-        assert compiled.html_code == expected_html
+        assert compiled.html_content == expected_html
 
         # Check if the compiled CSS contains the expected code
         sorted_rules = sorted(list(set(
@@ -116,4 +116,4 @@ class TestWebsite:
                 "}"
             ]) for name, (p, v) in sorted_rules
         ])
-        assert compiled.css_code == expected_css
+        assert compiled.css_content == expected_css
