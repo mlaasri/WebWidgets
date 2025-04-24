@@ -117,3 +117,46 @@ class TestWebsite:
             ]) for name, (p, v) in sorted_rules
         ])
         assert compiled.css_content == expected_css
+
+    def test_compile_website_custom_rule_namer(self):
+        """Test the `compile_website` method with a custom rule namer function."""
+        # Define a custom rule namer function
+        def custom_rule_namer(rules, index):
+            return f"custom_{index}_{list(rules[index].declarations.keys())[0]}"
+
+        # Build an compile a website with the custom rule namer
+        page = ww.Page([
+            TestWebsite.Text("Text!", {"padding": "0"}),
+            TestWebsite.Text("Another Text!", {"margin": "0"}),
+        ])
+        website = ww.Website([page])
+        compiled = website.compile(rule_namer=custom_rule_namer)
+
+        # Check the results
+        expected_html = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            '        <link href="styles.css" rel="stylesheet">',
+            "    </head>",
+            "    <body>",
+            '        <htmlnode class="custom_1_padding">',
+            "            Text!",
+            "        </htmlnode>",
+            '        <htmlnode class="custom_0_margin">',
+            "            Another Text!",
+            "        </htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        assert compiled.html_content == [expected_html]
+        expected_css = "\n".join([
+            ".custom_0_margin {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".custom_1_padding {",
+            "    padding: 0;",
+            "}"
+        ])
+        assert compiled.css_content == expected_css

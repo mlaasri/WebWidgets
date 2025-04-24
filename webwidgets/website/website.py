@@ -11,8 +11,8 @@
 # =======================================================================
 
 from .compiled_website import CompiledWebsite
-from typing import List
-from webwidgets.compilation.css import compile_css, apply_css
+from typing import Callable, List
+from webwidgets.compilation.css import compile_css, CSSRule, apply_css
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.widgets.containers.page import Page
 
@@ -38,13 +38,21 @@ class Website(ReprMixin):
         """
         self.pages.append(page)
 
-    def compile(self) -> CompiledWebsite:
-        """Compiles the website into HTML and CSS code."""
+    def compile(self, rule_namer: Callable[[List[CSSRule], int],
+                                           str] = None) -> CompiledWebsite:
+        """Compiles the website into HTML and CSS code.
+
+        :param rule_namer: See :py:func:`compile_css`.
+        :type rule_namer: Callable[[List[CSSRule], int], str]
+        :return: A new :py:class:`CompiledWebsite` object containing the
+            compiled HTML and CSS code.
+        :rtype: CompiledWebsite
+        """
         # Building the HTML representation of each page
         trees = [page.build() for page in self.pages]
 
         # Compiling HTML and CSS code
-        compiled_css = compile_css(trees)
+        compiled_css = compile_css(trees, rule_namer)
         for tree in trees:
             apply_css(compiled_css, tree)
         html_content = [tree.to_html() for tree in trees]
