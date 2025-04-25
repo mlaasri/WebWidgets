@@ -235,7 +235,7 @@ class TestHTMLNode:
         assert node.to_html() == expected_html
 
     @pytest.mark.parametrize("indent_level", [0, 1, 2])
-    @pytest.mark.parametrize("indent_size", [3, 4, 8])
+    @pytest.mark.parametrize("indent_size", [2, 3, 4, 8])
     def test_indentation(self, indent_level: int, indent_size: int):
         """Test the to_html method with different indentation parameters."""
 
