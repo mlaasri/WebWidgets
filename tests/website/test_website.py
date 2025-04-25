@@ -222,7 +222,7 @@ class TestWebsite:
         assert compiled_false.css_content == expected_css
 
     @pytest.mark.parametrize("indent_level", [0, 1, 2])
-    @pytest.mark.parametrize("indent_size", [3, 4, 8])
+    @pytest.mark.parametrize("indent_size", [2, 3, 4, 8])
     def test_compile_indentation(self, indent_level: int, indent_size: int):
         """Test the `compile` method with custom indentation levels and sizes."""
         website = TestWebsite.SimpleWebsite()
