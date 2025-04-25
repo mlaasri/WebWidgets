@@ -11,7 +11,7 @@
 # =======================================================================
 
 from .compiled_website import CompiledWebsite
-from typing import Callable, List
+from typing import Any, Callable, List
 from webwidgets.compilation.css import compile_css, CSSRule, apply_css
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.widgets.containers.page import Page
@@ -38,12 +38,28 @@ class Website(ReprMixin):
         """
         self.pages.append(page)
 
-    def compile(self, rule_namer: Callable[[List[CSSRule], int],
-                                           str] = None) -> CompiledWebsite:
+    def compile(self,
+                collapse_empty: bool = True,
+                force_one_line: bool = False,
+                indent_level: int = 0,
+                indent_size: int = 4,
+                rule_namer: Callable[[List[CSSRule], int], str] = None,
+                **kwargs: Any) -> CompiledWebsite:
         """Compiles the website into HTML and CSS code.
 
+        :param collapse_empty: See :py:meth:`HTMLNode.to_html`.
+        :type collapse_empty: bool
+        :param force_one_line: See :py:meth:`HTMLNode.to_html`.
+        :type force_one_line: bool
+        :param indent_level: See :py:meth:`HTMLNode.to_html`.
+        :type indent_level: int
+        :param indent_size: See :py:meth:`HTMLNode.to_html` and
+            :py:meth:`CompiledCSS.to_css`.
+        :type indent_size: int
         :param rule_namer: See :py:func:`compile_css`.
         :type rule_namer: Callable[[List[CSSRule], int], str]
+        :param kwargs: See :py:meth:`HTMLNode.to_html`.
+        :type kwargs: Any
         :return: A new :py:class:`CompiledWebsite` object containing the
             compiled HTML and CSS code.
         :rtype: CompiledWebsite
@@ -55,8 +71,14 @@ class Website(ReprMixin):
         compiled_css = compile_css(trees, rule_namer)
         for tree in trees:
             apply_css(compiled_css, tree)
-        html_content = [tree.to_html() for tree in trees]
-        css_content = compiled_css.to_css()
+        html_content = [tree.to_html(
+            collapse_empty=collapse_empty,
+            force_one_line=force_one_line,
+            indent_level=indent_level,
+            indent_size=indent_size,
+            **kwargs
+        ) for tree in trees]
+        css_content = compiled_css.to_css(indent_size=indent_size)
 
         # Storing the result in a new CompiledWebsite object
         return CompiledWebsite(html_content, css_content)

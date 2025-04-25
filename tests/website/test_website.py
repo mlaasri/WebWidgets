@@ -17,6 +17,10 @@ from webwidgets.compilation.html.html_node import HTMLNode, RawText
 
 
 class TestWebsite:
+    class Empty(ww.Widget):
+        def build(self):
+            return HTMLNode()
+
     class Text(ww.Widget):
         def __init__(self, text: str, style: Dict[str, str] = None):
             super().__init__()
@@ -25,6 +29,14 @@ class TestWebsite:
 
         def build(self):
             return HTMLNode(children=[RawText(self.text)], style=self.style)
+
+    class SimpleWebsite(ww.Website):
+        def __init__(self):
+            page = ww.Page([
+                TestWebsite.Text("Text!", {"padding": "0"}),
+                TestWebsite.Text("Another Text!", {"margin": "0"}),
+            ])
+            super().__init__([page])
 
     @pytest.mark.parametrize("num_pages", [1, 2, 3])
     @pytest.mark.parametrize("num_widgets", [1, 2, 3])
@@ -118,18 +130,145 @@ class TestWebsite:
         ])
         assert compiled.css_content == expected_css
 
-    def test_compile_website_custom_rule_namer(self):
-        """Test the `compile_website` method with a custom rule namer function."""
+    def test_compile_collapse_empty(self):
+        website = ww.Website([ww.Page([TestWebsite.Empty()])])
+
+        # Collapse empty elements
+        compiled_true = website.compile(collapse_empty=True)
+        expected_html_true = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head></head>",
+            "    <body>",
+            "        <htmlnode></htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        assert len(compiled_true.html_content) == 1
+        assert compiled_true.html_content[0] == expected_html_true
+        assert compiled_true.css_content == ""
+
+        # Don't collapse empty elements
+        compiled_false = website.compile(collapse_empty=False)
+        expected_html_false = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            "    </head>",
+            "    <body>",
+            "        <htmlnode>",
+            "        </htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        assert len(compiled_false.html_content) == 1
+        assert compiled_false.html_content[0] == expected_html_false
+        assert compiled_false.css_content == ""
+
+    def test_compile_force_one_line(self):
+        website = TestWebsite.SimpleWebsite()
+        expected_css = "\n".join([
+            ".r0 {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".r1 {",
+            "    padding: 0;",
+            "}"
+        ])
+
+        # Force one line HTML
+        compiled_true = website.compile(force_one_line=True)
+        expected_html_true = ''.join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "<head>",
+            '<link href="styles.css" rel="stylesheet">',
+            "</head>",
+            "<body>",
+            '<htmlnode class="r1">',
+            "Text!",
+            "</htmlnode>",
+            '<htmlnode class="r0">',
+            "Another Text!",
+            "</htmlnode>",
+            "</body>",
+            "</html>"
+        ])
+        assert len(compiled_true.html_content) == 1
+        assert compiled_true.html_content[0] == expected_html_true
+        assert compiled_true.css_content == expected_css
+
+        # Don't force one line HTML
+        compiled_false = website.compile(force_one_line=False)
+        expected_html_false = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            '        <link href="styles.css" rel="stylesheet">',
+            "    </head>",
+            "    <body>",
+            '        <htmlnode class="r1">',
+            "            Text!",
+            "        </htmlnode>",
+            '        <htmlnode class="r0">',
+            "            Another Text!",
+            "        </htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        assert len(compiled_false.html_content) == 1
+        assert compiled_false.html_content[0] == expected_html_false
+        assert compiled_false.css_content == expected_css
+
+    @pytest.mark.parametrize("indent_level", [0, 1, 2])
+    @pytest.mark.parametrize("indent_size", [3, 4, 8])
+    def test_compile_indentation(self, indent_level: int, indent_size: int):
+        """Test the `compile` method with custom indentation levels and sizes."""
+        website = TestWebsite.SimpleWebsite()
+        compiled = website.compile(
+            indent_level=indent_level,
+            indent_size=indent_size
+        )
+
+        # Check the results
+        expected_html = "\n".join([
+            f"{' ' * indent_size * indent_level}<!DOCTYPE html>",
+            f"{' ' * indent_size * indent_level}<html>",
+            f"{' ' * indent_size * (indent_level + 1)}<head>",
+            f'{" " * indent_size * (indent_level + 2)}<link href="styles.css" rel="stylesheet">',
+            f"{' ' * indent_size * (indent_level + 1)}</head>",
+            f"{' ' * indent_size * (indent_level + 1)}<body>",
+            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="r1">',
+            f"{' ' * indent_size * (indent_level + 3)}Text!",
+            f"{' ' * indent_size * (indent_level + 2)}</htmlnode>",
+            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="r0">',
+            f"{' ' * indent_size * (indent_level + 3)}Another Text!",
+            f"{' ' * indent_size * (indent_level + 2)}</htmlnode>",
+            f"{' ' * indent_size * (indent_level + 1)}</body>",
+            f"{' ' * indent_size * indent_level}</html>"
+        ])
+        assert len(compiled.html_content) == 1
+        assert compiled.html_content[0] == expected_html
+        expected_css = "\n".join([
+            ".r0 {",
+            f"{' ' * indent_size}margin: 0;",
+            "}",
+            "",
+            ".r1 {",
+            f"{' ' * indent_size}padding: 0;",
+            "}"
+        ])
+        assert compiled.css_content == expected_css
+
+    def test_compile_rule_namer(self):
+        """Test the `compile` method with a custom rule namer function."""
         # Define a custom rule namer function
         def custom_rule_namer(rules, index):
             return f"custom_{index}_{list(rules[index].declarations.keys())[0]}"
 
-        # Build an compile a website with the custom rule namer
-        page = ww.Page([
-            TestWebsite.Text("Text!", {"padding": "0"}),
-            TestWebsite.Text("Another Text!", {"margin": "0"}),
-        ])
-        website = ww.Website([page])
+        # Compile a simple website with the custom rule namer
+        website = TestWebsite.SimpleWebsite()
         compiled = website.compile(rule_namer=custom_rule_namer)
 
         # Check the results
@@ -159,4 +298,36 @@ class TestWebsite:
             "    padding: 0;",
             "}"
         ])
+        assert compiled.css_content == expected_css
+
+    def test_compile_kwargs(self):
+        website = TestWebsite.SimpleWebsite()
+        compiled = website.compile(replace_all_entities=True)
+        expected_html = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            '        <link href="styles.css" rel="stylesheet">',
+            "    </head>",
+            "    <body>",
+            '        <htmlnode class="r1">',
+            "            Text&excl;",
+            "        </htmlnode>",
+            '        <htmlnode class="r0">',
+            "            Another Text&excl;",
+            "        </htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        expected_css = "\n".join([
+            ".r0 {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".r1 {",
+            "    padding: 0;",
+            "}"
+        ])
+        assert len(compiled.html_content) == 1
+        assert compiled.html_content[0] == expected_html
         assert compiled.css_content == expected_css
