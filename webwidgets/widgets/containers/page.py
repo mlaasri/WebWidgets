@@ -21,7 +21,7 @@ class Page(Container):
     responsible for laying them out within the page.
     """
 
-    def build(self) -> RootNode:
+    def build(self, css_file_name: str = "styles.css") -> RootNode:
         """Builds the HTML representation of the page.
 
         This method constructs an HTML structure that includes a doctype
@@ -29,6 +29,9 @@ class Page(Container):
         containing the widgets. The widgets are rendered recurisvely by calling
         their :py:meth:`build` method.
 
+        :param css_file_name: The name of the CSS file to link to the page if
+            the page elements contain any styles. Defaults to "styles.css".
+        :type css_file_name: str
         :return: An :py:class:`RootNode` object representing the page.
         :rtype: RootNode
         """
@@ -42,7 +45,7 @@ class Page(Container):
         # To do so, we just check if any child node has a non-empty style.
         if any(style for n in nodes for style in n.get_styles().values()):
             head.add(Link(
-                attributes={"href": "styles.css", "rel": "stylesheet"}
+                attributes={"href": css_file_name, "rel": "stylesheet"}
             ))
 
         # Building the HTML representation of the page

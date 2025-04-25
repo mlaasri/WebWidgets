@@ -165,6 +165,40 @@ class TestWebsite:
         assert compiled_false.html_content[0] == expected_html_false
         assert compiled_false.css_content == ""
 
+    @pytest.mark.parametrize("css_file_name",
+                             ["style.css", "s.css", "css.css"])
+    def test_compile_css_file_name(self, css_file_name):
+        website = TestWebsite.SimpleWebsite()
+        compiled = website.compile(css_file_name=css_file_name)
+        expected_html = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            f'        <link href="{css_file_name}" rel="stylesheet">',
+            "    </head>",
+            "    <body>",
+            '        <htmlnode class="r1">',
+            "            Text!",
+            "        </htmlnode>",
+            '        <htmlnode class="r0">',
+            "            Another Text!",
+            "        </htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        expected_css = "\n".join([
+            ".r0 {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".r1 {",
+            "    padding: 0;",
+            "}"
+        ])
+        assert len(compiled.html_content) == 1
+        assert compiled.html_content[0] == expected_html
+        assert compiled.css_content == expected_css
+
     def test_compile_force_one_line(self):
         website = TestWebsite.SimpleWebsite()
         expected_css = "\n".join([

@@ -123,3 +123,21 @@ class TestPage:
             "</html>"
         ])
         assert page.build().to_html() == expected_html_after
+
+    @pytest.mark.parametrize("css_file_name",
+                             ["style.css", "s.css", "css.css"])
+    def test_page_with_custom_css_file_name(self, css_file_name):
+        page = ww.Page([TestPage.Styled()])
+        expected_html = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "    <head>",
+            f'        <link href="{css_file_name}" rel="stylesheet">',
+            "    </head>",
+            "    <body>",
+            "        <htmlnode></htmlnode>",
+            "    </body>",
+            "</html>"
+        ])
+        assert page.build(
+            css_file_name=css_file_name).to_html() == expected_html

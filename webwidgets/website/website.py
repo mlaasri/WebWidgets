@@ -40,6 +40,7 @@ class Website(ReprMixin):
 
     def compile(self,
                 collapse_empty: bool = True,
+                css_file_name: str = "styles.css",
                 force_one_line: bool = False,
                 indent_level: int = 0,
                 indent_size: int = 4,
@@ -49,6 +50,8 @@ class Website(ReprMixin):
 
         :param collapse_empty: See :py:meth:`HTMLNode.to_html`.
         :type collapse_empty: bool
+        :param css_file_name: See :py:meth:`Page.build`.
+        :type css_file_name: str
         :param force_one_line: See :py:meth:`HTMLNode.to_html`.
         :type force_one_line: bool
         :param indent_level: See :py:meth:`HTMLNode.to_html`.
@@ -65,7 +68,8 @@ class Website(ReprMixin):
         :rtype: CompiledWebsite
         """
         # Building the HTML representation of each page
-        trees = [page.build() for page in self.pages]
+        trees = [page.build(css_file_name=css_file_name)
+                 for page in self.pages]
 
         # Compiling HTML and CSS code
         compiled_css = compile_css(trees, rule_namer)
