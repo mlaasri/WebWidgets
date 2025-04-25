@@ -261,6 +261,40 @@ class TestWebsite:
         ])
         assert compiled.css_content == expected_css
 
+    @pytest.mark.parametrize("indent_level", [-2, -1])
+    def test_compile_negative_indent_levels(self, indent_level: int):
+        website = TestWebsite.SimpleWebsite()
+        compiled = website.compile(indent_level=indent_level)
+        indent = "    " if indent_level == -1 else ""
+        expected_html = "\n".join([
+            "<!DOCTYPE html>",
+            "<html>",
+            "<head>",
+            f'{indent}<link href="styles.css" rel="stylesheet">',
+            "</head>",
+            "<body>",
+            f'{indent}<htmlnode class="r1">',
+            f"{indent}    Text!",
+            f"{indent}</htmlnode>",
+            f'{indent}<htmlnode class="r0">',
+            f"{indent}    Another Text!",
+            f"{indent}</htmlnode>",
+            "</body>",
+            "</html>"
+        ])
+        expected_css = "\n".join([
+            ".r0 {",
+            "    margin: 0;",
+            "}",
+            "",
+            ".r1 {",
+            "    padding: 0;",
+            "}"
+        ])
+        assert len(compiled.html_content) == 1
+        assert compiled.html_content[0] == expected_html
+        assert compiled.css_content == expected_css
+
     def test_compile_rule_namer(self):
         """Test the `compile` method with a custom rule namer function."""
         # Define a custom rule namer function
