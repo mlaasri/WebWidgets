@@ -288,7 +288,8 @@ class TestWebsite:
             "    </body>",
             "</html>"
         ])
-        assert compiled.html_content == [expected_html]
+        assert len(compiled.html_content) == 1
+        assert compiled.html_content[0] == expected_html
         expected_css = "\n".join([
             ".custom_0_margin {",
             "    margin: 0;",
