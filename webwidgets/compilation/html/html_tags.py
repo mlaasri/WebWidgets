@@ -45,6 +45,11 @@ class Body(HTMLNode):
     pass
 
 
+class Div(HTMLNode):
+    """A `<div>` element used for grouping elements."""
+    pass
+
+
 @one_line
 @no_end_tag
 class Doctype(HTMLNode):
