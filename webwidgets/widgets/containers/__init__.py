@@ -10,5 +10,6 @@
 #
 # =======================================================================
 
+from .box import Box, Direction
 from .container import Container
 from .page import Page
