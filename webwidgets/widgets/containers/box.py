@@ -11,11 +11,11 @@
 # =======================================================================
 
 from .container import Container
-from enum import auto, StrEnum
+from enum import auto, Enum
 from webwidgets.compilation.html.html_tags import Div
 
 
-class Direction(StrEnum):
+class Direction(Enum):
     HORIZONTAL = auto()
     VERTICAL = auto()
 
