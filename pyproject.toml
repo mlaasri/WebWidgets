@@ -21,6 +21,11 @@ classifiers = [
 [project.urls]
 "Source code" = "https://github.com/mlaasri/WebWidgets"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
 [tool.hatch.version]
 path = "webwidgets/__init__.py"
 
