@@ -39,7 +39,7 @@ def render_page(page: ww.Page, driver: Union[Chrome, Firefox]) -> np.ndarray:
 
         # Exporting HTML and CSS code
         html_file_path = os.path.join(tmp, "index.html")
-        css_file_path = os.path.join(tmp, "style.css")
+        css_file_path = os.path.join(tmp, "styles.css")
         with open(html_file_path, "w") as f:
             f.write(compiled.html_content[0])
         with open(css_file_path, "w") as f:
