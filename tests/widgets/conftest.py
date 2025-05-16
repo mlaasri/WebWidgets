@@ -61,13 +61,13 @@ def get_driver_info(driver: Union[Chrome, Firefox]) -> DriverInfo:
     # Measuring the minimum size
     driver.set_window_size(1, 1)  # Trying to set a minimal size
     min_size = driver.get_window_size()
-    min_size = (min_size["width"], min_size["height"])
+    min_size = (min_size["height"], min_size["width"])
 
     # Rendering an empty page to measure the margin offset
     size = (2 * min_size[0], 2 * min_size[1])
     tmp_driver_info = DriverInfo(driver=driver, min_size=size, offset=(0, 0))
     array = render_page(ww.Page(), tmp_driver_info, size)
-    offset = size[0] - array.shape[1], size[1] - array.shape[0]
+    offset = size[0] - array.shape[0], size[1] - array.shape[1]
 
     # Returning the collected information
     return DriverInfo(driver=driver, min_size=min_size, offset=offset)

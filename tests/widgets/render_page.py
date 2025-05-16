@@ -40,9 +40,8 @@ def render_page(page: ww.Page, driver_info: DriverInfo,
     :param driver_info: The DriverInfo object containing the web driver and
         additional information about it to use for rendering.
     :type driver_info: DriverInfo
-    :param size: The size of the web driver's window as (width, height). This
-        parameter influences the size of the rendered image, but it it does not
-        enforce it.
+    :param size: The size of the web page to render as (height, width). This
+        parameter essentially controls the size of the rendered image.
     :type size: Tuple[int, int]
     :return: A numpy array of the rendered image.
     :rtype: np.ndarray
@@ -71,7 +70,7 @@ def render_page(page: ww.Page, driver_info: DriverInfo,
         # Rendering the page
         render_path = os.path.join(tmp, "render.png")
         driver_info.driver.get("file://" + html_file_path)
-        driver_info.driver.set_window_size(*size)
+        driver_info.driver.set_window_size(size[1], size[0])  # Width, height
         driver_info.driver.save_screenshot(render_path)
 
         # Reading the image data
