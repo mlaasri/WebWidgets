@@ -15,11 +15,12 @@ import os
 from PIL import Image
 from selenium.webdriver import Chrome, Firefox
 import tempfile
-from typing import Union
+from typing import Tuple, Union
 import webwidgets as ww
 
 
-def render_page(page: ww.Page, driver: Union[Chrome, Firefox]) -> np.ndarray:
+def render_page(page: ww.Page, driver: Union[Chrome, Firefox],
+                size: Tuple[int, int]) -> np.ndarray:
     """Renders a page with the given web driver and returns a numpy array of
     the rendered image.
 
@@ -27,6 +28,10 @@ def render_page(page: ww.Page, driver: Union[Chrome, Firefox]) -> np.ndarray:
     :type page: Page
     :param driver: The web driver to use for rendering.
     :type driver: Union[Chrome, Firefox]
+    :param size: The size of the web driver's window as (width, height). This
+        parameter influences the size of the rendered image, but it it does not
+        enforce it.
+    :type size: Tuple[int, int]
     :return: A numpy array of the rendered image.
     :rtype: np.ndarray
     """
@@ -48,6 +53,7 @@ def render_page(page: ww.Page, driver: Union[Chrome, Firefox]) -> np.ndarray:
         # Rendering the page
         render_path = os.path.join(tmp, "render.png")
         driver.get("file://" + html_file_path)
+        driver.set_window_size(*size)
         driver.save_screenshot(render_path)
 
         # Reading the image data
