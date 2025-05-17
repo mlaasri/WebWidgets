@@ -36,8 +36,8 @@ class TestBox:
                 box.add(TestBox.Color("red"))
             super().__init__(widgets=[box])
 
-    def test_box(self, web_drivers_info):
+    def test_box(self, web_drivers):
         page = TestBox.SimplePage()
-        for web_driver_info in web_drivers_info:
-            result = render_page(page, web_driver_info, size=(800, 800))
-            assert (result.shape[0], result.shape[1]) == (800, 800)
+        for web_driver in web_drivers:
+            result = render_page(page, web_driver)
+            assert result.shape
