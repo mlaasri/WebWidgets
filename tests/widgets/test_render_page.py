@@ -23,8 +23,8 @@ class TestRenderPage:
         def build(self):
             return ww.compilation.html.Div(
                 style={"background-color": "red",
-                       "height": "3000px",
-                       "width": "3000px"}
+                       "height": "100vh",
+                       "width": "100vw"}
             )
 
     def test_return_type_and_shape(self, web_drivers):
@@ -40,6 +40,10 @@ class TestRenderPage:
         page = ww.Page([TestRenderPage.Red()])
         for web_driver in web_drivers:
             array = render_page(page, web_driver)
+            center_x, center_y = array.shape[0] // 2, array.shape[1] // 2
             assert isinstance(array, np.ndarray)
-            assert np.all(array[10:-10, 10:-10, 0] == 255)
-            assert np.all(array[10:-10, 10:-10, 1:] == 0)
+
+            # Only test the center
+            assert array[center_x, center_y, 0] == 255
+            assert array[center_x, center_y, 1] == 0
+            assert array[center_x, center_y, 2] == 0

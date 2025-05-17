@@ -20,6 +20,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 def chrome_web_driver():
     options = ChromeOptions()
     options.add_argument("--headless")
+    options.add_argument("--hide-scrollbars")
     options.add_argument("--silent")
     driver = Chrome(options=options)
     yield driver
