@@ -88,4 +88,5 @@ class TestBox:
             for x, color in zip(xs, TestBox.SimplePage.colors):
                 coords = (half_y, x) if direction == ww.Direction.HORIZONTAL \
                     else (x, half_y)
-                assert np.all(result[*coords, :3] == np.array(color))
+                assert np.all(
+                    result[coords[0], coords[1], :3] == np.array(color))
