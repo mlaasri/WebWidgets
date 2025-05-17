@@ -19,7 +19,27 @@ class TestRenderPage:
     """Test cases for the test utility function `render_page`.
     """
 
-    def test_return_type(self, web_drivers):
+    class Red(ww.Widget):
+        def build(self):
+            return ww.compilation.html.Div(
+                style={"background-color": "red",
+                       "height": "3000px",
+                       "width": "3000px"}
+            )
+
+    def test_return_type_and_shape(self, web_drivers):
         for web_driver in web_drivers:
             array = render_page(ww.Page(), web_driver)
             assert isinstance(array, np.ndarray)
+            assert array.ndim == 3
+            assert array.shape[0] >= 10
+            assert array.shape[1] >= 10
+            assert array.shape[2] in (3, 4)  # Some drivers add alpha channel
+
+    def test_red_page(self, web_drivers):
+        page = ww.Page([TestRenderPage.Red()])
+        for web_driver in web_drivers:
+            array = render_page(page, web_driver)
+            assert isinstance(array, np.ndarray)
+            assert np.all(array[10:-10, 10:-10, 0] == 255)
+            assert np.all(array[10:-10, 10:-10, 1:] == 0)
