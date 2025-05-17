@@ -27,11 +27,17 @@ class TestBox:
             self.expand = expand
 
         def build(self):
-            h_unit = "vh" if self.expand == ww.Direction.HORIZONTAL else "%"
-            v_unit = "vw" if self.expand == ww.Direction.VERTICAL else "%"
             return Div(style={"background-color": self.color,
-                              "height": "100" + h_unit,
-                              "width": "100" + v_unit})
+                              "height": "100%",
+                              "width": "100%"})
+
+    # A Box that fills the entire viewport
+    class FullSizedBox(ww.Box):
+        def build(self, *args, **kwargs):
+            node = super().build(*args, **kwargs)
+            node.style["width"] = "100vw"
+            node.style["height"] = "100vh"
+            return node
 
     # A simple Page with one Box containing a variable number of Text widgets
     class SimplePage(ww.Page):
@@ -40,22 +46,46 @@ class TestBox:
         colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
 
         def __init__(self, box_direction: ww.Direction, n: int = 2):
-            box = ww.Box(box_direction)
+            box = TestBox.FullSizedBox(box_direction)
             css_colors = [f"rgb{c}" for c in TestBox.SimplePage.colors]
             for i in range(n):
                 color = css_colors[i % len(css_colors)]
                 box.add(TestBox.Color(color, box_direction))
             super().__init__(widgets=[box])
 
+    @pytest.mark.parametrize("direction", [ww.Direction.HORIZONTAL,
+                                           ww.Direction.VERTICAL])
     @pytest.mark.parametrize("n", [1, 2, 3])
-    def test_even_horizontal_box(self, n, web_drivers):
-        """Tests the even distribution of multiple colors by a Box
+    def test_even_box(self, direction, n, web_drivers):
+        """Tests the even distribution of multiple colors by a Box.
+
+        The test renders a page with a box and checks the color of each box
+        item at its center. For example, with 3 colored widgets per box, the
+        test will look for the color at the following positions (X) in the
+        rendered image, depending on the direction:
+
+        ```
+
+                +-------+-------+-------+           +-------+
+                |       |       |       |           |   X   |
+                |   X   |   X   |   X   |           +-------+
+                |       |       |       |           |   X   |
+                +-------+-------+-------+           +-------+
+                                                    |   X   |
+                                                    +-------+
+
+                        HORIZONTAL                  VERTICAL
+        ```
         """
-        page = TestBox.SimplePage(ww.Direction.HORIZONTAL, n)
+        page = TestBox.SimplePage(direction, n)
+        x_axis = 1 if direction == ww.Direction.HORIZONTAL else 0
+        y_axis = 1 - x_axis
         for web_driver in web_drivers:
             result = render_page(page, web_driver)
-            xs = [int(result.shape[1] * (1 / (2.0 * n) + k / n))
+            xs = [int(result.shape[x_axis] * (1 / (2.0 * n) + k / n))
                   for k in range(n)]
-            xs_colors = zip(xs, TestBox.SimplePage.colors)
-            assert all(np.all(result[result.shape[0] // 2, x, :3] ==
-                              np.array(color)) for x, color in xs_colors)
+            half_y = result.shape[y_axis] // 2
+            for x, color in zip(xs, TestBox.SimplePage.colors):
+                coords = (half_y, x) if direction == ww.Direction.HORIZONTAL \
+                    else (x, half_y)
+                assert np.all(result[*coords, :3] == np.array(color))
