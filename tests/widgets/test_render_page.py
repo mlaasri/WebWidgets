@@ -33,7 +33,7 @@ class TestRenderPage:
     def test_render_empty_page_size(self, size, web_drivers_info):
         for web_driver_info in web_drivers_info:
             array = render_page(ww.Page(), web_driver_info, size)
-            assert (array.shape[0], array.shape[1]) == size
+            assert (array.shape[0], array.shape[1]) == (size[1], size[0])
 
     @pytest.mark.parametrize("size", [
         (800, 800), (1000, 800), (800, 1000)
@@ -42,4 +42,4 @@ class TestRenderPage:
         for web_driver_info in web_drivers_info:
             array = render_page(
                 ww.Page([TestRenderPage.Red()]), web_driver_info, size)
-            assert (array.shape[0], array.shape[1]) == size
+            assert (array.shape[0], array.shape[1]) == (size[1], size[0])
