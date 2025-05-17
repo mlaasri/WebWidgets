@@ -40,10 +40,10 @@ class TestRenderPage:
         page = ww.Page([TestRenderPage.Red()])
         for web_driver in web_drivers:
             array = render_page(page, web_driver)
-            center_x, center_y = array.shape[0] // 2, array.shape[1] // 2
             assert isinstance(array, np.ndarray)
 
             # Only test the center
+            center_x, center_y = array.shape[0] // 2, array.shape[1] // 2
             assert array[center_x, center_y, 0] == 255
             assert array[center_x, center_y, 1] == 0
             assert array[center_x, center_y, 2] == 0
