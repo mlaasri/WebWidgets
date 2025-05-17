@@ -48,6 +48,7 @@ def render_page(page: ww.Page, driver: Union[Chrome, Firefox]) -> np.ndarray:
         # Rendering the page
         render_path = os.path.join(tmp, "render.png")
         driver.get("file://" + html_file_path)
+        driver.maximize_window()
         driver.save_screenshot(render_path)
 
         # Reading the image data
