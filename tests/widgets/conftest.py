@@ -11,7 +11,7 @@
 # =======================================================================
 
 import pytest
-from selenium import webdriver
+from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
@@ -21,7 +21,7 @@ def chrome_web_driver():
     options = ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--silent")
-    driver = webdriver.Chrome(options=options)
+    driver = Chrome(options=options)
     yield driver
     driver.quit()
 
@@ -30,7 +30,7 @@ def chrome_web_driver():
 def firefox_web_driver():
     options = FirefoxOptions()
     options.add_argument("--headless")
-    driver = webdriver.Firefox(options=options)
+    driver = Firefox(options=options)
     yield driver
     driver.quit()
 
