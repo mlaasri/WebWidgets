@@ -15,7 +15,7 @@ from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.utility.indentation import get_indentation
 from webwidgets.utility.representation import ReprMixin
-from webwidgets.utility.validation import validate_css_identifier
+from webwidgets.utility.validation import validate_css_identifier, validate_css_selector
 
 
 class CSSRule(ReprMixin):
@@ -39,9 +39,12 @@ class CSSRule(ReprMixin):
     def to_css(self, indent_size: int = 4) -> str:
         """Converts the rule into CSS code.
 
-        The rule's name is converted to a class selector. Note that the rule's
-        name and all property names are validated with
-        :py:func:`validate_css_identifier` before being converted. 
+        The rule's name is converted to a class selector.
+
+        Note that the rule's name and all property names are validated before
+        being converted. The rule's name is validated with
+        :py:func:`validate_css_selector` while the property names are validated
+        with :py:func:`validate_css_identifier`. 
 
         :param indent_size: The number of spaces to use for indentation in the
             CSS code. Defaults to 4.
@@ -52,8 +55,8 @@ class CSSRule(ReprMixin):
         # Defining indentation
         indentation = get_indentation(level=1, size=indent_size)
 
-        # Validating the rule name as an identifier
-        validate_css_identifier(self.name)
+        # Validating the rule name as a selector
+        validate_css_selector(self.name)
 
         # Writing down each property
         css_code = f".{self.name}" + " {\n"
