@@ -10,5 +10,6 @@
 #
 # =======================================================================
 
-from .css import compile_css, CSSRule, CompiledCSS, apply_css, \
+from .css import compile_css, CompiledCSS, apply_css, \
     default_rule_namer
+from .css_rule import CSSRule
