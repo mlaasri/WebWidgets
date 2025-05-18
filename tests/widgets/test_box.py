@@ -57,11 +57,11 @@ class TestBox:
                                            ww.Direction.VERTICAL])
     @pytest.mark.parametrize("n", [1, 2, 3])
     def test_even_box(self, direction, n, web_drivers):
-        """Tests the even distribution of multiple colors by a Box.
+        """Tests the even distribution of multiple colored widgets by a Box.
 
         The test renders a page with a box and checks the color of each box
         item at its center. For example, with 3 colored widgets per box, the
-        test will look for the color at the following positions (X) in the
+        test will look for the color at the following positions `X` in the
         rendered image, depending on the direction:
 
         ```
@@ -75,11 +75,26 @@ class TestBox:
                                                     +-------+
 
                         HORIZONTAL                  VERTICAL
+
         ```
+
+        Since the box should span each child evenly, the colors at the marked
+        `X` should match a predictable pattern.
         """
-        page = TestBox.SimplePage(direction, n)
+        # To locate the box items, the test uses a (x, y) coordinate system
+        # with the x-axis in the direction of the box and the y-axis across it.
+        # This system is the most intuitive for a horizontal box, with a
+        # standard horizontal x-axis and a vertical y-axis. For a vertical box,
+        # these axes are swapped in the code. This swap allows to reuse most of
+        # the test implementation for horizontal boxes.
+
+        # Swapping the axes if the box is vertical so we can reuse the same
+        # code for both directions
         x_axis = 1 if direction == ww.Direction.HORIZONTAL else 0
         y_axis = 1 - x_axis
+
+        # Rendering the page
+        page = TestBox.SimplePage(direction, n)
         for web_driver in web_drivers:
             result = render_page(page, web_driver)
             xs = [int(result.shape[x_axis] * (1 / (2.0 * n) + k / n))
@@ -87,6 +102,7 @@ class TestBox:
             half_y = result.shape[y_axis] // 2
             for x, color in zip(xs, TestBox.SimplePage.colors):
                 coords = (half_y, x) if direction == ww.Direction.HORIZONTAL \
-                    else (x, half_y)
+                    else (x, half_y)  # Swapping the indices for vertical boxes
+
                 assert np.all(
                     result[coords[0], coords[1], :3] == np.array(color))
