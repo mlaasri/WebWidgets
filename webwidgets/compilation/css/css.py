@@ -50,11 +50,8 @@ class CompiledCSS(ReprMixin):
         :return: The CSS code as a string.
         :rtype: str
         """
-        css_code = ""
-        for i, rule in enumerate(self.rules):
-            css_code += rule.to_css(indent_size=indent_size) + \
-                ('\n\n' if i < len(self.rules) - 1 else '')
-        return css_code
+        return '\n\n'.join(
+            rule.to_css(indent_size=indent_size) for rule in self.rules)
 
 
 def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
