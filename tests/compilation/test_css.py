@@ -18,6 +18,53 @@ from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, \
     apply_css, default_rule_namer
 
 
+class TestCSSRule:
+    def test_rule_to_css(self):
+        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        expected_css = '\n'.join([
+            ".rule-name {",
+            "    color: red;",
+            "    margin: 0;",
+            "}"
+        ])
+        assert rule.to_css() == expected_css
+
+    def test_empty_rule_to_css(self):
+        rule = CSSRule("my-name", {})
+        expected_css = '\n'.join([
+            ".my-name {",
+            "}"
+        ])
+        assert rule.to_css() == expected_css
+
+    @pytest.mark.parametrize("indent_size", [0, 1, 2, 3, 4])
+    def test_rule_indentation(self, indent_size):
+        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        expected_css = '\n'.join([
+            ".rule-name {",
+            f"{' ' * indent_size}color: red;",
+            f"{' ' * indent_size}margin: 0;",
+            "}"
+        ])
+        assert rule.to_css(indent_size=indent_size) == expected_css
+
+    @pytest.mark.parametrize("name", [
+        "3rule", "hi!", "Wrong name", "-invalid"
+    ])
+    def test_invalid_rule_name(self, name):
+        rule = CSSRule(name, {"property": "value"})
+        with pytest.raises(ValueError, match=name):
+            rule.to_css()
+
+    @pytest.mark.parametrize("property_name", [
+        "3prop", "hi!", "Wrong name", "-invalid"
+    ])
+    def test_invalid_property_name(self, property_name):
+        rule = CSSRule("rule", {property_name: "value"})
+        with pytest.raises(ValueError, match=property_name):
+            rule.to_css()
+
+
 class TestCompileCSS:
     @staticmethod
     def _serialize_rules(rules: List[CSSRule]) -> List[Dict[str, Any]]:

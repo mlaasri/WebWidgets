@@ -36,6 +36,34 @@ class CSSRule(ReprMixin):
         self.name = name
         self.declarations = declarations
 
+    def to_css(self, indent_size: int = 4) -> str:
+        """Converts the rule into CSS code.
+
+        The rule's name is converted to a class selector. Note that the rule's
+        name and all property names are validated with
+        :py:func:`validate_css_identifier` before being converted. 
+
+        :param indent_size: The number of spaces to use for indentation in the
+            CSS code. Defaults to 4.
+        :type indent_size: int
+        :return: The CSS code as a string.
+        :rtype: str
+        """
+        # Defining indentation
+        indentation = get_indentation(level=1, size=indent_size)
+
+        # Validating the rule name as an identifier
+        validate_css_identifier(self.name)
+
+        # Writing down each property
+        css_code = f".{self.name}" + " {\n"
+        for property_name, value in self.declarations.items():
+            validate_css_identifier(property_name)
+            css_code += f"{indentation}{property_name}: {value};\n"
+        css_code += "}"
+
+        return css_code
+
 
 class CompiledCSS(ReprMixin):
     """A utility class to hold compiled CSS rules.
@@ -63,29 +91,17 @@ class CompiledCSS(ReprMixin):
         """Converts the `rules` dictionary of the :py:class:`CompiledCSS`
         object into CSS code.
 
-        Rule names are converted to class selectors. Note that each rule and
-        property name is validated with :py:func:`validate_css_identifier`
-        before being converted. 
+        Rules are converted with their :py:meth:`CSSRule.to_css` methods.
 
-        :param indent_size: The number of spaces to use for indentation in the
-            CSS code. Defaults to 4.
+        :param indent_size: See :py:meth:`CSSRule.to_css`.
         :type indent_size: int
         :return: The CSS code as a string.
         :rtype: str
         """
-        # Initializing code and defining indentation
         css_code = ""
-        indentation = get_indentation(level=1, size=indent_size)
-
-        # Writing down each rule
         for i, rule in enumerate(self.rules):
-            validate_css_identifier(rule.name)
-            css_code += f".{rule.name}" + " {\n"
-            for property_name, value in rule.declarations.items():
-                validate_css_identifier(property_name)
-                css_code += f"{indentation}{property_name}: {value};\n"
-            css_code += "}" + ('\n\n' if i < len(self.rules) - 1 else '')
-
+            css_code += rule.to_css(indent_size=indent_size) + \
+                ('\n\n' if i < len(self.rules) - 1 else '')
         return css_code
 
 
