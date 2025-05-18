@@ -14,6 +14,13 @@ from typing import *
 import re
 
 
+# CSS selectors that are considered valid as selectors but not as identifiers
+# according to the `validate_css_identifier()` function.
+SPECIAL_SELECTORS = [
+    "*", "*::before", "*::after"
+]
+
+
 def validate_css_identifier(identifier: str) -> None:
     """Checks if the given identifier is a valid identifier token according to
     the CSS syntax rules and raises an exception if not.
@@ -57,6 +64,41 @@ def validate_css_identifier(identifier: str) -> None:
                          "allowed.")
 
 
+def validate_css_selector(selector: str) -> None:
+    """Checks if the given CSS selector is valid and raises an exception if
+    not.
+
+    To be valid, the selector must either be:
+    - a special selector, which is defined as either `*`, `*::before`, or
+      `*::after`
+    - any combination of special selectors separated by a comma and a single
+      space (e.g. `*::before, *::after`)
+    - or a valid CSS identifier, as defined and enforced by the
+      :py:func:`validate_css_identifier` function
+
+    Note that this function imposes stricter rules than the official CSS
+    Selector Level 4 specification (see source:
+    https://www.w3.org/TR/selectors-4/). For example, this function does not
+    allow selectors with the relational pseudo-class `:has()` whereas the
+    specification does.
+
+    :param selector: The CSS selector to validate.
+    :type selector: str
+    :raises ValueError: If the selector is not a special selector nor a valid
+        CSS identifier.
+    """
+    # Checking if the selector is a special selector
+    if selector in SPECIAL_SELECTORS:
+        return
+
+    # Checking if the selector is a combination of special selectors
+    if all(part in SPECIAL_SELECTORS for part in selector.split(", ")):
+        return
+
+    # Otherwise, deferring to validate_css_identifier
+    validate_css_identifier(selector)
+
+
 def validate_html_class(class_attribute: str) -> None:
     """Checks if the given HTML class attribute is valid and raises an
     exception if not.
@@ -65,7 +107,7 @@ def validate_html_class(class_attribute: str) -> None:
     - the class attribute cannot start nor end with a space
     - the class attribute cannot contain double spaces
     - each class in the attribute must be a valid CSS identifier, as validated
-      by the :py:func:`validate_css_identifier` function.
+      by the :py:func:`validate_css_identifier` function
 
     Note that this function imposes stricter rules than rule 2.3.7 of the HTML5
     specification (see source:

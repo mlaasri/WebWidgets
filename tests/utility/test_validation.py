@@ -10,28 +10,37 @@
 #
 # =======================================================================
 
+import itertools
 import pytest
 import re
 from webwidgets.compilation.css import compile_css, apply_css
 from webwidgets.compilation.html import HTMLNode
-from webwidgets.utility.validation import validate_css_identifier, validate_html_class
+from webwidgets.utility.validation import validate_css_identifier, \
+    validate_css_selector, validate_html_class
 
 
 class TestValidate:
-    def test_valid_css_identifiers(self):
+    @pytest.fixture
+    def valid_css_identifiers(self):
+        return [
+            "i",
+            "identifier",
+            "identifier123",
+            "myIdentifier",
+            "myIdentifier123",
+            "my-identifier-456",
+            "my-Ident_ifier-456",
+            "_identifier123",
+            "_myIdentifier",
+            "_my-Identifier456",
+            "--myIdentifier",
+            "--my-Identifier456"
+        ]
+
+    def test_valid_css_identifiers(self, valid_css_identifiers):
         """Test that valid CSS identifiers are accepted"""
-        validate_css_identifier("i")
-        validate_css_identifier("identifier")
-        validate_css_identifier("identifier123")
-        validate_css_identifier("myIdentifier")
-        validate_css_identifier("myIdentifier123")
-        validate_css_identifier("my-identifier-456")
-        validate_css_identifier("my-Ident_ifier-456")
-        validate_css_identifier("_identifier123")
-        validate_css_identifier("_myIdentifier")
-        validate_css_identifier("_my-Identifier456")
-        validate_css_identifier("--myIdentifier")
-        validate_css_identifier("--my-Identifier456")
+        for identifier in valid_css_identifiers:
+            validate_css_identifier(identifier)
 
     def test_invalid_css_identifier_empty(self):
         """Test that an invalid CSS identifier (that is empty) raises an exception"""
@@ -94,6 +103,46 @@ class TestValidate:
             (r"Invalid character\(s\).*" + re.escape(chars))
         with pytest.raises(ValueError, match=match):
             validate_css_identifier(code)
+
+    def test_valid_css_identifiers_as_selectors(self, valid_css_identifiers):
+        """Test that valid CSS identifiers are also valid selectors"""
+        for identifier in valid_css_identifiers:
+            validate_css_selector(identifier)
+
+    def test_special_css_selectors(self):
+        """Testing all possible combinations of special CSS selectors with no
+        repetition.
+        """
+        for i in (1, 2, 3):
+            for c in itertools.combinations(["*", "*::before", "*::after"], i):
+                for p in itertools.permutations(c):
+                    validate_css_selector(", ".join(p))
+
+    def test_invalid_empty_selector(self):
+        """Tests that an empty selector raises an exception"""
+        with pytest.raises(ValueError, match="identifier must start with"):
+            validate_css_selector("")
+
+    def test_non_special_selector_within_special_selectors(self):
+        """Tests that a non-special selector within a combination of special
+        selectors raises an exception"""
+        with pytest.raises(ValueError, match="identifier must start with"):
+            validate_css_selector("*, *::before, hello, *::after")
+
+    def test_invalid_css_selector_extra_space(self):
+        """Tests that an invalid combination of special selectors (with an
+        extra space) raises an exception"""
+        with pytest.raises(ValueError, match="identifier must start with"):
+            validate_css_selector("*,  *::before")
+
+    def test_invalid_non_special_css_selectors(self):
+        """Tests that invalid CSS selectors are rejected as invalid identifiers"""
+        with pytest.raises(ValueError, match="identifier must start with"):
+            validate_css_selector("*::has()")
+        with pytest.raises(ValueError, match="identifier must start with"):
+            validate_css_selector("::before")
+        with pytest.raises(ValueError, match=r"Invalid character\(s\).* !"):
+            validate_css_selector("h!")
 
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
