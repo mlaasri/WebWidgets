@@ -16,8 +16,7 @@ from webwidgets.utility.representation import ReprMixin
 
 
 class Widget(ABC, ReprMixin):
-    """
-    Abstract base class for all widgets.
+    """Abstract base class for all widgets.
 
     All subclasses of :py:class:`Widget` must implement a :py:meth:`build`
     method that returns an :py:class:`HTMLNode` object.
