@@ -14,8 +14,8 @@ import pytest
 from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, \
-    apply_css, default_rule_namer
+from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, \
+    CSSRule, default_rule_namer
 
 
 class TestCSSRule:

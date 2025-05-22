@@ -13,7 +13,7 @@
 import itertools
 import pytest
 import re
-from webwidgets.compilation.css import compile_css, apply_css
+from webwidgets.compilation.css import apply_css, compile_css
 from webwidgets.compilation.html import HTMLNode
 from webwidgets.utility.validation import validate_css_identifier, \
     validate_css_selector, validate_html_class
