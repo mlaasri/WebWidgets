@@ -17,9 +17,33 @@ from webwidgets.utility.representation import ReprMixin
 class CSSSection(ABC, ReprMixin):
     """Abstract base class representing a section of a CSS file.
 
-    All subclasses of :py:class:`CSSSection` must implement a :py:meth:`to_css`
-    method that returns a string.
+    All subclasses of :py:class:`CSSSection` must implement a
+    :py:meth:`compile_content` method that returns a string.
     """
+
+    @staticmethod
+    def compile_title(title: str) -> str:
+        """Compiles a section title into CSS code and returns it.
+
+        The title is converted into a single-line CSS comment that can be used
+        to identify a CSS section within the rest of the code.
+
+        :param title: The title to convert into a CSS comment.
+        :type title: str
+        :return: A string representing the CSS comment for the title.
+        :rtype: str
+        """
+        # Defining the CSS comment's start and end tokens
+        start, end = "/* ", " */"
+
+        # If the title is too long, we don't add decorative characters
+        remaining = 80 - len(start) - (len(title) + 2) - len(end)
+        if remaining <= 0:
+            return start + title + end
+
+        # Otherwise, we add decorative characters around the title
+        symbols = "=" * (remaining // 2)
+        return start + symbols + ' ' + title + ' ' + symbols + end
 
     def __init__(self, title: str = None):
         """Creates a new section with an optional title.
@@ -34,10 +58,28 @@ class CSSSection(ABC, ReprMixin):
         self.title = title
 
     @abstractmethod
-    def to_css(self) -> str:
-        """Converts the CSSSection object into CSS code.
+    def compile_content(self) -> str:
+        """Converts the content of the CSSSection object (excluding the title)
+        into CSS code.
 
         This method must be overridden by subclasses to compile specific CSS
         code.
         """
         pass
+
+    def to_css(self) -> str:
+        """Converts the CSSSection object into CSS code.
+
+        This function just wraps around :py:meth:`CSSSection.compile_title` and
+        :py:meth:`CSSSection.compile_content` to produce the final CSS code. If
+        the section has no title, :py:meth:`CSSSection.compile_title` is
+        skipped and this function will produce the same result as
+        :py:meth:`CSSSection.compile_content`.
+
+        :return: The CSS code for the section.
+        :rtype: str
+        """
+        if self.title is None:
+            return self.compile_content()
+        return CSSSection.compile_title(self.title) + "\n\n" + \
+            self.compile_content()
