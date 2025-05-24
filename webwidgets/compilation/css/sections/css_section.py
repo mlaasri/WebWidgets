@@ -11,6 +11,7 @@
 # =======================================================================
 
 from abc import ABC, abstractmethod
+from typing import Any
 from webwidgets.utility.representation import ReprMixin
 
 
@@ -67,7 +68,7 @@ class CSSSection(ABC, ReprMixin):
         """
         pass
 
-    def to_css(self) -> str:
+    def to_css(self, *args: Any, **kwargs: Any) -> str:
         """Converts the CSSSection object into CSS code.
 
         This function just wraps around :py:meth:`CSSSection.compile_title` and
@@ -76,10 +77,16 @@ class CSSSection(ABC, ReprMixin):
         skipped and this function will produce the same result as
         :py:meth:`CSSSection.compile_content`.
 
+        :param args: Arguments to pass to
+            :py:meth:`CSSSection.compile_content`.
+        :type args: Any
+        :param kwargs: Keyword arguments to pass to
+            :py:meth:`CSSSection.compile_content`.
+        :type kwargs: Any
         :return: The CSS code for the section.
         :rtype: str
         """
         if self.title is None:
-            return self.compile_content()
+            return self.compile_content(*args, **kwargs)
         return CSSSection.compile_title(self.title) + "\n\n" + \
-            self.compile_content()
+            self.compile_content(*args, **kwargs)
