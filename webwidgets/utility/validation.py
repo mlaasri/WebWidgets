@@ -21,6 +21,27 @@ SPECIAL_SELECTORS = [
 ]
 
 
+def validate_css_comment(comment: str) -> None:
+    """Validates that the given comment is a valid CSS comment according to the
+    CSS syntax rules and raises an exception if not.
+
+    This function just checks that the comment does not contain any closing
+    sequence `*/` as defined in the CSS Syntax Module Level 3, paragraph 4.3.2
+    (see source: https://www.w3.org/TR/css-syntax-3/#consume-comment).
+
+    :param comment: The CSS comment to validate, without its opening and
+        closing sequences. It can include any number of opening sequences
+        (`/*`) as part of its content, in which case it is still a valid
+        comment per the CSS specification, but it cannot contain any closing
+        sequences (`*/`).
+    :type comment: str
+    :raises ValueError: If the comment is not a valid CSS comment.
+    """
+    if "*/" in comment:
+        raise ValueError(
+            f"Invalid CSS comment: '{comment}' contains closing sequence '*/'")
+
+
 def validate_css_identifier(identifier: str) -> None:
     """Checks if the given identifier is a valid identifier token according to
     the CSS syntax rules and raises an exception if not.

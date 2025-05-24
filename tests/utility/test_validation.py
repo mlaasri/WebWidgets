@@ -15,8 +15,8 @@ import pytest
 import re
 from webwidgets.compilation.css import apply_css, compile_css
 from webwidgets.compilation.html import HTMLNode
-from webwidgets.utility.validation import validate_css_identifier, \
-    validate_css_selector, validate_html_class
+from webwidgets.utility.validation import validate_css_comment, \
+    validate_css_identifier, validate_css_selector, validate_html_class
 
 
 class TestValidate:
@@ -36,6 +36,22 @@ class TestValidate:
             "--myIdentifier",
             "--my-Identifier456"
         ]
+
+    def test_valid_css_comments(self):
+        """Test that valid CSS comments are accepted"""
+        validate_css_comment("")  # Empty comment is valid
+        validate_css_comment("This is a comment")
+        validate_css_comment("Comment /* with an opening sequence")
+        validate_css_comment("Many /* /* /* /* opening sequences")
+        validate_css_comment("1234567890!#*?")
+        validate_css_comment("*!/*H//*J/*J/*")  # Almost closing
+
+    @pytest.mark.parametrize("comment", [
+        "/* comment */", "comment */", "/*/", "abc /* 123 */"
+    ])
+    def test_invalid_css_comment(self, comment):
+        with pytest.raises(ValueError, match=re.escape("*/")):
+            validate_css_comment(comment)
 
     def test_valid_css_identifiers(self, valid_css_identifiers):
         """Test that valid CSS identifiers are accepted"""
