@@ -12,6 +12,8 @@
 
 from .css_rule import CSSRule
 import itertools
+from .sections.css_preamble import CSSPreamble
+from .sections.rule_section import RuleSection
 from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.utility.representation import ReprMixin
@@ -23,12 +25,13 @@ class CompiledCSS(ReprMixin):
 
     def __init__(self, trees: List[HTMLNode], rules: List[CSSRule],
                  mapping: Dict[int, List[CSSRule]]):
-        """Stores compiled CSS rules.
+        """Stores compiled CSS rules into a dedicated section entitled "Core".
 
         :param trees: The HTML trees at the origin of the compilation. These
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
-        :param rules: The compiled CSS rules.
+        :param rules: The compiled CSS rules. These are stored inside a
+            :py:class:`RuleSection` object with the title "Core".
         :type rules: List[CSSRule]
         :param mapping: A dictionary mapping each node ID to a list of rules
             that achieve the same style.
@@ -36,22 +39,26 @@ class CompiledCSS(ReprMixin):
         """
         super().__init__()
         self.trees = trees
-        self.rules = rules
+        self.preamble = CSSPreamble()
+        self.core = RuleSection(rules=rules, title="Core")
         self.mapping = mapping
 
     def to_css(self, indent_size: int = 4) -> str:
-        """Converts the `rules` dictionary of the :py:class:`CompiledCSS`
-        object into CSS code.
+        """Converts the `preamble` and `core` sections of the
+        :py:class:`CompiledCSS` object into CSS code.
 
-        Rules are converted with their :py:meth:`CSSRule.to_css` methods.
+        Sections are converted with their :py:meth:`RuleSection.to_css`
+        methods.
 
-        :param indent_size: See :py:meth:`CSSRule.to_css`.
+        :param indent_size: See :py:meth:`RuleSection.to_css`.
         :type indent_size: int
         :return: The CSS code as a string.
         :rtype: str
         """
         return '\n\n'.join(
-            rule.to_css(indent_size=indent_size) for rule in self.rules)
+            section.to_css(indent_size=indent_size) for section in (
+                self.preamble, self.core
+            ))
 
 
 def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
@@ -125,7 +132,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     .. code-block:: python
 
         >>> compiled_css = compile_css(tree)
-        >>> print(compiled_css.rules)
+        >>> print(compiled_css.core.rules)
         [
             CSSRule(name='r0', declarations={'color': 'blue'}),
             CSSRule(name='r1', declarations={'margin': '0'}),

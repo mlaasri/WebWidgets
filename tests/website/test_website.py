@@ -11,6 +11,7 @@
 # =======================================================================
 
 import pytest
+from tests.compilation.wrap_core_css import wrap_core_css
 from typing import Dict
 import webwidgets as ww
 from webwidgets.compilation.html.html_node import HTMLNode, RawText
@@ -68,7 +69,7 @@ class TestWebsite:
         assert all(c == expected_html for c in compiled.html_content)
 
         # Check if the compiled CSS contains the expected code
-        assert compiled.css_content == ""  # No CSS in this case
+        assert compiled.css_content == wrap_core_css("")  # No core CSS here
 
     @pytest.mark.parametrize("num_pages", [1, 2, 3, 4, 5, 6])
     @pytest.mark.parametrize("num_widgets", [1, 2, 3])
@@ -121,14 +122,14 @@ class TestWebsite:
             zip(rule_names[num_pages],
                 [list(styles[i % len(styles)].items())[0]
                  for i in range(num_pages)]))), key=lambda x: x[0])
-        expected_css = "\n\n".join([
+        expected_core_css = "\n\n".join([
             '\n'.join([
                 f".{name} " + "{",
                 f"    {p}: {v};",
                 "}"
             ]) for name, (p, v) in sorted_rules
         ])
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(expected_core_css)
 
     def test_compile_collapse_empty(self):
         website = ww.Website([ww.Page([TestWebsite.Empty()])])
@@ -146,7 +147,7 @@ class TestWebsite:
         ])
         assert len(compiled_true.html_content) == 1
         assert compiled_true.html_content[0] == expected_html_true
-        assert compiled_true.css_content == ""
+        assert compiled_true.css_content == wrap_core_css("")
 
         # Don't collapse empty elements
         compiled_false = website.compile(collapse_empty=False)
@@ -163,7 +164,7 @@ class TestWebsite:
         ])
         assert len(compiled_false.html_content) == 1
         assert compiled_false.html_content[0] == expected_html_false
-        assert compiled_false.css_content == ""
+        assert compiled_false.css_content == wrap_core_css("")
 
     @pytest.mark.parametrize("css_file_name",
                              ["style.css", "s.css", "css.css"])
@@ -186,7 +187,7 @@ class TestWebsite:
             "    </body>",
             "</html>"
         ])
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".r0 {",
             "    margin: 0;",
             "}",
@@ -197,11 +198,11 @@ class TestWebsite:
         ])
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(expected_core_css)
 
     def test_compile_force_one_line(self):
         website = TestWebsite.SimpleWebsite()
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".r0 {",
             "    margin: 0;",
             "}",
@@ -231,7 +232,7 @@ class TestWebsite:
         ])
         assert len(compiled_true.html_content) == 1
         assert compiled_true.html_content[0] == expected_html_true
-        assert compiled_true.css_content == expected_css
+        assert compiled_true.css_content == wrap_core_css(expected_core_css)
 
         # Don't force one line HTML
         compiled_false = website.compile(force_one_line=False)
@@ -253,7 +254,7 @@ class TestWebsite:
         ])
         assert len(compiled_false.html_content) == 1
         assert compiled_false.html_content[0] == expected_html_false
-        assert compiled_false.css_content == expected_css
+        assert compiled_false.css_content == wrap_core_css(expected_core_css)
 
     @pytest.mark.parametrize("indent_level", [0, 1, 2])
     @pytest.mark.parametrize("indent_size", [2, 3, 4, 8])
@@ -284,7 +285,7 @@ class TestWebsite:
         ])
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".r0 {",
             f"{' ' * indent_size}margin: 0;",
             "}",
@@ -293,7 +294,8 @@ class TestWebsite:
             f"{' ' * indent_size}padding: 0;",
             "}"
         ])
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(
+            expected_core_css, indent_size=indent_size)
 
     @pytest.mark.parametrize("indent_level", [-2, -1])
     def test_compile_negative_indent_levels(self, indent_level: int):
@@ -316,7 +318,7 @@ class TestWebsite:
             "</body>",
             "</html>"
         ])
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".r0 {",
             "    margin: 0;",
             "}",
@@ -327,7 +329,7 @@ class TestWebsite:
         ])
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(expected_core_css)
 
     def test_compile_rule_namer(self):
         """Test the `compile` method with a custom rule namer function."""
@@ -358,7 +360,7 @@ class TestWebsite:
         ])
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".custom_0_margin {",
             "    margin: 0;",
             "}",
@@ -367,7 +369,7 @@ class TestWebsite:
             "    padding: 0;",
             "}"
         ])
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(expected_core_css)
 
     def test_compile_kwargs(self):
         website = TestWebsite.SimpleWebsite()
@@ -388,7 +390,7 @@ class TestWebsite:
             "    </body>",
             "</html>"
         ])
-        expected_css = "\n".join([
+        expected_core_css = "\n".join([
             ".r0 {",
             "    margin: 0;",
             "}",
@@ -399,4 +401,4 @@ class TestWebsite:
         ])
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
-        assert compiled.css_content == expected_css
+        assert compiled.css_content == wrap_core_css(expected_core_css)
