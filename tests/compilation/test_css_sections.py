@@ -18,7 +18,7 @@ from webwidgets.compilation.css.sections.rule_section import RuleSection
 
 
 class TestCSSPreamble:
-    def test_css_preamble_is_section(self):
+    def test_css_preamble_is_rule_section(self):
         preamble = CSSPreamble()
         assert isinstance(preamble, CSSSection)
         assert isinstance(preamble, RuleSection)
@@ -26,7 +26,7 @@ class TestCSSPreamble:
     def test_css_preamble_to_css(self):
         preamble = CSSPreamble()
         expected_css = '\n'.join([
-            "/* " + CSSSection.prettify_title(preamble.title, 40) + " */",
+            "/* " + CSSSection.prettify_title("Preamble", 40) + " */",
             "",
             ".*, *::before, *::after {",
             "    box-sizing: border-box;",
