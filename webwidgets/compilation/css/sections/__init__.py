@@ -10,4 +10,5 @@
 #
 # =======================================================================
 
+from .css_preamble import CSSPreamble
 from .rule_section import RuleSection
