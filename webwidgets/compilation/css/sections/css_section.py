@@ -93,11 +93,14 @@ class CSSSection(ABC, ReprMixin):
         :return: The CSS code for the section.
         :rtype: str
         """
+        # If no title, we just return the compiled content
         if self.title is None:
             return self.compile_content(*args, **kwargs)
 
+        # Otherwise, we turn the title into a comment and validate it
         comment = ' ' + CSSSection.prettify_title(self.title, 40) + ' '
         validate_css_comment(comment)
 
+        # Adding the comment before the compiled content
         return "/*" + comment + "*/\n\n" + \
             self.compile_content(*args, **kwargs)
