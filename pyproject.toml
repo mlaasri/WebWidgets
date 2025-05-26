@@ -21,6 +21,14 @@ classifiers = [
 [project.urls]
 "Source code" = "https://github.com/mlaasri/WebWidgets"
 
+[project.optional-dependencies]
+dev = [
+    "numpy",
+    "pillow",
+    "pytest",
+    "selenium"
+]
+
 [tool.hatch.version]
 path = "webwidgets/__init__.py"
 
