@@ -14,8 +14,56 @@ import pytest
 from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
-from webwidgets.compilation.css.css import compile_css, CSSRule, CompiledCSS, \
-    apply_css, default_rule_namer
+from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, \
+    CSSRule, default_rule_namer
+from .wrap_core_css import wrap_core_css
+
+
+class TestCSSRule:
+    def test_rule_to_css(self):
+        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        expected_css = '\n'.join([
+            ".rule-name {",
+            "    color: red;",
+            "    margin: 0;",
+            "}"
+        ])
+        assert rule.to_css() == expected_css
+
+    def test_empty_rule_to_css(self):
+        rule = CSSRule("my-name", {})
+        expected_css = '\n'.join([
+            ".my-name {",
+            "}"
+        ])
+        assert rule.to_css() == expected_css
+
+    @pytest.mark.parametrize("indent_size", [0, 1, 2, 3, 4])
+    def test_rule_indentation(self, indent_size):
+        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        expected_css = '\n'.join([
+            ".rule-name {",
+            f"{' ' * indent_size}color: red;",
+            f"{' ' * indent_size}margin: 0;",
+            "}"
+        ])
+        assert rule.to_css(indent_size=indent_size) == expected_css
+
+    @pytest.mark.parametrize("name", [
+        "3rule", "hi!", "Wrong name", "-invalid"
+    ])
+    def test_invalid_rule_name(self, name):
+        rule = CSSRule(name, {"property": "value"})
+        with pytest.raises(ValueError, match=name):
+            rule.to_css()
+
+    @pytest.mark.parametrize("property_name", [
+        "3prop", "hi!", "Wrong name", "-invalid"
+    ])
+    def test_invalid_property_name(self, property_name):
+        rule = CSSRule("rule", {property_name: "value"})
+        with pytest.raises(ValueError, match=property_name):
+            rule.to_css()
 
 
 class TestCompileCSS:
@@ -72,7 +120,7 @@ class TestCompileCSS:
         assert compiled_css.trees == [tree]
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
         assert TestCompileCSS._serialize_mapping(
             compiled_css.mapping) == expected_mapping
 
@@ -83,7 +131,7 @@ class TestCompileCSS:
         assert compiled_css2.trees == [tree]
         assert [id(t) for t in compiled_css2.trees] == [id(tree)]
         assert TestCompileCSS._serialize_rules(
-            compiled_css2.rules) == expected_rules
+            compiled_css2.core.rules) == expected_rules
         assert TestCompileCSS._serialize_mapping(
             compiled_css2.mapping) == expected_mapping
 
@@ -108,7 +156,7 @@ class TestCompileCSS:
             {"name": "r2", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {id(node1): ['r1', 'r2'], id(
@@ -143,7 +191,7 @@ class TestCompileCSS:
             {"name": "r3", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
@@ -187,7 +235,7 @@ class TestCompileCSS:
             {"name": "r3", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
@@ -218,7 +266,7 @@ class TestCompileCSS:
             {"name": "r4", "declarations": {"c": "5"}},
         ]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
 
     def test_duplicate_node(self):
         """Test that adding the same node twice does not impact compilation"""
@@ -244,7 +292,7 @@ class TestCompileCSS:
         assert compiled_css.trees == [tree]
         assert [id(t) for t in compiled_css.trees] == [id(tree)]
         assert TestCompileCSS._serialize_rules(
-            compiled_css.rules) == expected_rules
+            compiled_css.core.rules) == expected_rules
         assert TestCompileCSS._serialize_mapping(
             compiled_css.mapping) == expected_mapping
 
@@ -256,7 +304,7 @@ class TestCompileCSS:
         assert [id(t) for t in compiled_css2.trees] == [
             id(tree), id(tree.children[0])]
         assert TestCompileCSS._serialize_rules(
-            compiled_css2.rules) == expected_rules
+            compiled_css2.core.rules) == expected_rules
         assert TestCompileCSS._serialize_mapping(
             compiled_css2.mapping) == expected_mapping
 
@@ -279,7 +327,7 @@ class TestCompileCSS:
             ]
         )
         compiled_css = compile_css(tree, rule_namer=rule_namer)
-        assert [r.name for r in compiled_css.rules] == names
+        assert [r.name for r in compiled_css.core.rules] == names
 
 
 class TestCompiledCSS:
@@ -293,7 +341,7 @@ class TestCompiledCSS:
         compiled_css = CompiledCSS(trees=None,
                                    rules=rules,
                                    mapping=None)
-        expected_css = '\n'.join([
+        expected_core_css = '\n'.join([
             ".r0 {",
             "    margin: 0;",
             "    padding: 0;",
@@ -308,7 +356,7 @@ class TestCompiledCSS:
             "    font-size: 16px;",
             "}"
         ])
-        assert compiled_css.to_css() == expected_css
+        assert compiled_css.to_css() == wrap_core_css(expected_core_css)
 
     def test_export_real_compiled_css(self):
         tree = HTMLNode(
@@ -319,7 +367,7 @@ class TestCompiledCSS:
             ]
         )
         compiled_css = compile_css(tree)
-        expected_css = '\n'.join([
+        expected_core_css = '\n'.join([
             ".r0 {",
             "    color: blue;",
             "}",
@@ -336,16 +384,16 @@ class TestCompiledCSS:
             "    padding: 0;",
             "}"
         ])
-        assert compiled_css.to_css() == expected_css
+        assert compiled_css.to_css() == wrap_core_css(expected_core_css)
 
     def test_export_empty_style(self):
         node = HTMLNode()
         css = compile_css(node).to_css()
-        assert css == ""
+        assert css == wrap_core_css("")
         other_css = CompiledCSS(trees=None,
-                                rules={},
+                                rules=[],
                                 mapping=None).to_css()
-        assert other_css == ""
+        assert other_css == wrap_core_css("")
 
     def test_export_invalid_style(self):
         node = HTMLNode(style={"marg!in": "0", "padding": "0"})
@@ -356,7 +404,7 @@ class TestCompiledCSS:
     @pytest.mark.parametrize("indent_size", [0, 2, 4, 8])
     def test_css_indentation(self, indent_size):
         node = HTMLNode(style={"a": "0", "b": "1"})
-        expected_css = '\n'.join([
+        expected_core_css = '\n'.join([
             ".r0 {",
             f"{' ' * indent_size}a: 0;",
             "}",
@@ -366,7 +414,7 @@ class TestCompiledCSS:
             "}"
         ])
         css = compile_css(node).to_css(indent_size=indent_size)
-        assert css == expected_css
+        assert css == wrap_core_css(expected_core_css, indent_size=indent_size)
 
 
 class TestApplyCSS:
@@ -419,7 +467,7 @@ class TestApplyCSS:
 
         # Compiling and applying CSS to the tree
         compiled_css = compile_css(tree)
-        assert TestCompileCSS._serialize_rules(compiled_css.rules) == [
+        assert TestCompileCSS._serialize_rules(compiled_css.core.rules) == [
             {"name": "r0", "declarations": {"color": "blue"}},
             {"name": "r1", "declarations": {"color": "green"}},
             {"name": "r2", "declarations": {"margin": "0"}},
@@ -453,7 +501,7 @@ class TestApplyCSS:
         )
         html_before = tree.to_html()
         compiled_css = compile_css(tree)
-        assert compiled_css.rules == []
+        assert compiled_css.core.rules == []
         apply_css(compiled_css, tree)
         html_after = tree.to_html()
 

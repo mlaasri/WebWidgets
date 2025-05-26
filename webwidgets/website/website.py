@@ -12,7 +12,7 @@
 
 from .compiled_website import CompiledWebsite
 from typing import Any, Callable, List
-from webwidgets.compilation.css import compile_css, CSSRule, apply_css
+from webwidgets.compilation.css import apply_css, compile_css, CSSRule
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.widgets.containers.page import Page
 
