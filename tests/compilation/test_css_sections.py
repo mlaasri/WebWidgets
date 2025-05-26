@@ -21,16 +21,43 @@ class TestCSSSection:
         with pytest.raises(TypeError, match="compile_content"):
             CSSSection("title")
 
-    @pytest.mark.parametrize("title", ["Title", "Section", "a" * 71])
-    def test_compile_short_title(self, title: str):
-        compiled_title = CSSSection.compile_title(title)
-        symbols = '=' * ((72 - len(title)) // 2)
-        assert compiled_title == f"/* {symbols} {title} {symbols} */"
+    @pytest.mark.parametrize("title", ["Title", "Section", "a" * 10])
+    def test_pad_title_with_invalid_length(self, title: str):
+        for i in range(len(title)):
+            with pytest.raises(ValueError, match="max length"):
+                CSSSection.pad_title(title, i)
 
-    @pytest.mark.parametrize("title", ["Title" * 80, "Section" * 80, "a" * 72])
-    def test_compile_long_title(self, title: str):
-        compiled_title = CSSSection.compile_title(title)
-        assert compiled_title == f"/* {title} */"
+    def test_pad_empty_title(self):
+        for i in range(4):
+            assert CSSSection.pad_title("", i) == ""
+        for i in range(4, 8):
+            characters = "=" * (i // 2 - 1)
+            assert CSSSection.pad_title("", i) == f"{characters}  {characters}"
+
+    @pytest.mark.parametrize("title", ["Title", "Section", "a" * 16])
+    def test_pad_basic_titles(self, title: str):
+        padded_title = CSSSection.pad_title(title, 20)
+        characters = '=' * ((18 - len(title)) // 2)
+        assert padded_title == f"{characters} {title} {characters}"
+
+    def test_padded_title_is_under_max_length(self):
+        for max_length in range(8):
+            for i in range(max_length + 1):
+                padded_title = CSSSection.pad_title("a" * i, max_length)
+                assert len(padded_title) <= max_length
+
+    def test_padded_title_is_maximum_length(self):
+        # Maximum length is defined as at most a constant number of characters
+        # less than max_length
+        for max_length in range(8):
+            for i in range(max_length + 1):
+                padded_title = CSSSection.pad_title("a" * i, max_length)
+                assert len(padded_title) >= max_length - 4
+
+    def test_padded_title_is_symmetric(self):
+        for i in range(8):
+            padded_title = CSSSection.pad_title("a" * i, 8)
+            assert padded_title[::-1] == padded_title
 
 
 class TestRuleSection:
@@ -101,7 +128,7 @@ class TestRuleSection:
         section = RuleSection([
             CSSRule("rule", {"property": "value"}),
         ], "title")
-        symbols = "=" * 33
+        symbols = "=" * 16
         expected_css = '\n'.join([
             f"/* {symbols} title {symbols} */",
             "",
@@ -131,7 +158,7 @@ class TestRuleSection:
         section = RuleSection([
             CSSRule("rule", {"property": "value"}),
         ], title)
-        symbols = "=" * 33
+        symbols = "=" * 16
         expected_css = '\n'.join([
             f"/* {symbols} {title} {symbols} */",
             "",

@@ -13,6 +13,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 from webwidgets.utility.representation import ReprMixin
+from webwidgets.utility.validation import validate_css_comment
 
 
 class CSSSection(ABC, ReprMixin):
@@ -23,28 +24,37 @@ class CSSSection(ABC, ReprMixin):
     """
 
     @staticmethod
-    def compile_title(title: str) -> str:
-        """Compiles a section title into CSS code and returns it.
+    def pad_title(title: str, max_length: int) -> str:
+        """Returns a padded version of the given title with decorative
+        characters `=` around it.
 
-        The title is converted into a single-line CSS comment that can be used
-        to identify a CSS section within the rest of the code.
+        This function will add the maximum number of decorative characters to
+        the title while keeping symmetry and remaining under the given maximum
+        length.
 
-        :param title: The title to convert into a CSS comment.
+        :param title: The title to pad. It should be shorter than `max_length`;
+            otherwise, an error will be raised.
         :type title: str
-        :return: A string representing the CSS comment for the title.
+        :param max_length: The maximum length of the padded title. It should be
+            at least the length of `title`; otherwise, an error will be raised.
+        :type max_length: int
+        :return: The padded title.
         :rtype: str
+        :raises ValueError: If the title is shorter than `max_length`.
         """
-        # Defining the CSS comment's start and end tokens
-        start, end = "/* ", " */"
+        # Checking consistency between arguments
+        if len(title) > max_length:
+            raise ValueError(f"Cannot pad title '{title}' of length "
+                             f"{len(title)} with max length {max_length}")
 
         # If the title is too long, we don't add decorative characters
-        remaining = 80 - len(start) - (len(title) + 2) - len(end)
-        if remaining <= 0:
-            return start + title + end
+        remaining = max_length - (len(title) + 2)
+        if remaining <= 1:
+            return title
 
         # Otherwise, we add decorative characters around the title
-        symbols = "=" * (remaining // 2)
-        return start + symbols + ' ' + title + ' ' + symbols + end
+        characters = "=" * (remaining // 2)
+        return characters + ' ' + title + ' ' + characters
 
     def __init__(self, title: str = None):
         """Creates a new section with an optional title.
@@ -71,11 +81,14 @@ class CSSSection(ABC, ReprMixin):
     def to_css(self, *args: Any, **kwargs: Any) -> str:
         """Converts the CSSSection object into CSS code.
 
-        This function just wraps around :py:meth:`CSSSection.compile_title` and
-        :py:meth:`CSSSection.compile_content` to produce the final CSS code. If
-        the section has no title, :py:meth:`CSSSection.compile_title` is
-        skipped and this function will produce the same result as
-        :py:meth:`CSSSection.compile_content`.
+        If the section has a title, it will be padded with
+        :py:meth:`CSSSection.pad_title` and turned into a comment. That comment
+        will be validated with :py:func:`validate_css_comment` and inserted
+        before the result of :py:meth:`CSSSection.compile_content` in the CSS
+        code.
+
+        If the section has no title, this function will produce the same result
+        as :py:meth:`CSSSection.compile_content`.
 
         :param args: Arguments to pass to
             :py:meth:`CSSSection.compile_content`.
@@ -88,5 +101,10 @@ class CSSSection(ABC, ReprMixin):
         """
         if self.title is None:
             return self.compile_content(*args, **kwargs)
-        return CSSSection.compile_title(self.title) + "\n\n" + \
+
+        max_length = max(40, len(self.title))
+        comment = ' ' + CSSSection.pad_title(self.title, max_length) + ' '
+        validate_css_comment(comment)
+
+        return "/*" + comment + "*/\n\n" + \
             self.compile_content(*args, **kwargs)
