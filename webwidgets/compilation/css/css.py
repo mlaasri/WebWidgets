@@ -25,12 +25,13 @@ class CompiledCSS(ReprMixin):
 
     def __init__(self, trees: List[HTMLNode], rules: List[CSSRule],
                  mapping: Dict[int, List[CSSRule]]):
-        """Stores compiled CSS rules into a dedicated section entitled "Core".
+        """Stores compiled CSS rules into a dedicated `core` section entitled
+        "Core".
 
         :param trees: The HTML trees at the origin of the compilation. These
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
-        :param rules: The compiled CSS rules. These are stored inside a
+        :param rules: The compiled CSS rules. These are stored inside a `core`
             :py:class:`RuleSection` object with the title "Core".
         :type rules: List[CSSRule]
         :param mapping: A dictionary mapping each node ID to a list of rules
