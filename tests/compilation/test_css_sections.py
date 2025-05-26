@@ -184,3 +184,8 @@ class TestRuleSection:
             "}"
         ])
         assert section.to_css(indent_size=indent_size) == expected_css
+
+    @pytest.mark.parametrize("title", ["Title */", "No*/*", "/*/"])
+    def test_invalid_title(self, title: str):
+        with pytest.raises(ValueError, match="Invalid CSS comment"):
+            RuleSection([], title).to_css()
