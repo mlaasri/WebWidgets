@@ -24,36 +24,30 @@ class CSSSection(ABC, ReprMixin):
     """
 
     @staticmethod
-    def pad_title(title: str, max_length: int) -> str:
-        """Returns a padded version of the given title with decorative
+    def prettify_title(title: str, min_length: int) -> str:
+        """Returns a prettified version of the given title with decorative
         characters `=` around it.
 
-        This function will add the maximum number of decorative characters to
-        the title while keeping symmetry and remaining under the given maximum
-        length.
+        This function will add the minimum number of decorative characters to
+        the title while keeping symmetry and remaining over the given minimum
+        length. In particular, if the given title is already above the minimum
+        length, this function will return it as is.
 
-        :param title: The title to pad. It should be shorter than `max_length`;
-            otherwise, an error will be raised.
+        :param title: The title to prettify.
         :type title: str
-        :param max_length: The maximum length of the padded title. It should be
-            at least the length of `title`; otherwise, an error will be raised.
+        :param max_length: The minimum length of the prettified title.
         :type max_length: int
-        :return: The padded title.
+        :return: The prettified title.
         :rtype: str
-        :raises ValueError: If the title is shorter than `max_length`.
         """
-        # Checking consistency between arguments
-        if len(title) > max_length:
-            raise ValueError(f"Cannot pad title '{title}' of length "
-                             f"{len(title)} with max length {max_length}")
-
-        # If the title is too long, we don't add decorative characters
-        remaining = max_length - (len(title) + 2)
-        if remaining <= 1:
+        # If the title is already above min_length, we don't add decorative
+        # characters
+        if len(title) >= min_length:
             return title
 
         # Otherwise, we add decorative characters around the title
-        characters = "=" * (remaining // 2)
+        remaining = min_length - len(title)
+        characters = "=" * max(((remaining - 1) // 2), 1)
         return characters + ' ' + title + ' ' + characters
 
     def __init__(self, title: str = None):
@@ -81,11 +75,11 @@ class CSSSection(ABC, ReprMixin):
     def to_css(self, *args: Any, **kwargs: Any) -> str:
         """Converts the CSSSection object into CSS code.
 
-        If the section has a title, it will be padded with
-        :py:meth:`CSSSection.pad_title` and turned into a comment. That comment
-        will be validated with :py:func:`validate_css_comment` and inserted
-        before the result of :py:meth:`CSSSection.compile_content` in the CSS
-        code.
+        If the section has a title, it will be prettified with
+        :py:meth:`CSSSection.prettify_title` and turned into a comment. That
+        comment will be validated with :py:func:`validate_css_comment` and
+        inserted before the result of :py:meth:`CSSSection.compile_content` in
+        the CSS code.
 
         If the section has no title, this function will produce the same result
         as :py:meth:`CSSSection.compile_content`.
@@ -102,8 +96,7 @@ class CSSSection(ABC, ReprMixin):
         if self.title is None:
             return self.compile_content(*args, **kwargs)
 
-        max_length = max(40, len(self.title))
-        comment = ' ' + CSSSection.pad_title(self.title, max_length) + ' '
+        comment = ' ' + CSSSection.prettify_title(self.title, 40) + ' '
         validate_css_comment(comment)
 
         return "/*" + comment + "*/\n\n" + \
