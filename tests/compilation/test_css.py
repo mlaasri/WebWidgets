@@ -34,12 +34,12 @@ class TestCompileCSS:
                 for rule in rules]
 
     @staticmethod
-    def _serialize_mapping(mapping: Dict[int, List[CSSRule]]) -> Dict[int, List[str]]:
+    def _serialize_mapping(mapping: Dict[int, List[ClassRule]]) -> Dict[int, List[str]]:
         """Utility function to convert a :py:attr:`CompiledCSS.mapping` object
         into a dictionary that can be used in testing.
 
         :param mapping: :py:attr:`CompiledCSS.mapping` object.
-        :type mapping: Dict[int, List[CSSRule]]
+        :type mapping: Dict[int, List[ClassRule]]
         :return: Dictionary mapping each node ID to the selectors of the rules
             that achieve the same style.
         """
