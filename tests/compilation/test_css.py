@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
 from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, \
-    ClassRule, CSSRule, default_rule_namer
+    ClassRule, CSSRule, default_class_namer
 from .wrap_core_css import wrap_core_css
 
 
@@ -262,7 +262,7 @@ class TestCompileCSS:
         assert TestCompileCSS._serialize_mapping(
             compiled_css2.mapping) == expected_mapping
 
-    @pytest.mark.parametrize("rule_namer, selectors", [
+    @pytest.mark.parametrize("class_namer, selectors", [
         (lambda _, i: f"rule{i}", [".rule0", ".rule1", ".rule2"]),
         (lambda _, i: f"rule-{i + 1}", [".rule-1", ".rule-2", ".rule-3"]),
         (lambda r, i: f"{list(r[i].declarations.items())[0][0]}{i}", [
@@ -272,7 +272,7 @@ class TestCompileCSS:
         (lambda r, i: f"r{list(r[i].declarations.items())[0][1]}-{i}", [
             ".r10-1", ".r4-2", ".r5-0"]),
     ])
-    def test_custom_rule_names(self, rule_namer, selectors):
+    def test_custom_class_names(self, class_namer, selectors):
         tree = HTMLNode(
             style={"az": "5", "bz": "4"},
             children=[
@@ -280,7 +280,7 @@ class TestCompileCSS:
                 HTMLNode(style={"bz": "10"}),
             ]
         )
-        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        compiled_css = compile_css(tree, class_namer=class_namer)
         assert [r.selector for r in compiled_css.core.rules] == selectors
 
 
@@ -536,20 +536,20 @@ class TestApplyCSS:
 
 
 class TestDefaultRuleNamer:
-    def test_default_rule_namer(self):
+    def test_default_class_namer(self):
         rules = [ClassRule(None, {"color": "red"}),
                  ClassRule(None, {"margin": "0"})]
         for i, rule in enumerate(rules):
-            rule.name = default_rule_namer(rules=rules, index=i)
+            rule.name = default_class_namer(rules=rules, index=i)
         assert rules[0].name == "r0"
         assert rules[1].name == "r1"
 
-    def test_default_rule_namer_override(self):
+    def test_default_class_namer_override(self):
         rules = [ClassRule("first", {"color": "red"}),
                  ClassRule("second", {"margin": "0"})]
         assert rules[0].name == "first"
         assert rules[1].name == "second"
         for i, rule in enumerate(rules):
-            rule.name = default_rule_namer(rules=rules, index=i)
+            rule.name = default_class_namer(rules=rules, index=i)
         assert rules[0].name == "r0"
         assert rules[1].name == "r1"

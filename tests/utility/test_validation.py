@@ -104,7 +104,7 @@ class TestValidate:
             validate_css_identifier(f"my-class-{chars}")
 
     @pytest.mark.parametrize("code, chars, raise_on_start", [
-        # Injection in rule name
+        # Injection in class name
         ("rule{}custom-code", "{, }", False),
         ("rule {}custom-code", "  , {, }", False),
 
@@ -252,8 +252,8 @@ class TestValidate:
             with pytest.raises(ValueError):
                 tree.to_html()
 
-    @pytest.mark.parametrize("rule_namer, valid", [
-        (None, True),  # Default rule namer
+    @pytest.mark.parametrize("class_namer, valid", [
+        (None, True),  # Default class namer
         (lambda _, i: f"rule{i}", True),
         (lambda _, i: f"r-{i + 1}", True),
         (lambda _, i: f"--r-{i + 1}", True),
@@ -266,7 +266,7 @@ class TestValidate:
          False),  # Invalid characters (comma...)
         (lambda _, i: f"r{i}" + "{}custom-code", False),  # Code injection
     ])
-    def test_validation_within_to_css(self, rule_namer, valid):
+    def test_validation_within_to_css(self, class_namer, valid):
         """Tests that valid class attributes make it through CSS rendering"""
         tree = HTMLNode(
             style={"az": "5", "bz": "4"},
@@ -275,7 +275,7 @@ class TestValidate:
                 HTMLNode(style={"bz": "10"}),
             ]
         )
-        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        compiled_css = compile_css(tree, class_namer=class_namer)
         if valid:
             compiled_css.to_css()
         else:

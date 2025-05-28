@@ -78,14 +78,15 @@ class TestWebsite:
         # Defining a set of styles to pick from
         styles = [{"margin": "0"}, {"color": "blue"}, {"font-size": "16px"}]
 
-        # Compile expected rule names based on number of pages involved
-        rule_names = {
+        # Compile expected class names based on number of pages involved
+        class_names = {
             1: ["r0"],
             2: ["r1", "r0"],
             3: ["r2", "r0", "r1"]
         }
         for k in range(4, num_pages + 1):
-            rule_names[k] = [rule_names[3][i % len(styles)] for i in range(k)]
+            class_names[k] = [
+                class_names[3][i % len(styles)] for i in range(k)]
 
         # Create a new website object
         website = ww.Website()
@@ -108,7 +109,7 @@ class TestWebsite:
                 "    </head>",
                 "    <body>"
             ]) + "\n" + "\n".join([
-                f'        <htmlnode class="{rule_names[num_pages][i % len(rule_names)]}">',
+                f'        <htmlnode class="{class_names[num_pages][i % len(class_names)]}">',
                 f"            {text}",
                 "        </htmlnode>",
             ] * num_widgets) + "\n" + "\n".join([
@@ -119,7 +120,7 @@ class TestWebsite:
 
         # Check if the compiled CSS contains the expected code
         sorted_rules = sorted(list(set(
-            zip(rule_names[num_pages],
+            zip(class_names[num_pages],
                 [list(styles[i % len(styles)].items())[0]
                  for i in range(num_pages)]))), key=lambda x: x[0])
         expected_core_css = "\n\n".join([
@@ -331,15 +332,15 @@ class TestWebsite:
         assert compiled.html_content[0] == expected_html
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_rule_namer(self):
-        """Test the `compile` method with a custom rule namer function."""
-        # Define a custom rule namer function
-        def custom_rule_namer(rules, index):
+    def test_compile_class_namer(self):
+        """Test the `compile` method with a custom class namer function."""
+        # Define a custom class namer function
+        def custom_class_namer(rules, index):
             return f"custom_{index}_{list(rules[index].declarations.keys())[0]}"
 
-        # Compile a simple website with the custom rule namer
+        # Compile a simple website with the custom class namer
         website = TestWebsite.SimpleWebsite()
-        compiled = website.compile(rule_namer=custom_rule_namer)
+        compiled = website.compile(class_namer=custom_class_namer)
 
         # Check the results
         expected_html = "\n".join([

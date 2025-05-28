@@ -47,7 +47,7 @@ class TestClassRule:
     @pytest.mark.parametrize("name", [
         "3rule", "hi!", "Wrong name", "-invalid"
     ])
-    def test_invalid_class_rule_name(self, name):
+    def test_invalid_class_class_name(self, name):
         rule = ClassRule(name, {"property": "value"})
         with pytest.raises(ValueError, match=name):
             rule.to_css()

@@ -12,7 +12,7 @@
 
 from .compiled_website import CompiledWebsite
 from typing import Any, Callable, List
-from webwidgets.compilation.css import apply_css, compile_css, CSSRule
+from webwidgets.compilation.css import apply_css, compile_css, ClassRule
 from webwidgets.utility.representation import ReprMixin
 from webwidgets.widgets.containers.page import Page
 
@@ -44,7 +44,7 @@ class Website(ReprMixin):
                 force_one_line: bool = False,
                 indent_level: int = 0,
                 indent_size: int = 4,
-                rule_namer: Callable[[List[CSSRule], int], str] = None,
+                class_namer: Callable[[List[ClassRule], int], str] = None,
                 **kwargs: Any) -> CompiledWebsite:
         """Compiles the website into HTML and CSS code.
 
@@ -59,8 +59,8 @@ class Website(ReprMixin):
         :param indent_size: See :py:meth:`HTMLNode.to_html` and
             :py:meth:`CompiledCSS.to_css`.
         :type indent_size: int
-        :param rule_namer: See :py:func:`compile_css`.
-        :type rule_namer: Callable[[List[CSSRule], int], str]
+        :param class_namer: See :py:func:`compile_css`.
+        :type class_namer: Callable[[List[ClassRule], int], str]
         :param kwargs: See :py:meth:`HTMLNode.to_html`.
         :type kwargs: Any
         :return: A new :py:class:`CompiledWebsite` object containing the
@@ -72,7 +72,7 @@ class Website(ReprMixin):
                  for page in self.pages]
 
         # Compiling HTML and CSS code
-        compiled_css = compile_css(trees, rule_namer)
+        compiled_css = compile_css(trees, class_namer)
         for tree in trees:
             apply_css(compiled_css, tree)
         html_content = [tree.to_html(

@@ -53,7 +53,7 @@ class CSSRule(ReprMixin):
         # Defining indentation
         indentation = get_indentation(level=1, size=indent_size)
 
-        # Validating the rule name as a selector
+        # Validating the selector
         validate_css_selector(self.selector)
 
         # Writing down each property
