@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-from .css_rule import CSSRule
+from .css_rule import ClassRule, CSSRule
 import itertools
 from .sections.css_preamble import CSSPreamble
 from .sections.rule_section import RuleSection
@@ -135,9 +135,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.core.rules)
         [
-            CSSRule(name='r0', declarations={'color': 'blue'}),
-            CSSRule(name='r1', declarations={'margin': '0'}),
-            CSSRule(name='r2', declarations={'padding': '0'})
+            ClassRule(name='r0', declarations={'color': 'blue'}),
+            ClassRule(name='r1', declarations={'margin': '0'}),
+            ClassRule(name='r2', declarations={'padding': '0'})
         ]
 
     :param trees: A single tree or a list of trees to optimize over. All
@@ -178,7 +178,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = [CSSRule(None, dict([p]))  # Initializing with no name
+    rules = [ClassRule("", dict([p]))  # Initializing with empty name
              for p in sorted(properties)]
     for i, rule in enumerate(rules):  # Assigning name from callback
         rule.name = rule_namer(rules, i)
