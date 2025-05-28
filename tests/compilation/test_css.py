@@ -15,13 +15,13 @@ from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
 from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, \
-    CSSRule, default_rule_namer
+    ClassRule, CSSRule, default_rule_namer
 from .wrap_core_css import wrap_core_css
 
 
-class TestCSSRule:
+class TestClassRule:
     def test_rule_to_css(self):
-        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        rule = ClassRule("rule-name", {"color": "red", "margin": "0"})
         expected_css = '\n'.join([
             ".rule-name {",
             "    color: red;",
@@ -31,7 +31,7 @@ class TestCSSRule:
         assert rule.to_css() == expected_css
 
     def test_empty_rule_to_css(self):
-        rule = CSSRule("my-name", {})
+        rule = ClassRule("my-name", {})
         expected_css = '\n'.join([
             ".my-name {",
             "}"
@@ -40,7 +40,7 @@ class TestCSSRule:
 
     @pytest.mark.parametrize("indent_size", [0, 1, 2, 3, 4])
     def test_rule_indentation(self, indent_size):
-        rule = CSSRule("rule-name", {"color": "red", "margin": "0"})
+        rule = ClassRule("rule-name", {"color": "red", "margin": "0"})
         expected_css = '\n'.join([
             ".rule-name {",
             f"{' ' * indent_size}color: red;",
@@ -53,7 +53,7 @@ class TestCSSRule:
         "3rule", "hi!", "Wrong name", "-invalid"
     ])
     def test_invalid_rule_name(self, name):
-        rule = CSSRule(name, {"property": "value"})
+        rule = ClassRule(name, {"property": "value"})
         with pytest.raises(ValueError, match=name):
             rule.to_css()
 
@@ -61,7 +61,7 @@ class TestCSSRule:
         "3prop", "hi!", "Wrong name", "-invalid"
     ])
     def test_invalid_property_name(self, property_name):
-        rule = CSSRule("rule", {property_name: "value"})
+        rule = ClassRule("rule", {property_name: "value"})
         with pytest.raises(ValueError, match=property_name):
             rule.to_css()
 
@@ -77,7 +77,8 @@ class TestCompileCSS:
         :return: List of the member variables of each :py:class:`CSSRule`.
         :rtype: Dict[int, Any]
         """
-        return [vars(rule) for rule in rules]
+        return [{a: getattr(rule, a) for a in ("selector", "declarations")}
+                for rule in rules]
 
     @staticmethod
     def _serialize_mapping(mapping: Dict[int, List[CSSRule]]) -> Dict[int, List[str]]:
@@ -86,10 +87,10 @@ class TestCompileCSS:
 
         :param mapping: :py:attr:`CompiledCSS.mapping` object.
         :type mapping: Dict[int, List[CSSRule]]
-        :return: Dictionary mapping each node ID to the name of the rules that
-            achieve the same style.
+        :return: Dictionary mapping each node ID to the selectors of the rules
+            that achieve the same style.
         """
-        return {i: [r.name for r in rules] for i, rules in mapping.items()}
+        return {i: [r.selector for r in rules] for i, rules in mapping.items()}
 
     def test_argument_type(self):
         """Compares compilation when given a node object versus a list of
@@ -105,12 +106,12 @@ class TestCompileCSS:
 
         # Define expected compilation results
         expected_rules = [
-            {"name": "r0", "declarations": {"a": "5"}},
-            {"name": "r1", "declarations": {"b": "4"}}
+            {"selector": ".r0", "declarations": {"a": "5"}},
+            {"selector": ".r1", "declarations": {"b": "4"}}
         ]
         expected_mapping = {
-            id(tree): ['r0', 'r1'],
-            id(tree.children[0]): ['r0']
+            id(tree): ['.r0', '.r1'],
+            id(tree.children[0]): ['.r0']
         }
 
         # Compile tree as single node object
@@ -151,16 +152,16 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = [
-            {"name": "r0", "declarations": {"color": "blue"}},
-            {"name": "r1", "declarations": {"margin": "0"}},
-            {"name": "r2", "declarations": {"padding": "0"}}
+            {"selector": ".r0", "declarations": {"color": "blue"}},
+            {"selector": ".r1", "declarations": {"margin": "0"}},
+            {"selector": ".r2", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
             compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
-        expected_mapping = {id(node1): ['r1', 'r2'], id(
-            node2): ['r0', 'r1'], id(node3): ['r1', 'r2']}
+        expected_mapping = {id(node1): ['.r1', '.r2'], id(
+            node2): ['.r0', '.r1'], id(node3): ['.r1', '.r2']}
         assert TestCompileCSS._serialize_mapping(
             compiled_css.mapping) == expected_mapping
 
@@ -185,19 +186,19 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = [
-            {"name": "r0", "declarations": {"color": "blue"}},
-            {"name": "r1", "declarations": {"margin": "0"}},
-            {"name": "r2", "declarations": {"margin": "5"}},
-            {"name": "r3", "declarations": {"padding": "0"}}
+            {"selector": ".r0", "declarations": {"color": "blue"}},
+            {"selector": ".r1", "declarations": {"margin": "0"}},
+            {"selector": ".r2", "declarations": {"margin": "5"}},
+            {"selector": ".r3", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
             compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
-            id(tree): ['r1', 'r3'],
-            id(tree.children[0]): ['r0', 'r2'],
-            id(tree.children[1]): ['r0', 'r3'],
+            id(tree): ['.r1', '.r3'],
+            id(tree.children[0]): ['.r0', '.r2'],
+            id(tree.children[1]): ['.r0', '.r3'],
             id(tree.children[0].children[0]): [],
             id(tree.children[1].children[0]): []
         }
@@ -229,20 +230,20 @@ class TestCompileCSS:
 
         # Check that the rules are correctly generated
         expected_rules = [
-            {"name": "r0", "declarations": {"color": "red"}},
-            {"name": "r1", "declarations": {"margin": "10"}},
-            {"name": "r2", "declarations": {"margin": "5"}},
-            {"name": "r3", "declarations": {"padding": "0"}}
+            {"selector": ".r0", "declarations": {"color": "red"}},
+            {"selector": ".r1", "declarations": {"margin": "10"}},
+            {"selector": ".r2", "declarations": {"margin": "5"}},
+            {"selector": ".r3", "declarations": {"padding": "0"}}
         ]
         assert TestCompileCSS._serialize_rules(
             compiled_css.core.rules) == expected_rules
 
         # Check that the mapping is correctly generated
         expected_mapping = {
-            id(tree1): ['r1', 'r3'],
-            id(tree1.children[0]): ['r0'],
-            id(tree2): ['r2', 'r3'],
-            id(tree2.children[0]): ['r1']
+            id(tree1): ['.r1', '.r3'],
+            id(tree1.children[0]): ['.r0'],
+            id(tree2): ['.r2', '.r3'],
+            id(tree2.children[0]): ['.r1']
         }
         assert TestCompileCSS._serialize_mapping(
             compiled_css.mapping) == expected_mapping
@@ -259,11 +260,11 @@ class TestCompileCSS:
         )
         compiled_css = compile_css(tree)
         expected_rules = [
-            {"name": "r0", "declarations": {"a": "10"}},
-            {"name": "r1", "declarations": {"a": "5"}},
-            {"name": "r2", "declarations": {"b": "10"}},
-            {"name": "r3", "declarations": {"b": "4"}},
-            {"name": "r4", "declarations": {"c": "5"}},
+            {"selector": ".r0", "declarations": {"a": "10"}},
+            {"selector": ".r1", "declarations": {"a": "5"}},
+            {"selector": ".r2", "declarations": {"b": "10"}},
+            {"selector": ".r3", "declarations": {"b": "4"}},
+            {"selector": ".r4", "declarations": {"c": "5"}},
         ]
         assert TestCompileCSS._serialize_rules(
             compiled_css.core.rules) == expected_rules
@@ -279,14 +280,14 @@ class TestCompileCSS:
             ]
         )
         expected_rules = [
-            {"name": "r0", "declarations": {"a": "5"}},
-            {"name": "r1", "declarations": {"b": "10"}},
-            {"name": "r2", "declarations": {"b": "4"}}
+            {"selector": ".r0", "declarations": {"a": "5"}},
+            {"selector": ".r1", "declarations": {"b": "10"}},
+            {"selector": ".r2", "declarations": {"b": "4"}}
         ]
         expected_mapping = {
-            id(tree): ['r0', 'r2'],
-            id(tree.children[0]): ['r0'],
-            id(tree.children[1]): ['r1']
+            id(tree): ['.r0', '.r2'],
+            id(tree.children[0]): ['.r0'],
+            id(tree.children[1]): ['.r1']
         }
         compiled_css = compile_css([tree])
         assert compiled_css.trees == [tree]
@@ -308,17 +309,17 @@ class TestCompileCSS:
         assert TestCompileCSS._serialize_mapping(
             compiled_css2.mapping) == expected_mapping
 
-    @pytest.mark.parametrize("rule_namer, names", [
-        (lambda _, i: f"rule{i}", ["rule0", "rule1", "rule2"]),
-        (lambda _, i: f"rule-{i + 1}", ["rule-1", "rule-2", "rule-3"]),
+    @pytest.mark.parametrize("rule_namer, selectors", [
+        (lambda _, i: f"rule{i}", [".rule0", ".rule1", ".rule2"]),
+        (lambda _, i: f"rule-{i + 1}", [".rule-1", ".rule-2", ".rule-3"]),
         (lambda r, i: f"{list(r[i].declarations.items())[0][0]}{i}", [
-            "az0", "bz1", "bz2"]),
+            ".az0", ".bz1", ".bz2"]),
         (lambda r, i: f"{list(r[i].declarations.items())[0][0][0]}{i}", [
-            "a0", "b1", "b2"]),
+            ".a0", ".b1", ".b2"]),
         (lambda r, i: f"r{list(r[i].declarations.items())[0][1]}-{i}", [
-            "r10-1", "r4-2", "r5-0"]),
+            ".r10-1", ".r4-2", ".r5-0"]),
     ])
-    def test_custom_rule_names(self, rule_namer, names):
+    def test_custom_rule_names(self, rule_namer, selectors):
         tree = HTMLNode(
             style={"az": "5", "bz": "4"},
             children=[
@@ -327,15 +328,16 @@ class TestCompileCSS:
             ]
         )
         compiled_css = compile_css(tree, rule_namer=rule_namer)
-        assert [r.name for r in compiled_css.core.rules] == names
+        assert [r.selector for r in compiled_css.core.rules] == selectors
 
 
 class TestCompiledCSS:
     def test_export_custom_compiled_css(self):
         rules = [
-            CSSRule(name="r0", declarations={"margin": "0", "padding": "0"}),
-            CSSRule(name="r1", declarations={"color": "blue"}),
-            CSSRule(name="r2", declarations={
+            CSSRule(selector=".r0", declarations={
+                    "margin": "0", "padding": "0"}),
+            CSSRule(selector=".r1", declarations={"color": "blue"}),
+            CSSRule(selector=".r2", declarations={
                     "background-color": "white", "font-size": "16px"})
         ]
         compiled_css = CompiledCSS(trees=None,
@@ -468,10 +470,10 @@ class TestApplyCSS:
         # Compiling and applying CSS to the tree
         compiled_css = compile_css(tree)
         assert TestCompileCSS._serialize_rules(compiled_css.core.rules) == [
-            {"name": "r0", "declarations": {"color": "blue"}},
-            {"name": "r1", "declarations": {"color": "green"}},
-            {"name": "r2", "declarations": {"margin": "0"}},
-            {"name": "r3", "declarations": {"padding": "0"}}
+            {"selector": ".r0", "declarations": {"color": "blue"}},
+            {"selector": ".r1", "declarations": {"color": "green"}},
+            {"selector": ".r2", "declarations": {"margin": "0"}},
+            {"selector": ".r3", "declarations": {"padding": "0"}}
         ]
         apply_css(compiled_css, tree)
 
@@ -582,16 +584,16 @@ class TestApplyCSS:
 
 class TestDefaultRuleNamer:
     def test_default_rule_namer(self):
-        rules = [CSSRule(None, {"color": "red"}),
-                 CSSRule(None, {"margin": "0"})]
+        rules = [ClassRule(None, {"color": "red"}),
+                 ClassRule(None, {"margin": "0"})]
         for i, rule in enumerate(rules):
             rule.name = default_rule_namer(rules=rules, index=i)
         assert rules[0].name == "r0"
         assert rules[1].name == "r1"
 
     def test_default_rule_namer_override(self):
-        rules = [CSSRule("first", {"color": "red"}),
-                 CSSRule("second", {"margin": "0"})]
+        rules = [ClassRule("first", {"color": "red"}),
+                 ClassRule("second", {"margin": "0"})]
         assert rules[0].name == "first"
         assert rules[1].name == "second"
         for i, rule in enumerate(rules):

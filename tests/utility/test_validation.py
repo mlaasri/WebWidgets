@@ -123,7 +123,7 @@ class TestValidate:
     def test_valid_css_identifiers_as_selectors(self, valid_css_identifiers):
         """Test that valid CSS identifiers are also valid selectors"""
         for identifier in valid_css_identifiers:
-            validate_css_selector(identifier)
+            validate_css_selector('.' + identifier)
 
     def test_special_css_selectors(self):
         """Testing all possible combinations of special CSS selectors with no
@@ -136,29 +136,29 @@ class TestValidate:
 
     def test_invalid_empty_selector(self):
         """Tests that an empty selector raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("")
 
     def test_non_special_selector_within_special_selectors(self):
         """Tests that a non-special selector within a combination of special
         selectors raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*, *::before, hello, *::after")
 
     def test_invalid_css_selector_extra_space(self):
         """Tests that an invalid combination of special selectors (with an
         extra space) raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*,  *::before")
 
     def test_invalid_non_special_css_selectors(self):
         """Tests that invalid CSS selectors are rejected as invalid identifiers"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*::has()")
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("::before")
         with pytest.raises(ValueError, match=r"Invalid character\(s\).* !"):
-            validate_css_selector("h!")
+            validate_css_selector(".h!")
 
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
