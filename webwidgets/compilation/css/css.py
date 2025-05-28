@@ -145,7 +145,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     :type trees: Union[HTMLNode, List[HTMLNode]]
     :param class_namer: A callable that takes two arguments, which are the list
         of all compiled rules and an index within that list, and returns a
-        unique name for the CSS class of the rule at the given index.
+        unique CSS class name to associate with the rule at the given index.
 
         This argument allows to customize the class naming process and use names
         other than the default `"r0"`, `"r1"`, etc. For example, it can be used
@@ -162,7 +162,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     :return: The :py:class:`CompiledCSS` object containing the optimized rules.
         Every HTML node present in one or more of the input trees is included
         in the :py:attr:`CompiledCSS.mapping` attribute, even if the node does
-        not have a style. Rules are alphabetically ordered by name in the
+        not have a style. Rules are alphabetically ordered by class name in the
         mapping.
     :rtype: CompiledCSS
     """
