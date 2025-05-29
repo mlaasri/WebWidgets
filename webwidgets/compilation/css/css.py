@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-from .css_rule import ClassRule, CSSRule
+from .css_rule import ClassRule
 import itertools
 from .sections.css_preamble import CSSPreamble
 from .sections.rule_section import RuleSection
@@ -23,17 +23,16 @@ class CompiledCSS(ReprMixin):
     """A utility class to hold compiled CSS rules.
     """
 
-    def __init__(self, trees: List[HTMLNode], rules: List[ClassRule],
+    def __init__(self, trees: List[HTMLNode], core: RuleSection,
                  mapping: Dict[int, List[ClassRule]]):
-        """Stores compiled CSS rules into a dedicated `core` section entitled
-        "Core".
+        """Stores compiled CSS rules and their mapping to the nodes in the
+        given trees.
 
         :param trees: The HTML trees at the origin of the compilation. These
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
-        :param rules: The compiled CSS rules. These are stored inside a `core`
-            :py:class:`RuleSection` object with the title "Core".
-        :type rules: List[ClassRule]
+        :param rules: The CSS section containing the compiled CSS rules.
+        :type rules: RuleSection
         :param mapping: A dictionary mapping each node ID to a list of rules
             that achieve the same style.
         :type mapping: Dict[int, List[ClassRule]]
@@ -41,7 +40,7 @@ class CompiledCSS(ReprMixin):
         super().__init__()
         self.trees = trees
         self.preamble = CSSPreamble()
-        self.core = RuleSection(rules=rules, title="Core")
+        self.core = core
         self.mapping = mapping
 
     def to_css(self, indent_size: int = 4) -> str:
@@ -186,7 +185,10 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     mapping = {node_id: [r for r in rules if
                          set(r.declarations.items()).issubset(style.items())]
                for node_id, style in styles.items()}
-    return CompiledCSS(trees, rules, mapping)
+
+    # Packaging the results into a CompiledCSS object
+    core = RuleSection(rules=rules, title="Core")
+    return CompiledCSS(trees, core, mapping)
 
 
 def default_class_namer(rules: List[ClassRule], index: int) -> str:

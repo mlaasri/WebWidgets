@@ -11,7 +11,7 @@
 # =======================================================================
 
 import pytest
-from webwidgets.compilation.css.css import ClassRule, CSSRule
+from webwidgets.compilation.css.css_rule import ClassRule, CSSRule
 
 
 class TestClassRule:

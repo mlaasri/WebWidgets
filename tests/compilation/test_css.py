@@ -15,7 +15,9 @@ from typing import Any, Dict, List
 from webwidgets.compilation.html.html_node import HTMLNode
 from webwidgets.compilation.html.html_tags import TextNode
 from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, \
-    ClassRule, CSSRule, default_class_namer
+    default_class_namer
+from webwidgets.compilation.css.css_rule import ClassRule, CSSRule
+from webwidgets.compilation.css.sections import RuleSection
 from .wrap_core_css import wrap_core_css
 
 
@@ -286,15 +288,18 @@ class TestCompileCSS:
 
 class TestCompiledCSS:
     def test_export_custom_compiled_css(self):
-        rules = [
-            CSSRule(selector=".r0", declarations={
+        core = RuleSection(
+            rules=[
+                CSSRule(selector=".r0", declarations={
                     "margin": "0", "padding": "0"}),
-            CSSRule(selector=".r1", declarations={"color": "blue"}),
-            CSSRule(selector=".r2", declarations={
+                CSSRule(selector=".r1", declarations={"color": "blue"}),
+                CSSRule(selector=".r2", declarations={
                     "background-color": "white", "font-size": "16px"})
-        ]
+            ],
+            title="Core"
+        )
         compiled_css = CompiledCSS(trees=None,
-                                   rules=rules,
+                                   core=core,
                                    mapping=None)
         expected_core_css = '\n'.join([
             ".r0 {",
@@ -346,7 +351,7 @@ class TestCompiledCSS:
         css = compile_css(node).to_css()
         assert css == wrap_core_css("")
         other_css = CompiledCSS(trees=None,
-                                rules=[],
+                                core=RuleSection(title="Core"),
                                 mapping=None).to_css()
         assert other_css == wrap_core_css("")
 
