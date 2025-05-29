@@ -28,6 +28,10 @@ class TestHTMLTags:
         body = Body()
         assert body.to_html() == "<body></body>"
 
+    def test_div(self):
+        div = Div()
+        assert div.to_html() == "<div></div>"
+
     def test_doctype(self):
         doctype = Doctype()
         assert doctype.to_html() == "<!DOCTYPE html>"
