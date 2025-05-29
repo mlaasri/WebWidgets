@@ -134,9 +134,9 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.core.rules)
         [
-            ClassRule(selector='.r0', declarations={'color': 'blue'}, ...),
-            ClassRule(selector='.r1', declarations={'margin': '0'}, ...),
-            ClassRule(selector='.r2', declarations={'padding': '0'}, ...)
+            ClassRule(selector='.c0', declarations={'color': 'blue'}, ...),
+            ClassRule(selector='.c1', declarations={'margin': '0'}, ...),
+            ClassRule(selector='.c2', declarations={'padding': '0'}, ...)
         ]
 
     :param trees: A single tree or a list of trees to optimize over. All
@@ -144,10 +144,11 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     :type trees: Union[HTMLNode, List[HTMLNode]]
     :param class_namer: A callable that takes two arguments, which are the list
         of all compiled rules and an index within that list, and returns a
-        unique HTML class name to associate with the rule at the given index.
+        unique name for the HTML class to associate with the rule at the given
+        index.
 
         This argument allows to customize the class naming process and use names
-        other than the default `"r0"`, `"r1"`, etc. For example, it can be used
+        other than the default `"c0"`, `"c1"`, etc. For example, it can be used
         to achieve something similar to Tailwind CSS and name HTML classes
         according to what they achieve, e.g. by prefixing their name with `"m"`
         for margin rules or `"p"` for padding rules. Note that all class
@@ -155,7 +156,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         function before being written into CSS code.
 
         Defaults to the :py:func:`default_class_namer` function which
-        implements a default naming strategy where each class is named `"r{i}"`
+        implements a default naming strategy where each class is named `"c{i}"`
         where `i` is the index of the rule in the list.
     :type class_namer: Callable[[List[ClassRule], int], str]
     :return: The :py:class:`CompiledCSS` object containing the optimized rules.
@@ -192,7 +193,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
 
 
 def default_class_namer(rules: List[ClassRule], index: int) -> str:
-    """Default class naming function. Returns a string like "r{i}" where {i} is
+    """Default class naming function. Returns a string like "c{i}" where {i} is
     the index of the rule.
 
     :param rules: List of all compiled ClassRule objects. This argument is not
@@ -200,6 +201,6 @@ def default_class_namer(rules: List[ClassRule], index: int) -> str:
     :type rules: List[ClassRule]
     :param index: Index of the rule whose class is being named.
     :type index: int
-    :return: A string like `"r{i}"` where `i` is the index of the rule.
+    :return: A string like `"c{i}"` where `i` is the index of the rule.
     """
-    return f'r{index}'
+    return f'c{index}'

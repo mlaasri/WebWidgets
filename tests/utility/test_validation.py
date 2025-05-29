@@ -188,7 +188,7 @@ class TestValidate:
         with pytest.raises(ValueError, match=r"Invalid character\(s\).*!, @, #"):
             validate_html_class("my-class123 my-other-class-!@#")
         with pytest.raises(ValueError, match="must start with"):
-            validate_html_class("my-class123 -er4 my-other-class")
+            validate_html_class("my-class123 -ec4 my-other-class")
 
     @pytest.mark.parametrize("code, chars, raise_on_start", [
         # Exception are raised on first offending class before space
@@ -220,12 +220,12 @@ class TestValidate:
         ("--c ", False),  # Ends with space
         ("--c d! r", False),  # Contains invalid character
     ])
-    @pytest.mark.parametrize("add_r2_in", [False, True])
-    def test_validation_within_apply_css(self, class_in, valid, add_r2_in):
+    @pytest.mark.parametrize("add_c2_in", [False, True])
+    def test_validation_within_apply_css(self, class_in, valid, add_c2_in):
         """Tests that valid class attributes make it through HTML rendering"""
         # Compiling and applying CSS to a tree
         c_in = None if class_in is None else ' '.join(
-            ([class_in] if class_in else []) + (["r2"] if add_r2_in else []))
+            ([class_in] if class_in else []) + (["c2"] if add_c2_in else []))
         tree = HTMLNode(
             attributes=None if c_in is None else {"class": c_in},
             style={"margin": "0", "padding": "0"},
@@ -236,11 +236,11 @@ class TestValidate:
         apply_css(compile_css(tree), tree)
 
         # Checking the final HTML code
-        class_out = "r1 r2" if not c_in else (c_in +
-                                              " r1" + ("" if add_r2_in else " r2"))
+        class_out = "c1 c2" if not c_in else (c_in +
+                                              " c1" + ("" if add_c2_in else " c2"))
         expected_html = '\n'.join([
             f'<htmlnode class="{class_out}">',
-            f'    <htmlnode class="r0 r1"></htmlnode>',
+            f'    <htmlnode class="c0 c1"></htmlnode>',
             '</htmlnode>'
         ])
         if valid:
