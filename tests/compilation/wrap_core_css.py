@@ -11,7 +11,7 @@
 # =======================================================================
 
 from typing import Any
-from webwidgets.compilation.css.sections.css_preamble import CSSPreamble
+from webwidgets.compilation.css.sections.preamble import Preamble
 from webwidgets.compilation.css.sections.css_section import CSSSection
 
 
@@ -21,17 +21,17 @@ def wrap_core_css(core_css: str, *args: Any, **kwargs: Any) -> str:
 
     :param core_css: The CSS code for the core section.
     :type core_css: str
-    :param args: Additional arguments to pass to :py:meth:`CSSPreamble.to_css`.
+    :param args: Additional arguments to pass to :py:meth:`Preamble.to_css`.
     :type args: Any
     :param kwargs: Additional keyword arguments to pass to
-        :py:meth:`CSSPreamble.to_css`.
+        :py:meth:`Preamble.to_css`.
     :type kwargs: Any
     :return: The final CSS code with the appropriate preamble and section
         titles.
     :rtype: str
     """
     return "\n\n".join((
-        CSSPreamble().to_css(*args, **kwargs),
+        Preamble().to_css(*args, **kwargs),
         "/* " + CSSSection.prettify_title("Core", 40) + " */",
         core_css
     ))

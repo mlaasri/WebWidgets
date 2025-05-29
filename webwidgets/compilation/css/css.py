@@ -12,7 +12,7 @@
 
 from .css_rule import ClassRule
 import itertools
-from .sections.css_preamble import CSSPreamble
+from .sections.preamble import Preamble
 from .sections.rule_section import RuleSection
 from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
@@ -39,7 +39,7 @@ class CompiledCSS(ReprMixin):
         """
         super().__init__()
         self.trees = trees
-        self.preamble = CSSPreamble()
+        self.preamble = Preamble()
         self.core = core
         self.mapping = mapping
 

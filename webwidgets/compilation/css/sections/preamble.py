@@ -14,12 +14,12 @@ from .rule_section import RuleSection
 from webwidgets.compilation.css.css_rule import CSSRule
 
 
-class CSSPreamble(RuleSection):
+class Preamble(RuleSection):
     """A set of CSS rules that apply globally to all HTML elements.
 
-    The preamble serves as a global default for multiple properties. It is used
-    to define the document's box model and set all margin and padding values to
-    0.
+    The CSS preamble serves as a global default for multiple properties. It is
+    used to define the document's box model and set all margin and padding
+    values to 0.
     """
 
     def __init__(self):

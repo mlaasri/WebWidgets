@@ -12,19 +12,19 @@
 
 import pytest
 from webwidgets.compilation.css.css_rule import CSSRule
-from webwidgets.compilation.css.sections.css_preamble import CSSPreamble
+from webwidgets.compilation.css.sections.preamble import Preamble
 from webwidgets.compilation.css.sections.css_section import CSSSection
 from webwidgets.compilation.css.sections.rule_section import RuleSection
 
 
-class TestCSSPreamble:
-    def test_css_preamble_is_rule_section(self):
-        preamble = CSSPreamble()
+class TestPreamble:
+    def test_preamble_is_rule_section(self):
+        preamble = Preamble()
         assert isinstance(preamble, CSSSection)
         assert isinstance(preamble, RuleSection)
 
-    def test_css_preamble_to_css(self):
-        preamble = CSSPreamble()
+    def test_preamble_to_css(self):
+        preamble = Preamble()
         expected_css = '\n'.join([
             "/* " + CSSSection.prettify_title("Preamble", 40) + " */",
             "",
