@@ -145,11 +145,11 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     :type trees: Union[HTMLNode, List[HTMLNode]]
     :param class_namer: A callable that takes two arguments, which are the list
         of all compiled rules and an index within that list, and returns a
-        unique CSS class name to associate with the rule at the given index.
+        unique HTML class name to associate with the rule at the given index.
 
         This argument allows to customize the class naming process and use names
         other than the default `"r0"`, `"r1"`, etc. For example, it can be used
-        to achieve something similar to Tailwind CSS and name CSS classes
+        to achieve something similar to Tailwind CSS and name HTML classes
         according to what they achieve, e.g. by prefixing their name with `"m"`
         for margin rules or `"p"` for padding rules. Note that all class
         selectors will be validated with the :py:func:`validate_css_selector`
