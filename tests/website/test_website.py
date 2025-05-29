@@ -78,14 +78,15 @@ class TestWebsite:
         # Defining a set of styles to pick from
         styles = [{"margin": "0"}, {"color": "blue"}, {"font-size": "16px"}]
 
-        # Compile expected rule names based on number of pages involved
-        rule_names = {
-            1: ["r0"],
-            2: ["r1", "r0"],
-            3: ["r2", "r0", "r1"]
+        # Compile expected class names based on number of pages involved
+        class_names = {
+            1: ["c0"],
+            2: ["c1", "c0"],
+            3: ["c2", "c0", "c1"]
         }
         for k in range(4, num_pages + 1):
-            rule_names[k] = [rule_names[3][i % len(styles)] for i in range(k)]
+            class_names[k] = [
+                class_names[3][i % len(styles)] for i in range(k)]
 
         # Create a new website object
         website = ww.Website()
@@ -108,7 +109,7 @@ class TestWebsite:
                 "    </head>",
                 "    <body>"
             ]) + "\n" + "\n".join([
-                f'        <htmlnode class="{rule_names[num_pages][i % len(rule_names)]}">',
+                f'        <htmlnode class="{class_names[num_pages][i % len(class_names)]}">',
                 f"            {text}",
                 "        </htmlnode>",
             ] * num_widgets) + "\n" + "\n".join([
@@ -119,7 +120,7 @@ class TestWebsite:
 
         # Check if the compiled CSS contains the expected code
         sorted_rules = sorted(list(set(
-            zip(rule_names[num_pages],
+            zip(class_names[num_pages],
                 [list(styles[i % len(styles)].items())[0]
                  for i in range(num_pages)]))), key=lambda x: x[0])
         expected_core_css = "\n\n".join([
@@ -178,21 +179,21 @@ class TestWebsite:
             f'        <link href="{css_file_name}" rel="stylesheet">',
             "    </head>",
             "    <body>",
-            '        <htmlnode class="r1">',
+            '        <htmlnode class="c1">',
             "            Text!",
             "        </htmlnode>",
-            '        <htmlnode class="r0">',
+            '        <htmlnode class="c0">',
             "            Another Text!",
             "        </htmlnode>",
             "    </body>",
             "</html>"
         ])
         expected_core_css = "\n".join([
-            ".r0 {",
+            ".c0 {",
             "    margin: 0;",
             "}",
             "",
-            ".r1 {",
+            ".c1 {",
             "    padding: 0;",
             "}"
         ])
@@ -203,11 +204,11 @@ class TestWebsite:
     def test_compile_force_one_line(self):
         website = TestWebsite.SimpleWebsite()
         expected_core_css = "\n".join([
-            ".r0 {",
+            ".c0 {",
             "    margin: 0;",
             "}",
             "",
-            ".r1 {",
+            ".c1 {",
             "    padding: 0;",
             "}"
         ])
@@ -221,10 +222,10 @@ class TestWebsite:
             '<link href="styles.css" rel="stylesheet">',
             "</head>",
             "<body>",
-            '<htmlnode class="r1">',
+            '<htmlnode class="c1">',
             "Text!",
             "</htmlnode>",
-            '<htmlnode class="r0">',
+            '<htmlnode class="c0">',
             "Another Text!",
             "</htmlnode>",
             "</body>",
@@ -243,10 +244,10 @@ class TestWebsite:
             '        <link href="styles.css" rel="stylesheet">',
             "    </head>",
             "    <body>",
-            '        <htmlnode class="r1">',
+            '        <htmlnode class="c1">',
             "            Text!",
             "        </htmlnode>",
-            '        <htmlnode class="r0">',
+            '        <htmlnode class="c0">',
             "            Another Text!",
             "        </htmlnode>",
             "    </body>",
@@ -274,10 +275,10 @@ class TestWebsite:
             f'{" " * indent_size * (indent_level + 2)}<link href="styles.css" rel="stylesheet">',
             f"{' ' * indent_size * (indent_level + 1)}</head>",
             f"{' ' * indent_size * (indent_level + 1)}<body>",
-            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="r1">',
+            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="c1">',
             f"{' ' * indent_size * (indent_level + 3)}Text!",
             f"{' ' * indent_size * (indent_level + 2)}</htmlnode>",
-            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="r0">',
+            f'{" " * indent_size * (indent_level + 2)}<htmlnode class="c0">',
             f"{' ' * indent_size * (indent_level + 3)}Another Text!",
             f"{' ' * indent_size * (indent_level + 2)}</htmlnode>",
             f"{' ' * indent_size * (indent_level + 1)}</body>",
@@ -286,11 +287,11 @@ class TestWebsite:
         assert len(compiled.html_content) == 1
         assert compiled.html_content[0] == expected_html
         expected_core_css = "\n".join([
-            ".r0 {",
+            ".c0 {",
             f"{' ' * indent_size}margin: 0;",
             "}",
             "",
-            ".r1 {",
+            ".c1 {",
             f"{' ' * indent_size}padding: 0;",
             "}"
         ])
@@ -309,21 +310,21 @@ class TestWebsite:
             f'{indent}<link href="styles.css" rel="stylesheet">',
             "</head>",
             "<body>",
-            f'{indent}<htmlnode class="r1">',
+            f'{indent}<htmlnode class="c1">',
             f"{indent}    Text!",
             f"{indent}</htmlnode>",
-            f'{indent}<htmlnode class="r0">',
+            f'{indent}<htmlnode class="c0">',
             f"{indent}    Another Text!",
             f"{indent}</htmlnode>",
             "</body>",
             "</html>"
         ])
         expected_core_css = "\n".join([
-            ".r0 {",
+            ".c0 {",
             "    margin: 0;",
             "}",
             "",
-            ".r1 {",
+            ".c1 {",
             "    padding: 0;",
             "}"
         ])
@@ -331,15 +332,15 @@ class TestWebsite:
         assert compiled.html_content[0] == expected_html
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_rule_namer(self):
-        """Test the `compile` method with a custom rule namer function."""
-        # Define a custom rule namer function
-        def custom_rule_namer(rules, index):
+    def test_compile_class_namer(self):
+        """Test the `compile` method with a custom class namer function."""
+        # Define a custom class namer function
+        def custom_class_namer(rules, index):
             return f"custom_{index}_{list(rules[index].declarations.keys())[0]}"
 
-        # Compile a simple website with the custom rule namer
+        # Compile a simple website with the custom class namer
         website = TestWebsite.SimpleWebsite()
-        compiled = website.compile(rule_namer=custom_rule_namer)
+        compiled = website.compile(class_namer=custom_class_namer)
 
         # Check the results
         expected_html = "\n".join([
@@ -381,21 +382,21 @@ class TestWebsite:
             '        <link href="styles.css" rel="stylesheet">',
             "    </head>",
             "    <body>",
-            '        <htmlnode class="r1">',
+            '        <htmlnode class="c1">',
             "            Text&excl;",
             "        </htmlnode>",
-            '        <htmlnode class="r0">',
+            '        <htmlnode class="c0">',
             "            Another Text&excl;",
             "        </htmlnode>",
             "    </body>",
             "</html>"
         ])
         expected_core_css = "\n".join([
-            ".r0 {",
+            ".c0 {",
             "    margin: 0;",
             "}",
             "",
-            ".r1 {",
+            ".c1 {",
             "    padding: 0;",
             "}"
         ])

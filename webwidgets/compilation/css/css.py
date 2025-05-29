@@ -10,9 +10,9 @@
 #
 # =======================================================================
 
-from .css_rule import CSSRule
+from .css_rule import ClassRule
 import itertools
-from .sections.css_preamble import CSSPreamble
+from .sections.preamble import Preamble
 from .sections.rule_section import RuleSection
 from typing import Callable, Dict, List, Union
 from webwidgets.compilation.html.html_node import HTMLNode
@@ -23,25 +23,24 @@ class CompiledCSS(ReprMixin):
     """A utility class to hold compiled CSS rules.
     """
 
-    def __init__(self, trees: List[HTMLNode], rules: List[CSSRule],
-                 mapping: Dict[int, List[CSSRule]]):
-        """Stores compiled CSS rules into a dedicated `core` section entitled
-        "Core".
+    def __init__(self, trees: List[HTMLNode], core: RuleSection,
+                 mapping: Dict[int, List[ClassRule]]):
+        """Stores compiled CSS rules and their mapping to the nodes in the
+        given trees.
 
         :param trees: The HTML trees at the origin of the compilation. These
             are the elements that have been styled with CSS properties.
         :type trees: List[HTMLNode]
-        :param rules: The compiled CSS rules. These are stored inside a `core`
-            :py:class:`RuleSection` object with the title "Core".
-        :type rules: List[CSSRule]
+        :param rules: The CSS section containing the compiled CSS rules.
+        :type rules: RuleSection
         :param mapping: A dictionary mapping each node ID to a list of rules
             that achieve the same style.
-        :type mapping: Dict[int, List[CSSRule]]
+        :type mapping: Dict[int, List[ClassRule]]
         """
         super().__init__()
         self.trees = trees
-        self.preamble = CSSPreamble()
-        self.core = RuleSection(rules=rules, title="Core")
+        self.preamble = Preamble()
+        self.core = core
         self.mapping = mapping
 
     def to_css(self, indent_size: int = 4) -> str:
@@ -105,8 +104,8 @@ def apply_css(css: CompiledCSS, tree: HTMLNode) -> None:
 
 
 def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
-                rule_namer: Callable[[List[CSSRule], int],
-                                     str] = None) -> CompiledCSS:
+                class_namer: Callable[[List[ClassRule], int],
+                                      str] = None) -> CompiledCSS:
     """Computes optimized CSS rules from the given HTML trees.
 
     The main purpose of this function is to reduce the number of CSS rules
@@ -135,34 +134,42 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         >>> compiled_css = compile_css(tree)
         >>> print(compiled_css.core.rules)
         [
-            CSSRule(name='r0', declarations={'color': 'blue'}),
-            CSSRule(name='r1', declarations={'margin': '0'}),
-            CSSRule(name='r2', declarations={'padding': '0'})
+            ClassRule(selector='.c0', declarations={'color': 'blue'}, ...),
+            ClassRule(selector='.c1', declarations={'margin': '0'}, ...),
+            ClassRule(selector='.c2', declarations={'padding': '0'}, ...)
         ]
+
+    Internally, each optimized rule gets compiled into a :py:class:`ClassRule`
+    object, which represents a CSS rule whose selector targets the HTML `class`
+    attribute. Each rule gets assigned a unique HTML class and all classes can
+    then be added to the trees with :py:func:`apply_css`. Classes are named
+    `"c0"`, `"c1"`, and so on by default, but this naming process can be
+    customized using the `class_namer` argument.
 
     :param trees: A single tree or a list of trees to optimize over. All
         children are recursively included in the compilation.
     :type trees: Union[HTMLNode, List[HTMLNode]]
-    :param rule_namer: A callable that takes two arguments, which are the list
+    :param class_namer: A callable that takes two arguments, which are the list
         of all compiled rules and an index within that list, and returns a
-        unique name for the rule at the given index.
+        unique name for the HTML class to associate with the rule at the given
+        index.
 
-        This argument allows to customize the rule naming process and use names
-        other than the default `"r0"`, `"r1"`, etc. For example, it can be used
-        to achieve something similar to Tailwind CSS and name rules according
-        to what they achieve, e.g. by prefixing their name with `"m"` for
-        margin rules or `"p"` for padding rules. Note that all rule names will
-        be validated with the :py:func:`validate_css_identifier` function
-        before being written into CSS code.
+        This argument allows to customize the class naming process and use names
+        other than the default `"c0"`, `"c1"`, etc. For example, it can be used
+        to achieve something similar to Tailwind CSS and name HTML classes
+        according to what they achieve, e.g. by prefixing their name with `"m"`
+        for margin rules or `"p"` for padding rules. Note that all class
+        selectors will be validated with the :py:func:`validate_css_selector`
+        function before being written into CSS code.
 
-        Defaults to the :py:func:`default_rule_namer` function which implements
-        a default naming strategy where each rule is named `"r{i}"` where `i`
-        is the index of the rule in the list.
-    :type rule_namer: Callable[[List[CSSRule], int], str]
+        Defaults to the :py:func:`default_class_namer` function which
+        implements a default naming strategy where each class is named `"c{i}"`
+        where `i` is the index of the rule in the list.
+    :type class_namer: Callable[[List[ClassRule], int], str]
     :return: The :py:class:`CompiledCSS` object containing the optimized rules.
         Every HTML node present in one or more of the input trees is included
         in the :py:attr:`CompiledCSS.mapping` attribute, even if the node does
-        not have a style. Rules are alphabetically ordered by name in the
+        not have a style. Rules are alphabetically ordered by class name in the
         mapping.
     :rtype: CompiledCSS
     """
@@ -170,34 +177,37 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
     if isinstance(trees, HTMLNode):
         trees = [trees]
 
-    # Handling default rule_namer
-    rule_namer = default_rule_namer if rule_namer is None else rule_namer
+    # Handling default class_namer
+    class_namer = default_class_namer if class_namer is None else class_namer
 
     # We compute a simple mapping where each CSS property defines its own
     # ruleset
     styles = {k: v for tree in trees for k, v in tree.get_styles().items()}
     properties = set(itertools.chain.from_iterable(s.items()
                      for s in styles.values()))
-    rules = [CSSRule(None, dict([p]))  # Initializing with no name
+    rules = [ClassRule("", dict([p]))  # Initializing with empty name
              for p in sorted(properties)]
     for i, rule in enumerate(rules):  # Assigning name from callback
-        rule.name = rule_namer(rules, i)
+        rule.name = class_namer(rules, i)
     rules = sorted(rules, key=lambda r: r.name)  # Sorting by name
     mapping = {node_id: [r for r in rules if
                          set(r.declarations.items()).issubset(style.items())]
                for node_id, style in styles.items()}
-    return CompiledCSS(trees, rules, mapping)
+
+    # Packaging the results into a CompiledCSS object
+    core = RuleSection(rules=rules, title="Core")
+    return CompiledCSS(trees, core, mapping)
 
 
-def default_rule_namer(rules: List[CSSRule], index: int) -> str:
-    """Default rule naming function. Returns a string like "r{i}" where {i} is
+def default_class_namer(rules: List[ClassRule], index: int) -> str:
+    """Default class naming function. Returns a string like "c{i}" where {i} is
     the index of the rule.
 
-    :param rules: List of all compiled CSSRule objects. This argument is not
+    :param rules: List of all compiled ClassRule objects. This argument is not
         used in this function, but it can be used in other naming strategies.
-    :type rules: List[CSSRule]
-    :param index: Index of the rule being named.
+    :type rules: List[ClassRule]
+    :param index: Index of the rule whose class is being named.
     :type index: int
-    :return: A string like `"r{i}"` where `i` is the index of the rule.
+    :return: A string like `"c{i}"` where `i` is the index of the rule.
     """
-    return f'r{index}'
+    return f'c{index}'

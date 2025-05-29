@@ -104,7 +104,7 @@ class TestValidate:
             validate_css_identifier(f"my-class-{chars}")
 
     @pytest.mark.parametrize("code, chars, raise_on_start", [
-        # Injection in rule name
+        # Injection in class name
         ("rule{}custom-code", "{, }", False),
         ("rule {}custom-code", "  , {, }", False),
 
@@ -123,7 +123,7 @@ class TestValidate:
     def test_valid_css_identifiers_as_selectors(self, valid_css_identifiers):
         """Test that valid CSS identifiers are also valid selectors"""
         for identifier in valid_css_identifiers:
-            validate_css_selector(identifier)
+            validate_css_selector('.' + identifier)
 
     def test_special_css_selectors(self):
         """Testing all possible combinations of special CSS selectors with no
@@ -136,29 +136,29 @@ class TestValidate:
 
     def test_invalid_empty_selector(self):
         """Tests that an empty selector raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("")
 
     def test_non_special_selector_within_special_selectors(self):
         """Tests that a non-special selector within a combination of special
         selectors raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*, *::before, hello, *::after")
 
     def test_invalid_css_selector_extra_space(self):
         """Tests that an invalid combination of special selectors (with an
         extra space) raises an exception"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*,  *::before")
 
     def test_invalid_non_special_css_selectors(self):
         """Tests that invalid CSS selectors are rejected as invalid identifiers"""
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("*::has()")
-        with pytest.raises(ValueError, match="identifier must start with"):
+        with pytest.raises(ValueError, match="selector must start with '.'"):
             validate_css_selector("::before")
         with pytest.raises(ValueError, match=r"Invalid character\(s\).* !"):
-            validate_css_selector("h!")
+            validate_css_selector(".h!")
 
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
@@ -188,7 +188,7 @@ class TestValidate:
         with pytest.raises(ValueError, match=r"Invalid character\(s\).*!, @, #"):
             validate_html_class("my-class123 my-other-class-!@#")
         with pytest.raises(ValueError, match="must start with"):
-            validate_html_class("my-class123 -er4 my-other-class")
+            validate_html_class("my-class123 -ec4 my-other-class")
 
     @pytest.mark.parametrize("code, chars, raise_on_start", [
         # Exception are raised on first offending class before space
@@ -220,12 +220,12 @@ class TestValidate:
         ("--c ", False),  # Ends with space
         ("--c d! r", False),  # Contains invalid character
     ])
-    @pytest.mark.parametrize("add_r2_in", [False, True])
-    def test_validation_within_apply_css(self, class_in, valid, add_r2_in):
+    @pytest.mark.parametrize("add_c2_in", [False, True])
+    def test_validation_within_apply_css(self, class_in, valid, add_c2_in):
         """Tests that valid class attributes make it through HTML rendering"""
         # Compiling and applying CSS to a tree
         c_in = None if class_in is None else ' '.join(
-            ([class_in] if class_in else []) + (["r2"] if add_r2_in else []))
+            ([class_in] if class_in else []) + (["c2"] if add_c2_in else []))
         tree = HTMLNode(
             attributes=None if c_in is None else {"class": c_in},
             style={"margin": "0", "padding": "0"},
@@ -236,11 +236,11 @@ class TestValidate:
         apply_css(compile_css(tree), tree)
 
         # Checking the final HTML code
-        class_out = "r1 r2" if not c_in else (c_in +
-                                              " r1" + ("" if add_r2_in else " r2"))
+        class_out = "c1 c2" if not c_in else (c_in +
+                                              " c1" + ("" if add_c2_in else " c2"))
         expected_html = '\n'.join([
             f'<htmlnode class="{class_out}">',
-            f'    <htmlnode class="r0 r1"></htmlnode>',
+            f'    <htmlnode class="c0 c1"></htmlnode>',
             '</htmlnode>'
         ])
         if valid:
@@ -252,8 +252,8 @@ class TestValidate:
             with pytest.raises(ValueError):
                 tree.to_html()
 
-    @pytest.mark.parametrize("rule_namer, valid", [
-        (None, True),  # Default rule namer
+    @pytest.mark.parametrize("class_namer, valid", [
+        (None, True),  # Default class namer
         (lambda _, i: f"rule{i}", True),
         (lambda _, i: f"r-{i + 1}", True),
         (lambda _, i: f"--r-{i + 1}", True),
@@ -266,7 +266,7 @@ class TestValidate:
          False),  # Invalid characters (comma...)
         (lambda _, i: f"r{i}" + "{}custom-code", False),  # Code injection
     ])
-    def test_validation_within_to_css(self, rule_namer, valid):
+    def test_validation_within_to_css(self, class_namer, valid):
         """Tests that valid class attributes make it through CSS rendering"""
         tree = HTMLNode(
             style={"az": "5", "bz": "4"},
@@ -275,7 +275,7 @@ class TestValidate:
                 HTMLNode(style={"bz": "10"}),
             ]
         )
-        compiled_css = compile_css(tree, rule_namer=rule_namer)
+        compiled_css = compile_css(tree, class_namer=class_namer)
         if valid:
             compiled_css.to_css()
         else:
