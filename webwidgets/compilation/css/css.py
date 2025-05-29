@@ -139,6 +139,13 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
             ClassRule(selector='.c2', declarations={'padding': '0'}, ...)
         ]
 
+    Internally, each optimized rule gets compiled into a :py:class:`ClassRule`
+    object, which represents a CSS rule whose selector targets the HTML `class`
+    attribute. Each rule gets assigned a unique HTML class and all classes can
+    then be added to the trees with :py:func:`apply_css`. Classes are named
+    `"c0"`, `"c1"`, and so on by default, but this naming process can be
+    customized using the `class_namer` argument.
+
     :param trees: A single tree or a list of trees to optimize over. All
         children are recursively included in the compilation.
     :type trees: Union[HTMLNode, List[HTMLNode]]
