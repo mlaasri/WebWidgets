@@ -11,6 +11,7 @@
 # =======================================================================
 
 import pytest
+from .render_page import render_page as _render_page
 from selenium.webdriver import Chrome, Firefox
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -34,6 +35,12 @@ def firefox_web_driver():
     driver = Firefox(options=options)
     yield driver
     driver.quit()
+
+
+# Exposing the `render_page` utility as a pytest fixture
+@pytest.fixture(scope="session")
+def render_page():
+    return _render_page
 
 
 @pytest.fixture(scope="session")
