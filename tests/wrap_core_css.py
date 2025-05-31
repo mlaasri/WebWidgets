@@ -11,8 +11,8 @@
 # =======================================================================
 
 from typing import Any
-from webwidgets.compilation.css.sections.preamble import Preamble
 from webwidgets.compilation.css.sections.css_section import CSSSection
+from webwidgets.compilation.css.sections.preamble import Preamble
 
 
 def wrap_core_css(core_css: str, *args: Any, **kwargs: Any) -> str:

@@ -11,7 +11,6 @@
 # =======================================================================
 
 import pytest
-from tests.compilation.wrap_core_css import wrap_core_css
 from typing import Dict
 import webwidgets as ww
 from webwidgets.compilation.html.html_node import HTMLNode, RawText
@@ -42,7 +41,8 @@ class TestWebsite:
     @pytest.mark.parametrize("num_pages", [1, 2, 3])
     @pytest.mark.parametrize("num_widgets", [1, 2, 3])
     @pytest.mark.parametrize("text", ["a", "b", "c"])
-    def test_compile_website_without_css(self, num_pages, num_widgets, text):
+    def test_compile_website_without_css(self, num_pages, num_widgets, text,
+                                         wrap_core_css):
         # Create a new website object
         website = ww.Website()
         for _ in range(num_pages):
@@ -74,7 +74,8 @@ class TestWebsite:
     @pytest.mark.parametrize("num_pages", [1, 2, 3, 4, 5, 6])
     @pytest.mark.parametrize("num_widgets", [1, 2, 3])
     @pytest.mark.parametrize("text", ["a", "b", "c"])
-    def test_compile_website_with_css(self, num_pages, num_widgets, text):
+    def test_compile_website_with_css(self, num_pages, num_widgets, text,
+                                      wrap_core_css):
         # Defining a set of styles to pick from
         styles = [{"margin": "0"}, {"color": "blue"}, {"font-size": "16px"}]
 
@@ -132,7 +133,7 @@ class TestWebsite:
         ])
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_collapse_empty(self):
+    def test_compile_collapse_empty(self, wrap_core_css):
         website = ww.Website([ww.Page([TestWebsite.Empty()])])
 
         # Collapse empty elements
@@ -169,7 +170,7 @@ class TestWebsite:
 
     @pytest.mark.parametrize("css_file_name",
                              ["style.css", "s.css", "css.css"])
-    def test_compile_css_file_name(self, css_file_name):
+    def test_compile_css_file_name(self, css_file_name, wrap_core_css):
         website = TestWebsite.SimpleWebsite()
         compiled = website.compile(css_file_name=css_file_name)
         expected_html = "\n".join([
@@ -201,7 +202,7 @@ class TestWebsite:
         assert compiled.html_content[0] == expected_html
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_force_one_line(self):
+    def test_compile_force_one_line(self, wrap_core_css):
         website = TestWebsite.SimpleWebsite()
         expected_core_css = "\n".join([
             ".c0 {",
@@ -259,7 +260,8 @@ class TestWebsite:
 
     @pytest.mark.parametrize("indent_level", [0, 1, 2])
     @pytest.mark.parametrize("indent_size", [2, 3, 4, 8])
-    def test_compile_indentation(self, indent_level: int, indent_size: int):
+    def test_compile_indentation(self, indent_level: int, indent_size: int,
+                                 wrap_core_css):
         """Test the `compile` method with custom indentation levels and sizes."""
         website = TestWebsite.SimpleWebsite()
         compiled = website.compile(
@@ -299,7 +301,8 @@ class TestWebsite:
             expected_core_css, indent_size=indent_size)
 
     @pytest.mark.parametrize("indent_level", [-2, -1])
-    def test_compile_negative_indent_levels(self, indent_level: int):
+    def test_compile_negative_indent_levels(self, indent_level: int,
+                                            wrap_core_css):
         website = TestWebsite.SimpleWebsite()
         compiled = website.compile(indent_level=indent_level)
         indent = "    " if indent_level == -1 else ""
@@ -332,7 +335,7 @@ class TestWebsite:
         assert compiled.html_content[0] == expected_html
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_class_namer(self):
+    def test_compile_class_namer(self, wrap_core_css):
         """Test the `compile` method with a custom class namer function."""
         # Define a custom class namer function
         def custom_class_namer(rules, index):
@@ -372,7 +375,7 @@ class TestWebsite:
         ])
         assert compiled.css_content == wrap_core_css(expected_core_css)
 
-    def test_compile_kwargs(self):
+    def test_compile_kwargs(self, wrap_core_css):
         website = TestWebsite.SimpleWebsite()
         compiled = website.compile(replace_all_entities=True)
         expected_html = "\n".join([
