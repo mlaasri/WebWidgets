@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 from typing import Tuple
 import webwidgets as ww
+from webwidgets.compilation.html import Div
 
 
 class TestRenderPage:
@@ -27,11 +28,9 @@ class TestRenderPage:
 
         def build(self):
             hex_color = "#%02x%02x%02x" % self.color
-            return ww.compilation.html.Div(
-                style={"background-color": hex_color,
-                       "height": "100vh",
-                       "width": "100vw"}
-            )
+            return Div(style={"background-color": hex_color,
+                              "height": "100vh",
+                              "width": "100vw"})
 
     def test_return_type_and_shape(self, web_drivers, render_page):
         for web_driver in web_drivers:
