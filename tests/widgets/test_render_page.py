@@ -12,13 +12,13 @@
 
 import numpy as np
 import pytest
-from .render_page import render_page
 from typing import Tuple
 import webwidgets as ww
+from webwidgets.compilation.html import Div
 
 
 class TestRenderPage:
-    """Test cases for the test utility function `render_page`.
+    """Test cases for the `render_page` fixture.
     """
 
     class Color(ww.Widget):
@@ -28,13 +28,11 @@ class TestRenderPage:
 
         def build(self):
             hex_color = "#%02x%02x%02x" % self.color
-            return ww.compilation.html.Div(
-                style={"background-color": hex_color,
-                       "height": "100vh",
-                       "width": "100vw"}
-            )
+            return Div(style={"background-color": hex_color,
+                              "height": "100vh",
+                              "width": "100vw"})
 
-    def test_return_type_and_shape(self, web_drivers):
+    def test_return_type_and_shape(self, web_drivers, render_page):
         for web_driver in web_drivers:
             array = render_page(ww.Page(), web_driver)
             assert isinstance(array, np.ndarray)
@@ -53,7 +51,7 @@ class TestRenderPage:
         (123, 45, 67),  # Other color 1
         (234, 0, 156)  # Other color 2
     ])
-    def test_colored_page(self, color, web_drivers):
+    def test_colored_page(self, color, web_drivers, render_page):
         page = ww.Page([TestRenderPage.Color(color)])
         for web_driver in web_drivers:
             array = render_page(page, web_driver)

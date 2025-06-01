@@ -18,7 +18,6 @@ from webwidgets.compilation.css.css import apply_css, compile_css, CompiledCSS, 
     default_class_namer
 from webwidgets.compilation.css.css_rule import ClassRule, CSSRule
 from webwidgets.compilation.css.sections import RuleSection
-from .wrap_core_css import wrap_core_css
 
 
 class TestCompileCSS:
@@ -287,7 +286,7 @@ class TestCompileCSS:
 
 
 class TestCompiledCSS:
-    def test_export_custom_compiled_css(self):
+    def test_export_custom_compiled_css(self, wrap_core_css):
         core = RuleSection(
             rules=[
                 CSSRule(selector=".c0", declarations={
@@ -318,7 +317,7 @@ class TestCompiledCSS:
         ])
         assert compiled_css.to_css() == wrap_core_css(expected_core_css)
 
-    def test_export_real_compiled_css(self):
+    def test_export_real_compiled_css(self, wrap_core_css):
         tree = HTMLNode(
             style={"margin": "0", "padding": "0"},
             children=[
@@ -346,7 +345,7 @@ class TestCompiledCSS:
         ])
         assert compiled_css.to_css() == wrap_core_css(expected_core_css)
 
-    def test_export_empty_style(self):
+    def test_export_empty_style(self, wrap_core_css):
         node = HTMLNode()
         css = compile_css(node).to_css()
         assert css == wrap_core_css("")
@@ -362,7 +361,7 @@ class TestCompiledCSS:
             compiled_css.to_css()
 
     @pytest.mark.parametrize("indent_size", [0, 2, 4, 8])
-    def test_css_indentation(self, indent_size):
+    def test_css_indentation(self, indent_size, wrap_core_css):
         node = HTMLNode(style={"a": "0", "b": "1"})
         expected_core_css = '\n'.join([
             ".c0 {",

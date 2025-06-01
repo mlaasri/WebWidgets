@@ -12,8 +12,8 @@
 
 import pytest
 from webwidgets.compilation.css.css_rule import CSSRule
-from webwidgets.compilation.css.sections.preamble import Preamble
 from webwidgets.compilation.css.sections.css_section import CSSSection
+from webwidgets.compilation.css.sections.preamble import Preamble
 from webwidgets.compilation.css.sections.rule_section import RuleSection
 
 

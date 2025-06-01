@@ -10,6 +10,11 @@
 #
 # =======================================================================
 
-from .box import Box, Direction
-from .container import Container
-from .page import Page
+import pytest
+from .wrap_core_css import wrap_core_css as _wrap_core_css
+
+
+# Exposing the `wrap_core_css` utility as a pytest fixture
+@pytest.fixture(scope="session")
+def wrap_core_css():
+    return _wrap_core_css

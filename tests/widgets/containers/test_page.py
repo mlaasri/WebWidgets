@@ -33,7 +33,7 @@ class TestPage:
         page = ww.Page()
         assert isinstance(page, Widget)
 
-    def test_rendering_empty_page(self):
+    def test_compiling_empty_page(self):
         page = ww.Page()
         expected_html = "\n".join([
             "<!DOCTYPE html>",
