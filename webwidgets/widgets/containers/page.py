@@ -32,7 +32,7 @@ class Page(Container):
         :param css_file_name: The name of the CSS file to link to the page if
             the page elements contain any styles. Defaults to "styles.css".
         :type css_file_name: str
-        :return: An :py:class:`RootNode` object representing the page.
+        :return: A :py:class:`RootNode` object representing the page.
         :rtype: RootNode
         """
         # Building nodes from the page's widgets
