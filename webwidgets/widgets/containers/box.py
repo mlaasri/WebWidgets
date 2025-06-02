@@ -11,13 +11,8 @@
 # =======================================================================
 
 from .container import Container
-from enum import auto, Enum
 from webwidgets.compilation.html.html_tags import Div
-
-
-class Direction(Enum):
-    HORIZONTAL = auto()
-    VERTICAL = auto()
+from webwidgets.utility.enums import Direction
 
 
 class Box(Container):

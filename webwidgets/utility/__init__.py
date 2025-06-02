@@ -10,6 +10,7 @@
 #
 # =======================================================================
 
+from .enums import *
 from .indentation import *
 from .representation import *
 from .sanitizing import *
