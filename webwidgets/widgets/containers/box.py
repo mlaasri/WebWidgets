@@ -30,7 +30,7 @@ class Box(Container):
         super().__init__()
         self.direction = direction
 
-    def build(self):
+    def build(self) -> Div:
         """Builds the HTML representation of the Box.
 
         The box is constructed as a `<div>` element with a flexbox layout. Its
@@ -40,6 +40,9 @@ class Box(Container):
         Each child widget is wrapped inside its own `<div>` element with a
         `data-role` attribute of "box-item". The items are centered within
         their own `<div>`.
+
+        :return: A :py:class:`Div` element representing the Box.
+        :rtype: Div
         """
         # Building child nodes
         nodes = [w.build() for w in self.widgets]
