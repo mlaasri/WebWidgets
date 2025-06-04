@@ -108,3 +108,143 @@ class TestBox:
                 assert np.all(array[region, :, 0] == color[0])
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
+
+    @pytest.mark.parametrize("green_space", [2, 2.0, 3, 3.0, 4, 4.0])
+    @pytest.mark.parametrize("explicit_default", [True, False])
+    def test_horizontal_box_spacing_two_colors(self, green_space,
+                                               explicit_default, render_page,
+                                               web_drivers):
+        # Creating a page with one box containing Color widgets
+        box = TestBox.FullSizedBox(direction=ww.Direction.HORIZONTAL)
+        if explicit_default:
+            box.add(TestBox.Color(color=(255, 0, 0)), space=1)
+        else:
+            box.add(TestBox.Color(color=(255, 0, 0)))
+        box.add(TestBox.Color(color=(0, 255, 0)), space=green_space)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the expected red and green regions, avoiding the edge
+            # if colors cannot spread evenly
+            all_indices = np.arange(array.shape[1])
+            edge = array.shape[1] // (int(green_space) + 1)
+            red, green = np.split(all_indices, [edge])
+            if array.shape[1] % (int(green_space) + 1) != 0:
+                green = green[green != edge]
+
+            # Testing than first region is red and second region is green
+            assert np.all(array[:, red, 0] == 255)
+            assert np.all(array[:, red, 1] == 0)
+            assert np.all(array[:, red, 2] == 0)
+            assert np.all(array[:, green, 0] == 0)
+            assert np.all(array[:, green, 1] == 255)
+            assert np.all(array[:, green, 2] == 0)
+
+    @pytest.mark.parametrize("green_space", [2, 2.0, 3, 3.0, 4, 4.0])
+    @pytest.mark.parametrize("explicit_default", [True, False])
+    def test_vertical_box_spacing_two_colors(self, green_space,
+                                             explicit_default, render_page,
+                                             web_drivers):
+        # Creating a page with one box containing Color widgets
+        box = TestBox.FullSizedBox(direction=ww.Direction.VERTICAL)
+        if explicit_default:
+            box.add(TestBox.Color(color=(255, 0, 0)), space=1)
+        else:
+            box.add(TestBox.Color(color=(255, 0, 0)))
+        box.add(TestBox.Color(color=(0, 255, 0)), space=green_space)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the expected red and green regions, avoiding the edge
+            # if colors cannot spread evenly
+            all_indices = np.arange(array.shape[0])
+            edge = array.shape[0] // (int(green_space) + 1)
+            red, green = np.split(all_indices, [edge])
+            if array.shape[0] % (int(green_space) + 1) != 0:
+                green = green[green != edge]
+
+            # Testing than first region is red and second region is green
+            assert np.all(array[red, :, 0] == 255)
+            assert np.all(array[red, :, 1] == 0)
+            assert np.all(array[red, :, 2] == 0)
+            assert np.all(array[green, :, 0] == 0)
+            assert np.all(array[green, :, 1] == 255)
+            assert np.all(array[green, :, 2] == 0)
+
+    @pytest.mark.parametrize("spaces", [
+        (2, 2, 2, 2), (1, 2, 3, 4), (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)
+    ])
+    def test_horizontal_box_spacing_more_colors(self, spaces, render_page,
+                                                web_drivers):
+        spaces = np.array(spaces)
+
+        # Creating a page with one box containing Color widgets
+        colors = [
+            (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)
+        ]
+        box = TestBox.FullSizedBox(direction=ww.Direction.HORIZONTAL)
+        for color, space in zip(colors, spaces):
+            box.add(TestBox.Color(color=color), space=space)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the expected colored regions, avoiding all edges even
+            # if colors spread evenly
+            all_indices = np.arange(array.shape[1])
+            edges = array.shape[1] * (spaces.cumsum() / spaces.sum())[:-1]
+            edges = np.floor(edges).astype(np.int32)
+            regions = np.split(all_indices, edges)
+            regions = [r[~np.isin(r, edges)] for r in regions]
+
+            # Testing each region
+            for color, region in zip(colors, regions):
+                assert np.all(array[:, region, 0] == color[0])
+                assert np.all(array[:, region, 1] == color[1])
+                assert np.all(array[:, region, 2] == color[2])
+
+    @pytest.mark.parametrize("spaces", [
+        (2, 2, 2, 2), (1, 2, 3, 4), (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)
+    ])
+    def test_vertical_box_spacing_more_colors(self, spaces, render_page,
+                                              web_drivers):
+        spaces = np.array(spaces)
+
+        # Creating a page with one box containing Color widgets
+        colors = [
+            (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)
+        ]
+        box = TestBox.FullSizedBox(direction=ww.Direction.VERTICAL)
+        for color, space in zip(colors, spaces):
+            box.add(TestBox.Color(color=color), space=space)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the expected colored regions, avoiding all edges even
+            # if colors spread evenly
+            all_indices = np.arange(array.shape[0])
+            edges = array.shape[0] * (spaces.cumsum() / spaces.sum())[:-1]
+            edges = np.floor(edges).astype(np.int32)
+            regions = np.split(all_indices, edges)
+            regions = [r[~np.isin(r, edges)] for r in regions]
+
+            # Testing each region
+            for color, region in zip(colors, regions):
+                assert np.all(array[region, :, 0] == color[0])
+                assert np.all(array[region, :, 1] == color[1])
+                assert np.all(array[region, :, 2] == color[2])
