@@ -63,6 +63,33 @@ class HTMLNode(ReprMixin):
             f'{k}="{v}"' for k, v in sorted(self.attributes.items())
         )
 
+    @property
+    def end_tag(self) -> str:
+        """Returns the closing tag of the HTML node.
+
+        :return: A string containing the closing tag of the element.
+        :rtype: str
+        """
+        return f"</{self._get_tag_name()}>"
+
+    @property
+    def start_tag(self) -> str:
+        """Returns the opening tag of the HTML node, including any attributes.
+
+        Attributes are validated with :py:meth:`HTMLNode.validate_attributes`
+        before rendering.
+
+        :return: A string containing the opening tag of the element with its attributes.
+        :rtype: str
+        """
+        # Rendering attributes
+        self.validate_attributes()
+        attributes = self._render_attributes()
+        maybe_space = ' ' if attributes else ''
+
+        # Building start tag
+        return f"<{self._get_tag_name()}{maybe_space}{attributes}>"
+
     def add(self, child: 'HTMLNode') -> None:
         """Adds a child to the HTML node.
 
@@ -100,33 +127,6 @@ class HTMLNode(ReprMixin):
         for child in self.children:
             styles.update(child.get_styles())
         return styles
-
-    @property
-    def start_tag(self) -> str:
-        """Returns the opening tag of the HTML node, including any attributes.
-
-        Attributes are validated with :py:meth:`HTMLNode.validate_attributes`
-        before rendering.
-
-        :return: A string containing the opening tag of the element with its attributes.
-        :rtype: str
-        """
-        # Rendering attributes
-        self.validate_attributes()
-        attributes = self._render_attributes()
-        maybe_space = ' ' if attributes else ''
-
-        # Building start tag
-        return f"<{self._get_tag_name()}{maybe_space}{attributes}>"
-
-    @property
-    def end_tag(self) -> str:
-        """Returns the closing tag of the HTML node.
-
-        :return: A string containing the closing tag of the element.
-        :rtype: str
-        """
-        return f"</{self._get_tag_name()}>"
 
     def to_html(self, collapse_empty: bool = True,
                 indent_size: int = 4, indent_level: int = 0,
