@@ -32,11 +32,19 @@ class TestBox:
                               "width": "100%"})
 
     # A Box that fills the entire viewport
-    class FullSizedBox(ww.Box):
+    class FullViewportBox(ww.Box):
         def build(self, *args, **kwargs):
             node = super().build(*args, **kwargs)
             node.style["width"] = "100vw"
             node.style["height"] = "100vh"
+            return node
+
+    # A Box that expands to 100% of its available space
+    class FullyExpandedBox(ww.Box):
+        def build(self, *args, **kwargs):
+            node = super().build(*args, **kwargs)
+            node.style["width"] = "100%"
+            node.style["height"] = "100%"
             return node
 
     @pytest.mark.parametrize("colors", [
@@ -47,7 +55,7 @@ class TestBox:
     def test_horizontal_box(self, colors, render_page, web_drivers):
         """Tests the even distribution of multiple colored widgets by a Box."""
         # Creating a page with one box containing widgets with the given colors
-        box = TestBox.FullSizedBox(direction=ww.Direction.HORIZONTAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
         for color in colors:
             box.add(TestBox.Color(color=color))
         page = ww.Page([box])
@@ -82,7 +90,7 @@ class TestBox:
     def test_vertical_box(self, colors, render_page, web_drivers):
         """Tests the even distribution of multiple colored widgets by a Box."""
         # Creating a page with one box containing widgets with the given colors
-        box = TestBox.FullSizedBox(direction=ww.Direction.VERTICAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
         for color in colors:
             box.add(TestBox.Color(color=color))
         page = ww.Page([box])
@@ -109,6 +117,29 @@ class TestBox:
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
 
+    def test_nested_boxes(self, render_page, web_drivers):
+        """Tests that two nested boxes with orthogonal directions render
+        correctly.
+        """
+        top_box = TestBox.FullyExpandedBox(direction=ww.Direction.HORIZONTAL)
+        top_box.add(TestBox.Color(color=(255, 0, 0)))
+        top_box.add(TestBox.Color(color=(0, 255, 0)))
+        out_box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
+        out_box.add(top_box)
+        out_box.add(TestBox.Color(color=(0, 0, 255)))
+        page = ww.Page([out_box])
+
+        for web_driver in web_drivers:
+            a = render_page(page, web_driver)
+            for i, c in enumerate((255, 0, 0)):
+                assert np.all(a[:a.shape[0] // 2, :a.shape[1] // 2, i] == c)
+            edge_x = a.shape[1] // 2 + (0 if a.shape[1] % 2 == 0 else 1)
+            for i, c in enumerate((0, 255, 0)):
+                assert np.all(a[:a.shape[0] // 2, edge_x:, i] == c)
+            edge_y = a.shape[0] // 2 + (0 if a.shape[0] % 2 == 0 else 1)
+            for i, c in enumerate((0, 0, 255)):
+                assert np.all(a[edge_y:, :, i] == c)
+
     @pytest.mark.parametrize("green_space", [
         2, 3, 4,  # as int
         2.0, 3.0, 4.0  # as float
@@ -118,7 +149,7 @@ class TestBox:
                                                explicit_default, render_page,
                                                web_drivers):
         # Creating a page with one box containing Color widgets
-        box = TestBox.FullSizedBox(direction=ww.Direction.HORIZONTAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
         if explicit_default:
             box.add(TestBox.Color(color=(255, 0, 0)), space=1)
         else:
@@ -156,7 +187,7 @@ class TestBox:
                                              explicit_default, render_page,
                                              web_drivers):
         # Creating a page with one box containing Color widgets
-        box = TestBox.FullSizedBox(direction=ww.Direction.VERTICAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
         if explicit_default:
             box.add(TestBox.Color(color=(255, 0, 0)), space=1)
         else:
@@ -197,7 +228,7 @@ class TestBox:
         colors = [
             (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)
         ]
-        box = TestBox.FullSizedBox(direction=ww.Direction.HORIZONTAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
         for color, space in zip(colors, spaces):
             box.add(TestBox.Color(color=color), space=space)
         page = ww.Page([box])
@@ -233,7 +264,7 @@ class TestBox:
         colors = [
             (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)
         ]
-        box = TestBox.FullSizedBox(direction=ww.Direction.VERTICAL)
+        box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
         for color, space in zip(colors, spaces):
             box.add(TestBox.Color(color=color), space=space)
         page = ww.Page([box])
