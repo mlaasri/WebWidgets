@@ -287,3 +287,26 @@ class TestBox:
                 assert np.all(array[region, :, 0] == color[0])
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
+
+    def test_nested_boxes_with_spacing(self, render_page, web_drivers):
+        """Tests that two nested boxes with orthogonal directions and uneven
+        spacing rules render correctly.
+        """
+        top_box = TestBox.FullyExpandedBox(direction=ww.Direction.HORIZONTAL)
+        top_box.add(TestBox.Color(color=(255, 0, 0)))
+        top_box.add(TestBox.Color(color=(0, 255, 0)), space=3)
+        out_box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
+        out_box.add(top_box, space=0.5)
+        out_box.add(TestBox.Color(color=(0, 0, 255)))
+        page = ww.Page([out_box])
+
+        for web_driver in web_drivers:
+            a = render_page(page, web_driver)
+            for i, c in enumerate((255, 0, 0)):
+                assert np.all(a[:a.shape[0] // 3, :a.shape[1] // 4, i] == c)
+            edge_x = a.shape[1] // 4 + (0 if a.shape[1] % 4 == 0 else 1)
+            for i, c in enumerate((0, 255, 0)):
+                assert np.all(a[:a.shape[0] // 3, edge_x:, i] == c)
+            edge_y = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
+            for i, c in enumerate((0, 0, 255)):
+                assert np.all(a[edge_y:, :, i] == c)
