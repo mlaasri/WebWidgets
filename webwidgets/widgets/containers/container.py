@@ -27,7 +27,7 @@ class Container(Widget):
         :type widgets: List[Widget]
         """
         super().__init__()
-        self.widgets = [] if widgets is None else widgets
+        self._widgets = [] if widgets is None else widgets
 
     def add(self, widget: Widget) -> None:
         """Adds a widget to the container.
@@ -35,4 +35,9 @@ class Container(Widget):
         :param widget: The widget to add to the container.
         :type widget: Widget
         """
-        self.widgets.append(widget)
+        self._widgets.append(widget)
+
+    @property
+    def widgets(self) -> List[Widget]:
+        """Returns the list of widgets contained within the container."""
+        return self._widgets

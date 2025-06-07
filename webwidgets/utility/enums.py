@@ -10,6 +10,9 @@
 #
 # =======================================================================
 
-from .box import Box
-from .container import Container
-from .page import Page
+from enum import auto, Enum
+
+
+class Direction(Enum):
+    HORIZONTAL = auto()
+    VERTICAL = auto()
