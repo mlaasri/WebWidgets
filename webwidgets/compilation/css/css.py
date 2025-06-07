@@ -170,7 +170,7 @@ def compile_css(trees: Union[HTMLNode, List[HTMLNode]],
         Every HTML node present in one or more of the input trees is included
         in the :py:attr:`CompiledCSS.mapping` attribute, even if the node does
         not have a style. Rules are alphabetically ordered by class name in the
-        mapping.
+        mapping and in the :py:attr:`CompiledCSS.core` rule section.
     :rtype: CompiledCSS
     """
     # Handling case of a single tree
