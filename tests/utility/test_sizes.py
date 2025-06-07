@@ -46,6 +46,14 @@ class TestSizes:
         with pytest.raises(AttributeError, match="RelativeSize"):
             ww.RelativeSize(5)
 
+    @pytest.mark.parametrize("value", [0, 10, 10.0, 82.33])
+    def test_percent(self, value):
+        size = ww.Percent(value)
+        assert isinstance(size, RelativeSize)
+        assert size.value == value
+        assert size.unit == "%"
+        assert size.to_css() == f"{value}%"
+
     @pytest.mark.parametrize("value", [0, 10, 10.0, 12.33])
     def test_px(self, value):
         size = ww.Px(value)

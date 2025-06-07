@@ -11,7 +11,7 @@
 # =======================================================================
 
 from .representation import ReprMixin
-from typing import Union
+from typing import Callable, Type, Union
 
 
 class Size(ReprMixin):
@@ -67,6 +67,34 @@ class RelativeSize(Size):
     size of a display or a font. Examples include percentages (`"%"`) and ems
     (`"em"`).
     """
+    pass
+
+
+def with_unit(unit: str) -> Callable[[Type[Size]], Type[Size]]:
+    """Returns a decorator to override the unit of a Size subclass with the
+    given unit.
+
+    :param unit: The unit to be used for the Size subclass.
+    :type unit: str
+    :return: A decorator that overrides the unit of a Size subclass with the
+        given unit.
+    :rtype: Callable[[Type[Size]], Type[Size]]
+    """
+    def _decorator(cls):
+        """Decorator to override the unit of a Size subclass.
+
+        :param cls: A subclass of Size whose unit should be overridden.
+        :return: The given class with a new unit.
+        """
+        cls.unit = property(
+            lambda _: unit, doc=f"Always returns '{unit}'.")
+        return cls
+    return _decorator
+
+
+@with_unit("%")
+class Percent(RelativeSize):
+    """A size expressed in percentage (`"%"`)."""
     pass
 
 
