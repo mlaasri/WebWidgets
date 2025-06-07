@@ -133,12 +133,12 @@ class TestBox:
             a = render_page(page, web_driver)
             for i, c in enumerate((255, 0, 0)):
                 assert np.all(a[:a.shape[0] // 2, :a.shape[1] // 2, i] == c)
-            edge_x = a.shape[1] // 2 + (0 if a.shape[1] % 2 == 0 else 1)
+            edge_col = a.shape[1] // 2 + (0 if a.shape[1] % 2 == 0 else 1)
             for i, c in enumerate((0, 255, 0)):
-                assert np.all(a[:a.shape[0] // 2, edge_x:, i] == c)
-            edge_y = a.shape[0] // 2 + (0 if a.shape[0] % 2 == 0 else 1)
+                assert np.all(a[:a.shape[0] // 2, edge_col:, i] == c)
+            edge_row = a.shape[0] // 2 + (0 if a.shape[0] % 2 == 0 else 1)
             for i, c in enumerate((0, 0, 255)):
-                assert np.all(a[edge_y:, :, i] == c)
+                assert np.all(a[edge_row:, :, i] == c)
 
     @pytest.mark.parametrize("green_space", [
         2, 3, 4,  # as int
@@ -304,9 +304,9 @@ class TestBox:
             a = render_page(page, web_driver)
             for i, c in enumerate((255, 0, 0)):
                 assert np.all(a[:a.shape[0] // 3, :a.shape[1] // 4, i] == c)
-            edge_x = a.shape[1] // 4 + (0 if a.shape[1] % 4 == 0 else 1)
+            edge_col = a.shape[1] // 4 + (0 if a.shape[1] % 4 == 0 else 1)
             for i, c in enumerate((0, 255, 0)):
-                assert np.all(a[:a.shape[0] // 3, edge_x:, i] == c)
-            edge_y = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
+                assert np.all(a[:a.shape[0] // 3, edge_col:, i] == c)
+            edge_row = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
             for i, c in enumerate((0, 0, 255)):
-                assert np.all(a[edge_y:, :, i] == c)
+                assert np.all(a[edge_row:, :, i] == c)
