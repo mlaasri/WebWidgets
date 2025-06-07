@@ -109,7 +109,10 @@ class TestBox:
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
 
-    @pytest.mark.parametrize("green_space", [2, 2.0, 3, 3.0, 4, 4.0])
+    @pytest.mark.parametrize("green_space", [
+        2, 3, 4,  # as int
+        2.0, 3.0, 4.0  # as float
+    ])
     @pytest.mark.parametrize("explicit_default", [True, False])
     def test_horizontal_box_spacing_two_colors(self, green_space,
                                                explicit_default, render_page,
@@ -144,7 +147,10 @@ class TestBox:
             assert np.all(array[:, green, 1] == 255)
             assert np.all(array[:, green, 2] == 0)
 
-    @pytest.mark.parametrize("green_space", [2, 2.0, 3, 3.0, 4, 4.0])
+    @pytest.mark.parametrize("green_space", [
+        2, 3, 4,  # as int
+        2.0, 3.0, 4.0  # as float
+    ])
     @pytest.mark.parametrize("explicit_default", [True, False])
     def test_vertical_box_spacing_two_colors(self, green_space,
                                              explicit_default, render_page,
@@ -180,7 +186,8 @@ class TestBox:
             assert np.all(array[green, :, 2] == 0)
 
     @pytest.mark.parametrize("spaces", [
-        (2, 2, 2, 2), (1, 2, 3, 4), (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)
+        (2, 2, 2, 2), (1, 2, 3, 4),
+        (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)  # Mixed types
     ])
     def test_horizontal_box_spacing_more_colors(self, spaces, render_page,
                                                 web_drivers):
@@ -215,7 +222,8 @@ class TestBox:
                 assert np.all(array[:, region, 2] == color[2])
 
     @pytest.mark.parametrize("spaces", [
-        (2, 2, 2, 2), (1, 2, 3, 4), (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)
+        (2, 2, 2, 2), (1, 2, 3, 4),
+        (1, 2, 2, 0.5), (1, 0.25, 0.75, 3)  # Mixed types
     ])
     def test_vertical_box_spacing_more_colors(self, spaces, render_page,
                                               web_drivers):
