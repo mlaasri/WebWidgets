@@ -50,3 +50,10 @@ class TestSize:
     def test_with_unit_not_importable_at_top_level(self):
         with pytest.raises(AttributeError, match="with_unit"):
             ww.with_unit("10px")
+
+    @pytest.mark.parametrize("unit", ["m", "cm", "%"])
+    def test_with_unit(self, unit):
+        @with_unit(unit)
+        class CustomUnit(Size):
+            pass
+        assert CustomUnit(3).to_css() == f"3{unit}"
