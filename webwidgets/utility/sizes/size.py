@@ -10,7 +10,7 @@
 #
 # =======================================================================
 
-from .representation import ReprMixin
+from webwidgets.utility.representation import ReprMixin
 from typing import Callable, Type, Union
 
 
@@ -90,14 +90,3 @@ def with_unit(unit: str) -> Callable[[Type[Size]], Type[Size]]:
             lambda _: unit, doc=f"Always returns '{unit}'.")
         return cls
     return _decorator
-
-
-@with_unit("%")
-class Percent(RelativeSize):
-    """A size expressed in percentage (`"%"`)."""
-    pass
-
-
-class Px(AbsoluteSize):
-    """A size expressed in pixels (`"px"`)."""
-    pass

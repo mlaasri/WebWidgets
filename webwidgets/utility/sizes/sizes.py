@@ -10,11 +10,22 @@
 #
 # =======================================================================
 
-__version__ = "0.0.0"  # Dynamically set by build backend
+from .size import AbsoluteSize, RelativeSize, with_unit
 
-from . import compilation
-from . import utility
-from .utility.enums import *
-from .utility.sizes.sizes import *
-from .website import *
-from .widgets import *
+
+# Only exposing concrete size classes when using a wildcard import
+__all__ = [
+    "Percent",
+    "Px"
+]
+
+
+@with_unit("%")
+class Percent(RelativeSize):
+    """A size expressed in percentage (`"%"`)."""
+    pass
+
+
+class Px(AbsoluteSize):
+    """A size expressed in pixels (`"px"`)."""
+    pass
