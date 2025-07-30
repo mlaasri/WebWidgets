@@ -15,6 +15,7 @@ import pytest
 from typing import Tuple
 import webwidgets as ww
 from webwidgets.compilation.html import Div
+from webwidgets.widgets.containers.box import BoxItemProperties
 
 
 class TestBox:
@@ -310,3 +311,10 @@ class TestBox:
             edge_row = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
+
+
+class TestBoxItemProperties:
+    @pytest.mark.parametrize("space", [4, 5.1, 0.2])
+    def test_to_style(self, space):
+        props = BoxItemProperties(space=space)
+        assert props.to_style() == {'flex-grow': str(space)}

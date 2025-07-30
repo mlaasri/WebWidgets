@@ -12,7 +12,7 @@
 
 from .container import Container
 from dataclasses import dataclass
-from typing import Dict, Union
+from typing import Any, Dict, Union
 from webwidgets.compilation.html.html_tags import Div
 from webwidgets.utility.enums import Direction
 from webwidgets.widgets.widget import Widget
@@ -86,9 +86,8 @@ class Box(Container):
                 "display": "flex",
                 "flex-direction": "row",
                 "align-items": "center",
-                "justify-content": "center",
-                "flex-grow": str(props.space)
-            }) for node, props in zip(nodes, properties)]
+                "justify-content": "center"
+            } | props.to_style()) for node, props in zip(nodes, properties)]
 
         # Assembling the box
         flex_dir = "row" if self.direction == Direction.HORIZONTAL else "column"
@@ -106,3 +105,13 @@ class BoxItemProperties:
     """
 
     space: int
+
+    def to_style(self) -> Dict[str, str]:
+        """Converts the properties of the :py:class:`BoxItemProperties`
+        instance into a dictionary of CSS properties that can be added to the
+        style of an HTML node.
+
+        :return: A dictionary of CSS properties.
+        :rtype: Dict[str, str]
+        """
+        return {"flex-grow": str(self.space)}
