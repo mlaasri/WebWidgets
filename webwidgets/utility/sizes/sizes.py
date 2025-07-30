@@ -10,9 +10,22 @@
 #
 # =======================================================================
 
-from .enums import *
-from .indentation import *
-from .representation import *
-from .sanitizing import *
-from .sizes import *
-from .validation import *
+from .size import AbsoluteSize, RelativeSize, with_unit
+
+
+# Only exposing concrete size classes when using a wildcard import
+__all__ = [
+    "Percent",
+    "Px"
+]
+
+
+@with_unit("%")
+class Percent(RelativeSize):
+    """A size expressed in percentage (`"%"`)."""
+    pass
+
+
+class Px(AbsoluteSize):
+    """A size expressed in pixels (`"px"`)."""
+    pass

@@ -15,5 +15,6 @@ __version__ = "0.0.0"  # Dynamically set by build backend
 from . import compilation
 from . import utility
 from .utility.enums import *
+from .utility.sizes.sizes import *
 from .website import *
 from .widgets import *
