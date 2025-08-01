@@ -32,6 +32,7 @@ class TestPreamble:
             "    box-sizing: border-box;",
             "    margin: 0;",
             "    padding: 0;",
+            "    overflow: hidden;",
             "}"
         ])
         assert preamble.to_css() == expected_css
