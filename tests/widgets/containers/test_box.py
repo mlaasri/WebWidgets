@@ -289,7 +289,7 @@ class TestBox:
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
 
-    def test_nested_boxes_with_spacing(self, render_page, web_drivers):
+    def test_nested_boxes_with_uneven_spacing(self, render_page, web_drivers):
         """Tests that two nested boxes with orthogonal directions and uneven
         spacing rules render correctly.
         """
