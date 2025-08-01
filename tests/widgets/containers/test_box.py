@@ -22,15 +22,20 @@ class TestBox:
 
     # A simple color widget
     class Color(ww.Widget):
-        def __init__(self, color: Tuple[int, int, int]):
+        def __init__(self,
+                     color: Tuple[int, int, int],
+                     height: str = "100%",
+                     width: str = "100%"):
             super().__init__()
             self.color = color
+            self.height = height
+            self.width = width
 
         def build(self):
             hex_color = "#%02x%02x%02x" % self.color
             return Div(style={"background-color": hex_color,
-                              "height": "100%",
-                              "width": "100%"})
+                              "height": self.height,
+                              "width": self.width})
 
     # A Box that fills the entire viewport
     class FullViewportBox(ww.Box):
@@ -311,6 +316,31 @@ class TestBox:
             edge_row = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
+
+    def test_large_box_item_is_clipped(self, render_page, web_drivers):
+        """Tests that a large box item is clipped to respect the spacing rules
+        of the box.
+        """
+        # Defining the box. The large item has a width of 50vw, which is above
+        # the space allocated by the spacing rules (1/3), so it should be
+        # clipped to 1/3 of the viewport
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
+        big_item = TestBox.Color(color=(255, 0, 0), width="50vw")
+        box.add(big_item, space=1)
+        box.add(TestBox.Color(color=(0, 255, 0)), space=2)
+
+        # Creating a page containing the box
+        page = ww.Page([box])
+
+        # Testing that the large item (colored in red) only occupies 1/3 of the
+        # box
+        for web_driver in web_drivers:
+            a = render_page(page, web_driver)
+            for i, c in enumerate((255, 0, 0)):
+                assert np.all(a[:, :a.shape[1] // 3, i] == c)
+            edge_col = a.shape[1] // 3 + (0 if a.shape[1] % 3 == 0 else 1)
+            for i, c in enumerate((0, 255, 0)):
+                assert np.all(a[:, edge_col:, i] == c)
 
 
 class TestBoxItemProperties:
