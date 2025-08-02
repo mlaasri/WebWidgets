@@ -15,21 +15,27 @@ import pytest
 from typing import Tuple
 import webwidgets as ww
 from webwidgets.compilation.html import Div
+from webwidgets.widgets.containers.box import BoxItemProperties
 
 
 class TestBox:
 
     # A simple color widget
     class Color(ww.Widget):
-        def __init__(self, color: Tuple[int, int, int]):
+        def __init__(self,
+                     color: Tuple[int, int, int],
+                     height: str = "100%",
+                     width: str = "100%"):
             super().__init__()
             self.color = color
+            self.height = height
+            self.width = width
 
         def build(self):
             hex_color = "#%02x%02x%02x" % self.color
             return Div(style={"background-color": hex_color,
-                              "height": "100%",
-                              "width": "100%"})
+                              "height": self.height,
+                              "width": self.width})
 
     # A Box that fills the entire viewport
     class FullViewportBox(ww.Box):
@@ -288,7 +294,7 @@ class TestBox:
                 assert np.all(array[region, :, 1] == color[1])
                 assert np.all(array[region, :, 2] == color[2])
 
-    def test_nested_boxes_with_spacing(self, render_page, web_drivers):
+    def test_nested_boxes_with_uneven_spacing(self, render_page, web_drivers):
         """Tests that two nested boxes with orthogonal directions and uneven
         spacing rules render correctly.
         """
@@ -310,3 +316,52 @@ class TestBox:
             edge_row = a.shape[0] // 3 + (0 if a.shape[0] % 3 == 0 else 1)
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
+
+    @pytest.mark.parametrize("direction", (
+        ww.Direction.HORIZONTAL, ww.Direction.VERTICAL
+    ))
+    def test_large_box_item_is_clipped(self, direction, render_page,
+                                       web_drivers):
+        """Tests that a large box item is clipped to respect the spacing rules
+        of the box.
+        """
+        # Defining the box. The large item has either a width of 50vw or a
+        # height of 50vh (depending on the direction), which is above the space
+        # allocated by the spacing rules (1/3), so it should be clipped to 1/3
+        # of the viewport
+        box = TestBox.FullViewportBox(direction=direction)
+        size_arg = {"width": "50vw"} if direction == ww.Direction.HORIZONTAL \
+            else {"height": "50vh"}
+        big_item = TestBox.Color(color=(255, 0, 0), **size_arg)
+        box.add(big_item, space=1)
+        box.add(TestBox.Color(color=(0, 255, 0)), space=2)
+
+        # Creating a page containing the box
+        page = ww.Page([box])
+
+        # Testing that the large item (colored in red) only occupies 1/3 of the
+        # box
+        for web_driver in web_drivers:
+            a = render_page(page, web_driver)
+            for i, c in enumerate((255, 0, 0)):
+                if direction == ww.Direction.HORIZONTAL:
+                    assert np.all(a[:, :a.shape[1] // 3, i] == c)
+                else:
+                    assert np.all(a[:a.shape[0] // 3, :, i] == c)
+            axis = 1 if direction == ww.Direction.HORIZONTAL else 0
+            edge = a.shape[axis] // 3 + (0 if a.shape[axis] % 3 == 0 else 1)
+            for i, c in enumerate((0, 255, 0)):
+                if direction == ww.Direction.HORIZONTAL:
+                    assert np.all(a[:, edge:, i] == c)
+                else:
+                    assert np.all(a[edge:, :, i] == c)
+
+
+class TestBoxItemProperties:
+    @pytest.mark.parametrize("space", [4, 5.1, 0.2])
+    def test_to_style(self, space):
+        props = BoxItemProperties(space=space)
+        assert props.to_style() == {
+            'flex-grow': str(space),
+            'flex-shrink': str(space)
+        }
