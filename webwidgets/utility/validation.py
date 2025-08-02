@@ -127,8 +127,14 @@ def validate_css_value(value: str) -> None:
     """Checks if the given value is a valid CSS property value and raises an
     exception if not.
 
-    To be valid, the value must only contain letters (`a-z`, `A-Z`), digits
-    (`0-9`), spaces (` `), percent characters (`%`), and hyphens (`-`).
+    To be valid, the value must only contain:
+    - letters (`a-z`, `A-Z`)
+    - digits (`0-9`)
+    - dots (`.`)
+    - spaces (` `)
+    - hyphens (`-`)
+    - percent characters (`%`)
+    - hashtags (`#`)
 
     Note that this function imposes stricter rules than the official CSS
     specification - more precisely, than chapter 2 of the CSS Values and Units
@@ -141,12 +147,12 @@ def validate_css_value(value: str) -> None:
     :type value: str
     :raises ValueError: If the value is not a valid CSS property value.
     """
-    if not re.match(r'^[a-zA-Z0-9 %-]+$', value):
-        invalid_chars = re.findall('[^a-zA-Z0-9 %-]', value)
+    if not re.match(r'^[a-zA-Z0-9. \-%#]+$', value):
+        invalid_chars = re.findall(r'[^a-zA-Z0-9. \-%#]', value)
         raise ValueError("Invalid character(s) in CSS property value "
                          f"'{value}': {', '.join(invalid_chars)}\n"
-                         "Only letters, digits, spaces, percent characters, "
-                         "and hyphens are allowed.")
+                         "Only letters, digits, dots, spaces, hyphens, "
+                         "percent characters, and hashtags are allowed.")
 
 
 def validate_html_class(class_attribute: str) -> None:

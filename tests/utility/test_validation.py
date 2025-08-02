@@ -167,13 +167,13 @@ class TestValidateCSS:
         validate_css_value("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         validate_css_value("0123456789")
         validate_css_value("9876543210px")
-        validate_css_value("blue 0 0 30px")
+        validate_css_value("blue 0 0 5-5 30px")
         validate_css_value("4 orange 56")
         validate_css_value("4 oRAnGe  56")
         validate_css_value("border-box")
-        validate_css_value("5 space-between auto")
+        validate_css_value("5 #ff0Az3 space-between auto 10%m")
 
-    @pytest.mark.parametrize("char1", "!@#$^&*()<>?/|\\}{[\":;\']")
+    @pytest.mark.parametrize("char1", "!@$^&*()<>?/|\\}{[\":;\']")
     @pytest.mark.parametrize("char2", "}{")
     @pytest.mark.parametrize("use_char2", (False, True))
     def test_invalid_css_value_with_invalid_character(self, char1, char2,
