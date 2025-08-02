@@ -12,7 +12,7 @@
 
 from .container import Container
 from dataclasses import dataclass
-from typing import Any, Dict, Union
+from typing import Dict, Union
 from webwidgets.compilation.html.html_tags import Div
 from webwidgets.utility.enums import Direction
 from webwidgets.widgets.widget import Widget
