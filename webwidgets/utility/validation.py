@@ -21,8 +21,8 @@ SPECIAL_SELECTORS = [
 
 
 def validate_css_comment(comment: str) -> None:
-    """Validates that the given comment is a valid CSS comment according to the
-    CSS syntax rules and raises an exception if not.
+    """Checks if the given comment is a valid CSS comment according to the CSS
+    syntax rules and raises an exception if not.
 
     This function just checks that the comment does not contain any closing
     sequence `*/` as defined in the CSS Syntax Module Level 3, paragraph 4.3.2
