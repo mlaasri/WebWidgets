@@ -123,6 +123,32 @@ def validate_css_selector(selector: str) -> None:
     validate_css_identifier(selector[1:])
 
 
+def validate_css_value(value: str) -> None:
+    """Checks if the given value is a valid CSS property value and raises an
+    exception if not.
+
+    To be valid, the value must only contain letters (`a-z`, `A-Z`), digits
+    (`0-9`), spaces (` `), percent characters (`%`), and hyphens (`-`).
+
+    Note that this function imposes stricter rules than the official CSS
+    specification - more precisely, than chapter 2 of the CSS Values and Units
+    Module Level 3 (see source:
+    https://www.w3.org/TR/css-values-3/#value-defs). For example, this function
+    does not allow functional notations like `calc()` whereas the specification
+    does.
+
+    :param value: The value to validate as a CSS property value.
+    :type value: str
+    :raises ValueError: If the value is not a valid CSS property value.
+    """
+    if not re.match(r'^[a-zA-Z0-9 %-]+$', value):
+        invalid_chars = re.findall('[^a-zA-Z0-9 %-]', value)
+        raise ValueError("Invalid character(s) in CSS property value "
+                         f"'{value}': {', '.join(invalid_chars)}\n"
+                         "Only letters, digits, spaces, percent characters, "
+                         "and hyphens are allowed.")
+
+
 def validate_html_class(class_attribute: str) -> None:
     """Checks if the given HTML class attribute is valid and raises an
     exception if not.

@@ -16,7 +16,8 @@ import re
 from webwidgets.compilation.css import apply_css, compile_css
 from webwidgets.compilation.html import HTMLNode
 from webwidgets.utility.validation import validate_css_comment, \
-    validate_css_identifier, validate_css_selector, validate_html_class
+    validate_css_identifier, validate_css_selector, validate_css_value, \
+    validate_html_class
 
 
 class TestValidateCSS:
@@ -159,6 +160,30 @@ class TestValidateCSS:
             validate_css_selector("::before")
         with pytest.raises(ValueError, match=r"Invalid character\(s\).* !"):
             validate_css_selector(".h!")
+
+    def test_valid_css_values(self):
+        """Tests that valid CSS property values are accepted"""
+        validate_css_value("abcdefghijklmnopqrstuvwxyz")
+        validate_css_value("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        validate_css_value("0123456789")
+        validate_css_value("9876543210px")
+        validate_css_value("blue 0 0 30px")
+        validate_css_value("4 orange 56")
+        validate_css_value("4 oRAnGe  56")
+        validate_css_value("border-box")
+        validate_css_value("5 space-between auto")
+
+    @pytest.mark.parametrize("char1", "!@#$^&*()<>?/|\\}{[\":;\']")
+    @pytest.mark.parametrize("char2", "}{")
+    @pytest.mark.parametrize("use_char2", (False, True))
+    def test_invalid_css_value_with_invalid_character(self, char1, char2,
+                                                      use_char2):
+        """Tests that an invalid CSS value (containing one or two invalid
+        characters) raises an exception"""
+        chars = ', '.join([char1, char2] if use_char2 else [char1])
+        with pytest.raises(ValueError,
+                           match=fr"Invalid character\(s\).*{re.escape(chars)}"):
+            validate_css_value(f"red-{char1} 0{char2 if use_char2 else ''} px")
 
 
 class TestValidateHTML:
