@@ -115,4 +115,7 @@ class BoxItemProperties:
         :return: A dictionary of CSS properties.
         :rtype: Dict[str, str]
         """
-        return {"flex-grow": str(self.space)}
+        return {
+            "flex-grow": str(self.space),
+            "flex-shrink": str(self.space)
+        }

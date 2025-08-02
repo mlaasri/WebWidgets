@@ -347,4 +347,7 @@ class TestBoxItemProperties:
     @pytest.mark.parametrize("space", [4, 5.1, 0.2])
     def test_to_style(self, space):
         props = BoxItemProperties(space=space)
-        assert props.to_style() == {'flex-grow': str(space)}
+        assert props.to_style() == {
+            'flex-grow': str(space),
+            'flex-shrink': str(space)
+        }
