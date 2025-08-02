@@ -19,7 +19,7 @@ from webwidgets.utility.validation import validate_css_comment, \
     validate_css_identifier, validate_css_selector, validate_html_class
 
 
-class TestValidate:
+class TestValidateCSS:
     @pytest.fixture
     def valid_css_identifiers(self):
         return [
@@ -160,6 +160,8 @@ class TestValidate:
         with pytest.raises(ValueError, match=r"Invalid character\(s\).* !"):
             validate_css_selector(".h!")
 
+
+class TestValidateHTML:
     def test_valid_html_classes(self):
         """Test that valid HTML class attributes are accepted"""
         validate_html_class("")
