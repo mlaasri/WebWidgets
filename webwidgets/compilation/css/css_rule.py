@@ -13,7 +13,8 @@
 from typing import Dict
 from webwidgets.utility.indentation import get_indentation
 from webwidgets.utility.representation import ReprMixin
-from webwidgets.utility.validation import validate_css_identifier, validate_css_selector
+from webwidgets.utility.validation import validate_css_identifier, \
+    validate_css_selector, validate_css_value
 
 
 class CSSRule(ReprMixin):
@@ -60,6 +61,7 @@ class CSSRule(ReprMixin):
         css_code = self.selector + " {\n"
         for property_name, value in self.declarations.items():
             validate_css_identifier(property_name)
+            validate_css_value(value)
             css_code += f"{indentation}{property_name}: {value};\n"
         css_code += "}"
 
