@@ -317,15 +317,22 @@ class TestBox:
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
 
-    def test_large_box_item_is_clipped(self, render_page, web_drivers):
+    @pytest.mark.parametrize("direction", (
+        ww.Direction.HORIZONTAL, ww.Direction.VERTICAL
+    ))
+    def test_large_box_item_is_clipped(self, direction, render_page,
+                                       web_drivers):
         """Tests that a large box item is clipped to respect the spacing rules
         of the box.
         """
-        # Defining the box. The large item has a width of 50vw, which is above
-        # the space allocated by the spacing rules (1/3), so it should be
-        # clipped to 1/3 of the viewport
-        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
-        big_item = TestBox.Color(color=(255, 0, 0), width="50vw")
+        # Defining the box. The large item has either a width of 50vw or a
+        # height of 50vh (depending on the direction), which is above the space
+        # allocated by the spacing rules (1/3), so it should be clipped to 1/3
+        # of the viewport
+        box = TestBox.FullViewportBox(direction=direction)
+        size_arg = {"width": "50vw"} if direction == ww.Direction.HORIZONTAL \
+            else {"height": "50vh"}
+        big_item = TestBox.Color(color=(255, 0, 0), **size_arg)
         box.add(big_item, space=1)
         box.add(TestBox.Color(color=(0, 255, 0)), space=2)
 
@@ -337,10 +344,17 @@ class TestBox:
         for web_driver in web_drivers:
             a = render_page(page, web_driver)
             for i, c in enumerate((255, 0, 0)):
-                assert np.all(a[:, :a.shape[1] // 3, i] == c)
-            edge_col = a.shape[1] // 3 + (0 if a.shape[1] % 3 == 0 else 1)
+                if direction == ww.Direction.HORIZONTAL:
+                    assert np.all(a[:, :a.shape[1] // 3, i] == c)
+                else:
+                    assert np.all(a[:a.shape[0] // 3, :, i] == c)
+            axis = 1 if direction == ww.Direction.HORIZONTAL else 0
+            edge = a.shape[axis] // 3 + (0 if a.shape[axis] % 3 == 0 else 1)
             for i, c in enumerate((0, 255, 0)):
-                assert np.all(a[:, edge_col:, i] == c)
+                if direction == ww.Direction.HORIZONTAL:
+                    assert np.all(a[:, edge:, i] == c)
+                else:
+                    assert np.all(a[edge:, :, i] == c)
 
 
 class TestBoxItemProperties:
