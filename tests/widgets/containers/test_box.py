@@ -317,6 +317,72 @@ class TestBox:
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
 
+    @pytest.mark.parametrize("size", (3, 4, 5, 6))
+    def test_horizontal_box_with_absolute_size(self, size, render_page,
+                                               web_drivers):
+        """Tests that a widget with absolute size renders with that size"""
+        # Creating a page with one box
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
+        box.add(TestBox.Color(color=(255, 0, 0)), space=ww.Px(size))
+        box.add(TestBox.Color(color=(0, 255, 0)), space=1)
+        box.add(TestBox.Color(color=(0, 0, 255)), space=1)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the regions where to search for each color. If the last
+            # two colors cannot spread evenly (which happens when the space
+            # left for the two colors has an odd size), we exclude all edges
+            # where one color stops and another starts.
+            all_indices = np.arange(array.shape[1])
+            edge = size + (array.shape[1] - size) // 2
+            regions = np.split(all_indices, (size, edge))
+            if (array.shape[1] - size) % 2 != 0:
+                regions = [r[r != edge] for r in regions]
+
+            assert len(regions) == 3  # One region per color
+            for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
+                                     regions):
+                assert np.all(array[:, region, 0] == color[0])
+                assert np.all(array[:, region, 1] == color[1])
+                assert np.all(array[:, region, 2] == color[2])
+
+    @pytest.mark.parametrize("size", (3, 4, 5, 6))
+    def test_vertical_box_with_absolute_size(self, size, render_page,
+                                             web_drivers):
+        """Tests that a widget with absolute size renders with that size"""
+        # Creating a page with one box
+        box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
+        box.add(TestBox.Color(color=(255, 0, 0)), space=ww.Px(size))
+        box.add(TestBox.Color(color=(0, 255, 0)), space=1)
+        box.add(TestBox.Color(color=(0, 0, 255)), space=1)
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the regions where to search for each color. If the last
+            # two colors cannot spread evenly (which happens when the space
+            # left for the two colors has an odd size), we exclude all edges
+            # where one color stops and another starts.
+            all_indices = np.arange(array.shape[0])
+            edge = size + (array.shape[0] - size) // 2
+            regions = np.split(all_indices, (size, edge))
+            if (array.shape[0] - size) % 2 != 0:
+                regions = [r[r != edge] for r in regions]
+
+            assert len(regions) == 3  # One region per color
+            for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
+                                     regions):
+                assert np.all(array[region, :, 0] == color[0])
+                assert np.all(array[region, :, 1] == color[1])
+                assert np.all(array[region, :, 2] == color[2])
+
     @pytest.mark.parametrize("direction", (
         ww.Direction.HORIZONTAL, ww.Direction.VERTICAL
     ))
