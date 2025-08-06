@@ -318,14 +318,20 @@ class TestBox:
                 assert np.all(a[edge_row:, :, i] == c)
 
     @pytest.mark.parametrize("size", (3, 4, 5, 6))
-    def test_horizontal_box_with_absolute_size(self, size, render_page,
-                                               web_drivers):
-        """Tests that a widget with absolute size renders with that size"""
+    @pytest.mark.parametrize("position", (0, 1, 2))
+    def test_horizontal_box_with_absolute_size(self, size, position,
+                                               render_page, web_drivers):
+        """Tests that a widget with absolute size renders with the requested
+        size and is not expanded. Multiple sizes and positions within the box
+        (first, middle, last) are tested.
+        """
         # Creating a page with one box
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        spaces = [1, 1, 1]
+        spaces[position] = ww.Px(size)
         box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
-        box.add(TestBox.Color(color=(255, 0, 0)), space=ww.Px(size))
-        box.add(TestBox.Color(color=(0, 255, 0)), space=1)
-        box.add(TestBox.Color(color=(0, 0, 255)), space=1)
+        for _ in range(3):
+            box.add(TestBox.Color(color=colors.pop(0)), space=spaces.pop(0))
         page = ww.Page([box])
 
         for web_driver in web_drivers:
@@ -333,15 +339,20 @@ class TestBox:
             # Rendering the page with the box
             array = render_page(page, web_driver)
 
-            # Computing the regions where to search for each color. If the last
-            # two colors cannot spread evenly (which happens when the space
-            # left for the two colors has an odd size), we exclude all edges
+            # Computing the regions where to search for each color. If the two
+            # expanding colors cannot spread evenly (which happens when the
+            # remaining space for them has an odd size), we exclude all edges
             # where one color stops and another starts.
             all_indices = np.arange(array.shape[1])
-            edge = size + (array.shape[1] - size) // 2
-            regions = np.split(all_indices, (size, edge))
+            half_remainder = (array.shape[1] - size) // 2
+            edges = [
+                [size, size + half_remainder],  # position = 0
+                [half_remainder, array.shape[1] - half_remainder],  # position = 1
+                [half_remainder, 2 * half_remainder]  # position = 2
+            ][position]
+            regions = np.split(all_indices, edges)
             if (array.shape[1] - size) % 2 != 0:
-                regions = [r[r != edge] for r in regions]
+                regions = [r[~np.isin(r, edges)] for r in regions]
 
             assert len(regions) == 3  # One region per color
             for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
@@ -351,14 +362,20 @@ class TestBox:
                 assert np.all(array[:, region, 2] == color[2])
 
     @pytest.mark.parametrize("size", (3, 4, 5, 6))
-    def test_vertical_box_with_absolute_size(self, size, render_page,
-                                             web_drivers):
-        """Tests that a widget with absolute size renders with that size"""
+    @pytest.mark.parametrize("position", (0, 1, 2))
+    def test_vertical_box_with_absolute_size(self, size, position,
+                                             render_page, web_drivers):
+        """Tests that a widget with absolute size renders with the requested
+        size and is not expanded. Multiple sizes and positions within the box
+        (first, middle, last) are tested.
+        """
         # Creating a page with one box
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        spaces = [1, 1, 1]
+        spaces[position] = ww.Px(size)
         box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
-        box.add(TestBox.Color(color=(255, 0, 0)), space=ww.Px(size))
-        box.add(TestBox.Color(color=(0, 255, 0)), space=1)
-        box.add(TestBox.Color(color=(0, 0, 255)), space=1)
+        for _ in range(3):
+            box.add(TestBox.Color(color=colors.pop(0)), space=spaces.pop(0))
         page = ww.Page([box])
 
         for web_driver in web_drivers:
@@ -366,15 +383,20 @@ class TestBox:
             # Rendering the page with the box
             array = render_page(page, web_driver)
 
-            # Computing the regions where to search for each color. If the last
-            # two colors cannot spread evenly (which happens when the space
-            # left for the two colors has an odd size), we exclude all edges
+            # Computing the regions where to search for each color. If the two
+            # expanding colors cannot spread evenly (which happens when the
+            # remaining space for them has an odd size), we exclude all edges
             # where one color stops and another starts.
             all_indices = np.arange(array.shape[0])
-            edge = size + (array.shape[0] - size) // 2
-            regions = np.split(all_indices, (size, edge))
+            half_remainder = (array.shape[0] - size) // 2
+            edges = [
+                [size, size + half_remainder],  # position = 0
+                [half_remainder, array.shape[0] - half_remainder],  # position = 1
+                [half_remainder, 2 * half_remainder]  # position = 2
+            ][position]
+            regions = np.split(all_indices, edges)
             if (array.shape[0] - size) % 2 != 0:
-                regions = [r[r != edge] for r in regions]
+                regions = [r[~np.isin(r, edges)] for r in regions]
 
             assert len(regions) == 3  # One region per color
             for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
