@@ -362,6 +362,7 @@ class TestBoxItemProperties:
     def test_to_style(self, space):
         props = BoxItemProperties(space=space)
         assert props.to_style() == {
+            'flex-basis': "0",
             'flex-grow': str(space),
             'flex-shrink': str(space)
         }
