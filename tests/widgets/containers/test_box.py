@@ -236,7 +236,7 @@ class TestBox:
         ]
         box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
         for color, space in zip(colors, spaces):
-            box.add(TestBox.Color(color=color), space=space)
+            box.add(TestBox.Color(color=color), space=space.item())
         page = ww.Page([box])
 
         for web_driver in web_drivers:
@@ -272,7 +272,7 @@ class TestBox:
         ]
         box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
         for color, space in zip(colors, spaces):
-            box.add(TestBox.Color(color=color), space=space)
+            box.add(TestBox.Color(color=color), space=space.item())
         page = ww.Page([box])
 
         for web_driver in web_drivers:
