@@ -447,10 +447,19 @@ class TestBox:
 
 class TestBoxItemProperties:
     @pytest.mark.parametrize("space", [4, 5.1, 0.2])
-    def test_to_style(self, space):
+    def test_to_style_numeric(self, space):
         props = BoxItemProperties(space=space)
         assert props.to_style() == {
             'flex-basis': "0",
             'flex-grow': str(space),
             'flex-shrink': str(space)
+        }
+
+    @pytest.mark.parametrize("space", [ww.Px(4), ww.Px(3.5)])
+    def test_to_style_absolute_size(self, space):
+        props = BoxItemProperties(space=space)
+        assert props.to_style() == {
+            'flex-basis': f"{space.value}px",
+            'flex-grow': "0",
+            'flex-shrink': "0"
         }
