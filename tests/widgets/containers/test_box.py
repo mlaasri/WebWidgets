@@ -236,7 +236,7 @@ class TestBox:
         ]
         box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
         for color, space in zip(colors, spaces):
-            box.add(TestBox.Color(color=color), space=space)
+            box.add(TestBox.Color(color=color), space=space.item())
         page = ww.Page([box])
 
         for web_driver in web_drivers:
@@ -272,7 +272,7 @@ class TestBox:
         ]
         box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
         for color, space in zip(colors, spaces):
-            box.add(TestBox.Color(color=color), space=space)
+            box.add(TestBox.Color(color=color), space=space.item())
         page = ww.Page([box])
 
         for web_driver in web_drivers:
@@ -317,6 +317,94 @@ class TestBox:
             for i, c in enumerate((0, 0, 255)):
                 assert np.all(a[edge_row:, :, i] == c)
 
+    @pytest.mark.parametrize("size", (3, 4, 5, 6))
+    @pytest.mark.parametrize("position", (0, 1, 2))
+    def test_horizontal_box_with_absolute_size(self, size, position,
+                                               render_page, web_drivers):
+        """Tests that a widget with absolute size renders with the requested
+        size and is not expanded. Multiple sizes and positions within the box
+        (first, middle, last) are tested.
+        """
+        # Creating a page with one box
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        spaces = [1, 1, 1]
+        spaces[position] = ww.Px(size)
+        box = TestBox.FullViewportBox(direction=ww.Direction.HORIZONTAL)
+        for _ in range(3):
+            box.add(TestBox.Color(color=colors.pop(0)), space=spaces.pop(0))
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the regions where to search for each color. If the two
+            # expanding colors cannot spread evenly (which happens when the
+            # remaining space for them has an odd size), we exclude all edges
+            # where one color stops and another starts.
+            all_indices = np.arange(array.shape[1])
+            half_remainder = (array.shape[1] - size) // 2
+            edges = [
+                [size, size + half_remainder],  # position = 0
+                [half_remainder, array.shape[1] - half_remainder],  # position = 1
+                [half_remainder, 2 * half_remainder]  # position = 2
+            ][position]
+            regions = np.split(all_indices, edges)
+            if (array.shape[1] - size) % 2 != 0:
+                regions = [r[~np.isin(r, edges)] for r in regions]
+
+            assert len(regions) == 3  # One region per color
+            for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
+                                     regions):
+                assert np.all(array[:, region, 0] == color[0])
+                assert np.all(array[:, region, 1] == color[1])
+                assert np.all(array[:, region, 2] == color[2])
+
+    @pytest.mark.parametrize("size", (3, 4, 5, 6))
+    @pytest.mark.parametrize("position", (0, 1, 2))
+    def test_vertical_box_with_absolute_size(self, size, position,
+                                             render_page, web_drivers):
+        """Tests that a widget with absolute size renders with the requested
+        size and is not expanded. Multiple sizes and positions within the box
+        (first, middle, last) are tested.
+        """
+        # Creating a page with one box
+        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+        spaces = [1, 1, 1]
+        spaces[position] = ww.Px(size)
+        box = TestBox.FullViewportBox(direction=ww.Direction.VERTICAL)
+        for _ in range(3):
+            box.add(TestBox.Color(color=colors.pop(0)), space=spaces.pop(0))
+        page = ww.Page([box])
+
+        for web_driver in web_drivers:
+
+            # Rendering the page with the box
+            array = render_page(page, web_driver)
+
+            # Computing the regions where to search for each color. If the two
+            # expanding colors cannot spread evenly (which happens when the
+            # remaining space for them has an odd size), we exclude all edges
+            # where one color stops and another starts.
+            all_indices = np.arange(array.shape[0])
+            half_remainder = (array.shape[0] - size) // 2
+            edges = [
+                [size, size + half_remainder],  # position = 0
+                [half_remainder, array.shape[0] - half_remainder],  # position = 1
+                [half_remainder, 2 * half_remainder]  # position = 2
+            ][position]
+            regions = np.split(all_indices, edges)
+            if (array.shape[0] - size) % 2 != 0:
+                regions = [r[~np.isin(r, edges)] for r in regions]
+
+            assert len(regions) == 3  # One region per color
+            for color, region in zip(((255, 0, 0), (0, 255, 0), (0, 0, 255)),
+                                     regions):
+                assert np.all(array[region, :, 0] == color[0])
+                assert np.all(array[region, :, 1] == color[1])
+                assert np.all(array[region, :, 2] == color[2])
+
     @pytest.mark.parametrize("direction", (
         ww.Direction.HORIZONTAL, ww.Direction.VERTICAL
     ))
@@ -359,9 +447,19 @@ class TestBox:
 
 class TestBoxItemProperties:
     @pytest.mark.parametrize("space", [4, 5.1, 0.2])
-    def test_to_style(self, space):
+    def test_to_style_numeric(self, space):
         props = BoxItemProperties(space=space)
         assert props.to_style() == {
+            'flex-basis': "0",
             'flex-grow': str(space),
             'flex-shrink': str(space)
+        }
+
+    @pytest.mark.parametrize("space", [ww.Px(4), ww.Px(3.5)])
+    def test_to_style_absolute_size(self, space):
+        props = BoxItemProperties(space=space)
+        assert props.to_style() == {
+            'flex-basis': f"{space.value}px",
+            'flex-grow': "0",
+            'flex-shrink': "0"
         }

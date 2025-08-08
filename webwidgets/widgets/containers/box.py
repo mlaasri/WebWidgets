@@ -12,9 +12,10 @@
 
 from .container import Container
 from dataclasses import dataclass
-from typing import Any, Dict, Union
+from typing import Dict, Union
 from webwidgets.compilation.html.html_tags import Div
 from webwidgets.utility.enums import Direction
+from webwidgets.utility.sizes.sizes import AbsoluteSize
 from webwidgets.widgets.widget import Widget
 
 
@@ -34,7 +35,8 @@ class Box(Container):
         self.direction = direction
         self._properties: Dict[int, BoxItemProperties] = {}
 
-    def add(self, widget: Widget, space: Union[float, int] = 1) -> None:
+    def add(self, widget: Widget,
+            space: Union[int, float, AbsoluteSize] = 1) -> None:
         """Adds a widget to the box with an optional space coefficient.
 
         This function overrides :py:meth:`Container.add` from the base class to
@@ -44,18 +46,24 @@ class Box(Container):
         :param widget: The widget to add to the box.
         :type widget: Widget
         :param space: The amount of space to allocate for the widget to live
-            in, specified as a positive coefficient. The coefficient represents
-            the weight to give to the widget during space allocation within the
-            entire box.
+            in.
 
-            For example, if widget A has a space factor of 1 and widget B has a
-            space factor of 2, B will be allocated twice as much space as A,
-            i.e. a total of 2/3 of the entire box if the only widgets it
-            contains are A and B.
+            If a numeric value (int or float), it must be at least 1, and it is
+            construed as the weight to give to the widget during space
+            allocation within the entire box. For example, if widget A has a
+            space of 1 and widget B has a space of 2, B will be allocated twice
+            as much space as A, i.e. a total of 2/3 of the entire box if the
+            only widgets the box contains are A and B.
+
+            If an instance of :py:class:`AbsoluteSize`, it is construed as the
+            exact size to allocate for the widget. For example, if widget A has
+            a space of `Px(100)` (i.e. 100px) and widget B has a space of 1, A
+            will be allocated exactly 100px while B will be allocated all the
+            remaining space if the only widgets the box contains are A and B.
 
             Note that this value controls the amount of free space available
             for the widget to grow in, not the size of the widget itself.
-        :type space: Union[float, int]
+        :type space: Union[int, float, AbsoluteSize]
         """
         super().add(widget=widget)
         self._properties[id(widget)] = BoxItemProperties(space=space)
@@ -86,8 +94,7 @@ class Box(Container):
                 "display": "flex",
                 "flex-direction": "row",
                 "align-items": "center",
-                "justify-content": "center",
-                "flex-basis": "0"
+                "justify-content": "center"
             } | props.to_style()) for node, props in zip(nodes, properties)]
 
         # Assembling the box
@@ -105,7 +112,7 @@ class BoxItemProperties:
     contained in a :py:class:`Box` during compilation.
     """
 
-    space: int
+    space: Union[int, float, AbsoluteSize]
 
     def to_style(self) -> Dict[str, str]:
         """Converts the properties of the :py:class:`BoxItemProperties`
@@ -115,7 +122,17 @@ class BoxItemProperties:
         :return: A dictionary of CSS properties.
         :rtype: Dict[str, str]
         """
+        # If a numeric value, the space serves as a relative weight
+        if isinstance(self.space, (int, float)):
+            return {
+                "flex-basis": "0",
+                "flex-grow": str(self.space),
+                "flex-shrink": str(self.space)
+            }
+
+        # If an AbsoluteSize object, the space is a fixed size
         return {
-            "flex-grow": str(self.space),
-            "flex-shrink": str(self.space)
+            "flex-basis": self.space.to_css(),
+            "flex-grow": "0",
+            "flex-shrink": "0"
         }
